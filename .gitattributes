@@ -1,0 +1,4 @@
+*.pth filter=lfs diff=lfs merge=lfs -text
+CUB_200_2011/attributes/image_attribute_labels.txt filter=lfs diff=lfs merge=lfs -text
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text

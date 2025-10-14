@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Read(//private/tmp/**)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "Bash(timeout 120 python test_v2_pytorch.py)",
+      "Bash(timeout 120 python test_unified_processor.py)",
+      "Bash(.venv/bin/pip install:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(.venv/bin/pip list:*)",
+      "Bash(rm:*)",
+      "Bash(timeout 120 python test_encrypted_model.py)",
+      "Bash(chmod:*)",
+      "Bash(./build_macos.sh:*)",
+      "Bash(security find-identity:*)",
+      "Bash(codesign:*)",
+      "Bash(spctl:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git lfs:*)",
+      "Bash(git rm:*)",
+      "Bash(iconutil:*)",
+      "Bash(sips:*)",
+      "Bash(find:*)",
+      "Bash(git reset:*)",
+      "Bash(git reflog:*)",
+      "Bash(git gc:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(sort:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
