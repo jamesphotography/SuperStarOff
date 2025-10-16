@@ -33,17 +33,27 @@ class StarNetV2:
 
         # Default model path - try encrypted file first
         if model_path is None:
-            current_dir = Path(__file__).parent
-            encrypted_path = current_dir.parent / "models" / "SuperStarOff2025.pt"
-            fallback_path = current_dir.parent / "models" / "StarNet2_weights.pt"
+            import sys
 
-            # Prefer encrypted model
+            # Determine if running as bundled app or from source
+            if getattr(sys, 'frozen', False):
+                # Running as bundled app (PyInstaller)
+                base_path = Path(sys._MEIPASS)
+            else:
+                # Running from source
+                current_dir = Path(__file__).parent
+                base_path = current_dir.parent
+
+            encrypted_path = base_path / "models" / "SuperStarOff2025.pt"
+
+            # Only use encrypted model (don't fallback to old model)
             if encrypted_path.exists():
                 model_path = encrypted_path
                 self.is_encrypted = True
             else:
-                model_path = fallback_path
-                self.is_encrypted = False
+                raise FileNotFoundError(f"Model file not found at {encrypted_path}")
+
+            self.is_encrypted = True
         else:
             # User specified path - check if it's encrypted by name
             model_path = Path(model_path)

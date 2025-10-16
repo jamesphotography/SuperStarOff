@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_dynamic_libs, collect_submodules
 
 block_cipher = None
 
@@ -7,9 +8,14 @@ datas = [
     ('models/SuperStarOff2025.pt', 'models'),
     ('resources/styles/dark_theme.qss', 'resources/styles'),
     ('resources/icons/icon.jpg', 'resources/icons'),
+    ('resources/icons/icon.icns', 'resources/icons'),
+    ('resources/icons/icon.png', 'resources/icons'),
     ('examples/海豚星云-Sh2-308-S-4天数据.jpg', 'examples'),
     ('examples/海豚星云-Sh2-308-S-4天数据_starless_stride256.jpg', 'examples'),
 ]
+
+# 收集imagecodecs的所有二进制文件
+imagecodecs_binaries = collect_dynamic_libs('imagecodecs')
 
 # 收集所有需要的隐藏导入
 hiddenimports = [
@@ -20,8 +26,12 @@ hiddenimports = [
     'torchvision',
     'numpy',
     'PIL',
+    'PIL.Image',
+    'PIL.ImageFile',
     'tifffile',
     'imagecodecs',
+    'imagecodecs._shared',
+    'imagecodecs._imcd',
     'cryptography',
     'cryptography.fernet',
     'cryptography.hazmat',
@@ -31,10 +41,13 @@ hiddenimports = [
     'cryptography.hazmat.backends',
 ]
 
+# 添加imagecodecs的所有子模块
+hiddenimports += collect_submodules('imagecodecs')
+
 a = Analysis(
     ['src/app.py'],
     pathex=[],
-    binaries=[],
+    binaries=imagecodecs_binaries,
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
@@ -70,7 +83,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/icons/icon.jpg',
+    icon='resources/icons/icon.icns',
 )
 
 coll = COLLECT(
@@ -87,7 +100,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='慧眼去星V1.app',
-    icon='resources/icons/icon.jpg',
+    icon='resources/icons/icon.icns',
     bundle_identifier='com.superstaroff.app',
     info_plist={
         'NSPrincipalClass': 'NSApplication',

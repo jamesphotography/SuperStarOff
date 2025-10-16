@@ -13,6 +13,7 @@ sys.path.insert(0, str(src_dir))
 
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
+from gui.logger import gui_logger
 from gui.main_window import MainWindow
 
 
@@ -22,10 +23,22 @@ def main():
     # Create application instance
     app = QApplication(sys.argv)
 
-    # Set application icon
-    icon_path = src_dir.parent / "resources" / "icons" / "icon.jpg"
+    # Set application icon - prefer .icns for macOS, fallback to .jpg
+    icon_base = src_dir.parent / "resources" / "icons"
+    icon_path = icon_base / "icon.icns"
+    if not icon_path.exists():
+        icon_path = icon_base / "icon.jpg"
+
     if icon_path.exists():
-        app.setWindowIcon(QIcon(str(icon_path)))
+        gui_logger.info(f"Loading application icon from: {icon_path}")
+        icon = QIcon(str(icon_path))
+        if not icon.isNull():
+            app.setWindowIcon(icon)
+            gui_logger.info(f"Application icon loaded successfully")
+        else:
+            gui_logger.warning(f"Icon file exists but QIcon is null: {icon_path}")
+    else:
+        gui_logger.warning(f"Icon file not found at: {icon_base}")
 
     # Set application metadata
     app.setApplicationName("慧眼去星 SuperStarOff")

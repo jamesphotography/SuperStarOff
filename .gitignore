@@ -74,3 +74,4 @@ docs/_templates/
 *.bak
 *.swp
 *~.nib
+*.pkg

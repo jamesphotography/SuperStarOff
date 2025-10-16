@@ -1,32 +1,20 @@
 # SuperStarOff 依赖列表
-# Python 3.12+ required
+# Python 3.9+ required
 
 # 核心依赖
 torch>=2.0.0  # PyTorch for V2 model
-PyQt6>=6.5.0  # GUI framework
 
 # 图像处理
-numpy>=1.26.0,<2.0
-Pillow>=11.0.0
-tifffile>=2024.0.0
-imagecodecs>=2025.0.0  # TIFF 压缩格式支持 (LZW, JPEG, etc.)
+numpy>=1.24.0,<2.0
+Pillow>=10.0.0
+tifffile>=2023.0.0
+imagecodecs>=2023.0.0  # TIFF 压缩格式支持 (LZW, JPEG, etc.)
 
 # 加密
-cryptography>=43.0.0  # Model encryption
-
-# 可视化和交互
-matplotlib>=3.10.0
-ipython>=9.0.0
+cryptography>=41.0.0  # Model encryption
 
 # 工具库
 tqdm>=4.60.0  # 进度条
-pyyaml>=6.0  # 配置文件
-
-# 开发依赖 (可选)
-pytest>=7.0.0  # 测试
-black>=23.0.0  # 代码格式化
-flake8>=6.0.0  # 代码检查
-mypy>=1.0.0  # 类型检查
 
 # GPU 支持 (macOS Apple Silicon)
 # tensorflow-metal>=1.0.0  # 取消注释以启用 GPU 加速
