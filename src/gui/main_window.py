@@ -140,17 +140,23 @@ class MainWindow(QMainWindow):
 
     def load_stylesheet(self):
         """Load dark theme stylesheet"""
-        # Navigate from src/gui/main_window.py to project root
-        # __file__ -> gui/main_window.py
-        # .parent -> gui/
-        # .parent -> src/
-        # .parent -> SuperStarOff/ (project root)
-        current_file = Path(__file__).resolve()
-        project_root = current_file.parent.parent.parent
-        style_path = project_root / "resources" / "styles" / "dark_theme.qss"
+        import sys
+
+        # Determine if running as bundled app or from source
+        if getattr(sys, 'frozen', False):
+            # Running as bundled app (PyInstaller)
+            # sys._MEIPASS points to the temp folder where PyInstaller extracts files
+            base_path = Path(sys._MEIPASS)
+        else:
+            # Running from source
+            # Navigate from src/gui/main_window.py to project root
+            current_file = Path(__file__).resolve()
+            base_path = current_file.parent.parent.parent
+
+        style_path = base_path / "resources" / "styles" / "dark_theme.qss"
 
         if style_path.exists():
-            with open(style_path, 'r') as f:
+            with open(style_path, 'r', encoding='utf-8') as f:
                 self.setStyleSheet(f.read())
         else:
             print(f"Warning: Stylesheet not found at {style_path}")
@@ -162,10 +168,25 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("慧眼去星 SuperStarOff - 星点去除工具")
         self.setGeometry(100, 100, 1400, 900)
 
-        # Set window icon
-        icon_path = Path(__file__).parent.parent.parent / "resources" / "icons" / "icon.jpg"
+        # Set window icon - prefer .icns for macOS, fallback to .jpg
+        icon_base = Path(__file__).parent.parent.parent / "resources" / "icons"
+
+        # Try .icns first (native macOS format)
+        icon_path = icon_base / "icon.icns"
+        if not icon_path.exists():
+            # Fallback to .jpg
+            icon_path = icon_base / "icon.jpg"
+
         if icon_path.exists():
-            self.setWindowIcon(QIcon(str(icon_path)))
+            gui_logger.info(f"Loading window icon from: {icon_path}")
+            icon = QIcon(str(icon_path))
+            if not icon.isNull():
+                self.setWindowIcon(icon)
+                gui_logger.info(f"Window icon loaded successfully")
+            else:
+                gui_logger.warning(f"Icon file exists but QIcon is null: {icon_path}")
+        else:
+            gui_logger.warning(f"Icon file not found at {icon_path}")
         
         # Create menu bar
         self.create_menu_bar()
@@ -563,11 +584,18 @@ class MainWindow(QMainWindow):
     def load_demo_images(self):
         """Load demo images on startup"""
         try:
-            # Get paths to demo images
-            current_dir = Path(__file__).parent
-            project_root = current_dir.parent.parent
-            examples_dir = project_root / "examples"
+            import sys
 
+            # Determine if running as bundled app or from source
+            if getattr(sys, 'frozen', False):
+                # Running as bundled app
+                base_path = Path(sys._MEIPASS)
+            else:
+                # Running from source
+                current_dir = Path(__file__).parent
+                base_path = current_dir.parent.parent
+
+            examples_dir = base_path / "examples"
             demo_original = examples_dir / "海豚星云-Sh2-308-S-4天数据.jpg"
             demo_starless = examples_dir / "海豚星云-Sh2-308-S-4天数据_starless_stride256.jpg"
 
