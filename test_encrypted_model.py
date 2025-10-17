@@ -11,7 +11,7 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from starnet_v2_pytorch import StarNetV2
+from model_processor import StarNetV2
 import numpy as np
 
 

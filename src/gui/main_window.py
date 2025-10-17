@@ -23,7 +23,7 @@ current_dir = Path(__file__).parent
 src_dir = current_dir.parent
 sys.path.insert(0, str(src_dir))
 
-from starnet_v2_pytorch import StarNetV2
+from model_processor import StarNetV2
 from gui.image_viewer import ImageViewer
 from gui.logger import gui_logger
 
