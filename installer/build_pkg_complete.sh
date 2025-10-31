@@ -63,11 +63,11 @@ fi
 echo "✓ superstaroff_core.py 存在"
 
 # 检查加密模块
-if [ ! -f "$PROJECT_ROOT/src/model_crypto.py" ]; then
-    echo "❌ 错误: 找不到 model_crypto.py"
+if [ ! -f "$PROJECT_ROOT/src/core_utils.py" ]; then
+    echo "❌ 错误: 找不到 core_utils.py"
     exit 1
 fi
-echo "✓ model_crypto.py 存在"
+echo "✓ core_utils.py 存在"
 
 # 检查模型文件
 if [ ! -d "$PROJECT_ROOT/models" ]; then
@@ -122,9 +122,9 @@ echo "  - 复制核心 Python 模块..."
 cp "$PROJECT_ROOT/photoshop_integration/superstaroff_core.py" "$APP_DIR/"
 echo "    ✓ 已复制: superstaroff_core.py"
 
-# 复制加密模块（仍需要用于解密模型）
-cp "$PROJECT_ROOT/src/model_crypto.py" "$APP_DIR/"
-echo "    ✓ 已复制: model_crypto.py"
+# 复制核心工具模块（包含解密功能）
+cp "$PROJECT_ROOT/src/core_utils.py" "$APP_DIR/"
+echo "    ✓ 已复制: core_utils.py"
 
 # 复制模型
 echo "  - 复制 models 目录..."
@@ -344,9 +344,9 @@ import sys
 import torch
 
 try:
-    # 测试加密模型加载（model_crypto.py 现在直接在安装目录下）
+    # 测试加密模型加载（core_utils.py 现在直接在安装目录下）
     sys.path.insert(0, '/usr/local/SuperStarOff')
-    from model_crypto import ModelCrypto
+    from core_utils import ModelCrypto
 
     model_path = '/usr/local/SuperStarOff/models/SuperStarOff2025.pt'
     buffer = ModelCrypto.decrypt_to_memory(model_path)

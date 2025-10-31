@@ -50,21 +50,35 @@ class ModelCrypto:
         Returns:
             Fernet 密钥
         """
-        # 组合多个因子生成密码短语
-        # 这些因子分散在代码中，不易被识别
-        factor1 = "HuiYanQuXing"  # 慧眼去星
-        factor2 = "2025"
-        factor3 = "DeepSpace"
+        import base64
 
-        # 计算组合因子的哈希值
-        combined = f"{factor1}{factor2}{factor3}"
-        passphrase_hash = hashlib.sha256(combined.encode()).hexdigest()
+        # 第1层：使用字节序列而非明文字符串（混淆）
+        # 这些看起来像随机数据，实际是编码后的密钥因子
+        _p1 = bytes([72, 117, 105, 89, 97, 110])  # 对应部分字符
+        _p2 = bytes([81, 117, 88, 105, 110, 103])  # 对应部分字符
+        _p3 = bytes([50, 48, 50, 53])  # 年份
 
-        # 从哈希值派生密钥
+        # 第2层：添加路径绑定因子
+        # 从预期安装路径派生部分密钥，增加环境依赖
+        _install_base = "/usr/local/SuperStarOff"
+        _path_factor = hashlib.md5(_install_base.encode()).digest()[:8]
+
+        # 第3层：添加应用标识符（混淆在普通变量名中）
+        _app_signature = bytes([68, 101, 101, 112, 83, 112, 97, 99, 101])  # 应用标识
+
+        # 第4层：组合所有因子并多次哈希
+        _raw = _p1 + _p2 + _p3 + _path_factor + _app_signature
+
+        # 第5层：多轮哈希增加计算复杂度
+        _digest = hashlib.sha256(_raw).digest()
+        for _ in range(1000):  # 1000轮额外哈希
+            _digest = hashlib.sha256(_digest).digest()
+
+        # 第6层：使用最终digest作为passphrase派生密钥
+        passphrase_hash = hashlib.sha256(_digest).hexdigest()
         key_material = ModelCrypto._derive_key(passphrase_hash)
 
         # 转换为 Fernet 密钥格式
-        import base64
         return base64.urlsafe_b64encode(key_material)
 
     @staticmethod

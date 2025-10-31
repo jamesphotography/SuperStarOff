@@ -86,7 +86,7 @@ class SuperStarOff:
 
         # 尝试解密加载
         try:
-            from model_crypto import ModelCrypto
+            from core_utils import ModelCrypto
 
             print("正在解密模型...")
             buffer = ModelCrypto.decrypt_to_memory(str(self.model_path))
