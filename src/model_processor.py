@@ -93,7 +93,7 @@ class StarNetV2:
             # Load encrypted model
             print("Decrypting model...")
             try:
-                from model_crypto import ModelCrypto
+                from core_utils import ModelCrypto
 
                 # Decrypt to memory
                 buffer = ModelCrypto.decrypt_to_memory(str(self.model_path))
