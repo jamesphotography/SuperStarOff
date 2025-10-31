@@ -4,146 +4,261 @@
  *
  * 使用方法：
  * 1. 在Photoshop中打开图片
- * 2. 运行此脚本（文件 > 脚本 > 浏览，选择此文件）
- * 3. 等待处理完成，结果会作为新图层出现
+ * 2. 运行此脚本（文件 > 脚本 > SuperStarOff）
+ * 3. 选择处理参数，等待处理完成
+ * 4. 结果会作为新图层出现（去星图层 + 星点图层）
  *
- * 或者：将此脚本放到 Photoshop/Presets/Scripts 文件夹，
+ * 安装方法：
+ * 将此脚本放到 Photoshop/Presets/Scripts 文件夹，
  * 然后可以从 文件 > 脚本 菜单直接运行
  */
 
-// ============== 配置区域 ==============
-// 请修改这个路径为你的Python CLI工具的实际路径
-var PYTHON_CLI_PATH = "/Users/jameszhenyu/PycharmProjects/SuperStarOff/photoshop_integration/superstaroff_cli.py";
-
-// Python解释器路径 - 使用虚拟环境的 Python
-var PYTHON_INTERPRETER = "/Users/jameszhenyu/PycharmProjects/SuperStarOff/.venv/bin/python";
-
-// 处理参数
-var STRIDE = 256;  // 可选: 128, 256, 384, 512
-var DEVICE = "auto";  // 可选: auto, cpu, mps
-
-// 临时文件目录
-var TEMP_DIR = Folder.temp + "/SuperStarOff/";
-// ======================================
+// ============== 配置 ==============
+var INSTALL_DIR = "/usr/local/SuperStarOff";  // 默认安装路径
+var STRIDE = 256;
+var DEVICE = "auto";
+// ==================================
 
 function main() {
-    // 写入日志文件确认脚本被调用
-    var logFile = new File(TEMP_DIR + "jsx_execution_log.txt");
-    var logFolder = new Folder(TEMP_DIR);
-    if (!logFolder.exists) logFolder.create();
-
-    logFile.open("w");
-    logFile.writeln("=== JSX Script Executed at " + new Date().toString() + " ===");
-    logFile.writeln("Documents count: " + app.documents.length);
-    logFile.close();
-
-    $.writeln("=== SuperStarOff JSX: main() called ===");
-
-    // 检查是否有打开的文档
-    if (app.documents.length == 0) {
-        alert("请先在Photoshop中打开一张图片！", "慧眼去星");
-        return;
-    }
-
-    var doc = app.activeDocument;
-
-    // 保存当前状态（用于撤销）
-    app.activeDocument.suspendHistory("慧眼去星 - 去除星点", "processStarRemoval()");
-}
-
-function processStarRemoval() {
-    var doc = app.activeDocument;
-    var activeLayer = doc.activeLayer;
-
     try {
-        // 显示进度
-        app.displayDialogs = DialogModes.NO;
-
-        // 创建临时目录
-        var tempFolder = new Folder(TEMP_DIR);
-        if (!tempFolder.exists) {
-            tempFolder.create();
-        }
-
-        // 生成临时文件名
-        var timestamp = new Date().getTime();
-        var inputFile = TEMP_DIR + "input_" + timestamp + ".tif";
-        var outputFile = TEMP_DIR + "output_" + timestamp + ".tif";
-
-        // 步骤1: 导出当前图层为TIF
-        $.writeln("正在导出图层...");
-        exportLayerAsTiff(doc, activeLayer, inputFile);
-
-        // 步骤2: 调用Python处理
-        $.writeln("正在调用去星工具...");
-        var result = callPythonCLI(inputFile, outputFile);
-
-        if (!result.success) {
-            app.displayDialogs = DialogModes.ALL;
-            alert("去星处理失败！\n\n" +
-                  "退出代码: " + result.exitCode + "\n\n" +
-                  "输入文件存在: " + result.inputExists + "\n" +
-                  "输出文件存在: " + result.outputExists + "\n\n" +
-                  "Python 输出:\n" + result.logContent + "\n\n" +
-                  "完整日志在控制台",
-                  "慧眼去星");
+        // 检查文档
+        if (app.documents.length == 0) {
+            alert("请先在Photoshop中打开一张图片！");
             return;
         }
 
-        // 步骤3: 导入结果作为新图层
-        $.writeln("正在导入结果...");
-        var starlessLayerName = "去星";
-        importAsNewLayer(doc, outputFile, starlessLayerName);
+        // 显示参数选择对话框
+        var params = showParamsDialog();
+        if (!params) {
+            // 用户取消
+            return;
+        }
 
-        // 步骤4: 设置去星图层为 Difference 混合模式
-        $.writeln("正在设置图层混合模式...");
-        var starlessLayer = doc.activeLayer;
-        starlessLayer.blendMode = BlendMode.DIFFERENCE;
+        // 使用用户选择的参数
+        STRIDE = params.stride;
+        DEVICE = params.device;
 
-        // 步骤5: 盖印可见图层，创建星点图层
-        $.writeln("正在创建星点图层...");
-
-        // 执行盖印可见图层 (Cmd+Opt+Shift+E)
-        // 根据 Action 文件，关键是 MrgV 命令的 Dplc (duplicate) 参数
-        var desc = new ActionDescriptor();
-        desc.putBoolean(charIDToTypeID("Dplc"), true);  // duplicate = true
-        executeAction(charIDToTypeID("MrgV"), desc, DialogModes.NO);
-
-        // 重命名新创建的图层为"星点"，设置混合模式为 Linear Dodge (Add)，并隐藏
-        var starsLayer = doc.activeLayer;
-        starsLayer.name = "星点";
-        starsLayer.blendMode = BlendMode.LINEARDODGE;  // Linear Dodge (Add)
-        starsLayer.visible = false;  // 隐藏星点图层
-
-        $.writeln("星点图层创建完成");
-
-        // 步骤6: 将去星图层的混合模式改回 Normal
-        $.writeln("正在调整去星图层混合模式...");
-        starlessLayer.blendMode = BlendMode.NORMAL;
-
-        $.writeln("图层设置完成");
-
-        // 步骤6: 清理临时文件
-        cleanupTempFiles(inputFile, outputFile);
-
-        app.displayDialogs = DialogModes.ALL;
-        alert("去星处理完成！\n\n已创建:\n- 去星图层（Difference混合模式）\n- 星点图层（Screen混合模式）", "慧眼去星");
+        processImage();
 
     } catch (e) {
-        app.displayDialogs = DialogModes.ALL;
-        alert("处理过程中发生错误:\n\n" + e.toString(), "慧眼去星");
+        alert("错误:\n\n" + e.toString());
         $.writeln("Error: " + e.toString());
     }
 }
 
-/**
- * 导出图层为TIFF文件
- */
-function exportLayerAsTiff(doc, layer, filePath) {
-    // 确保原文档是活动的
+function showParamsDialog() {
+    // 创建对话框，设置最小尺寸
+    var dlg = new Window("dialog", "慧眼去星 - 处理参数");
+    dlg.preferredSize = [450, 300];
+    dlg.alignChildren = ["fill", "top"];
+    dlg.spacing = 15;
+    dlg.margins = 20;
+
+    // 标题说明
+    var titleGroup = dlg.add("group");
+    titleGroup.alignment = ["fill", "top"];
+    var titleText = titleGroup.add("statictext", undefined, "请选择处理参数：");
+    titleText.graphics.font = ScriptUI.newFont(titleText.graphics.font.name, "BOLD", 14);
+
+    dlg.add("panel", undefined, undefined, {borderStyle: "black"});
+
+    // Stride 选择
+    var stridePanel = dlg.add("panel", undefined, "处理质量");
+    stridePanel.alignChildren = ["left", "top"];
+    stridePanel.spacing = 10;
+    stridePanel.margins = 15;
+
+    var strideRadio1 = stridePanel.add("radiobutton", undefined, "快速模式 (stride=512) - 约30秒");
+    var strideRadio2 = stridePanel.add("radiobutton", undefined, "平衡模式 (stride=256) - 约1分钟 【推荐】");
+    var strideRadio3 = stridePanel.add("radiobutton", undefined, "精细模式 (stride=128) - 约2分钟");
+    strideRadio2.value = true;  // 默认选择平衡
+
+    // 设备选择
+    var devicePanel = dlg.add("panel", undefined, "计算设备");
+    devicePanel.alignChildren = ["left", "top"];
+    devicePanel.spacing = 10;
+    devicePanel.margins = 15;
+
+    var deviceRadio1 = devicePanel.add("radiobutton", undefined, "自动检测 【推荐】");
+    var deviceRadio2 = devicePanel.add("radiobutton", undefined, "强制使用 GPU (MPS) - Apple Silicon");
+    var deviceRadio3 = devicePanel.add("radiobutton", undefined, "仅使用 CPU");
+    deviceRadio1.value = true;  // 默认自动
+
+    dlg.add("panel", undefined, undefined, {borderStyle: "black"});
+
+    // 教程链接
+    var tutorialGroup = dlg.add("group");
+    tutorialGroup.alignment = ["center", "top"];
+    tutorialGroup.spacing = 5;
+
+    var tutorialText = tutorialGroup.add("statictext", undefined, "教程：请访问詹姆斯油管频道");
+
+    var linkButton = tutorialGroup.add("button", undefined, "YouTube");
+    linkButton.preferredSize = [80, 25];
+    linkButton.onClick = function() {
+        // 在浏览器中打开链接
+        var url = "https://www.youtube.com/@JamesZhenYu";
+        if ($.os.indexOf("Windows") != -1) {
+            system("start " + url);
+        } else {
+            system("open " + url);
+        }
+    };
+
+    // 按钮
+    var btnGroup = dlg.add("group");
+    btnGroup.alignment = ["center", "top"];
+    btnGroup.spacing = 10;
+    var okBtn = btnGroup.add("button", undefined, "开始处理", {name: "ok"});
+    var cancelBtn = btnGroup.add("button", undefined, "取消", {name: "cancel"});
+    okBtn.preferredSize = [120, 35];
+    cancelBtn.preferredSize = [120, 35];
+
+    if (dlg.show() == 1) {
+        // 获取 stride
+        var stride = 256;
+        if (strideRadio1.value) stride = 512;
+        else if (strideRadio2.value) stride = 256;
+        else if (strideRadio3.value) stride = 128;
+
+        // 获取 device
+        var device = "auto";
+        if (deviceRadio1.value) device = "auto";
+        else if (deviceRadio2.value) device = "mps";
+        else if (deviceRadio3.value) device = "cpu";
+
+        return {
+            stride: stride,
+            device: device
+        };
+    }
+
+    return null;
+}
+
+function processImage() {
+    var doc = app.activeDocument;
+    var activeLayer = doc.activeLayer;
+
+    app.displayDialogs = DialogModes.NO;
+
+    try {
+        // 获取临时目录路径
+        var tempDirPath = Folder.temp.fsName + "/SuperStarOff/";
+        var tempFolder = new Folder(tempDirPath);
+        if (!tempFolder.exists) {
+            tempFolder.create();
+        }
+
+        // 生成文件名
+        var timestamp = new Date().getTime();
+        var inputFile = tempDirPath + "input_" + timestamp + ".tif";
+        var outputFile = tempDirPath + "output_" + timestamp + ".tif";
+
+        $.writeln("=== SuperStarOff 开始处理 ===");
+        $.writeln("输入: " + inputFile);
+        $.writeln("输出: " + outputFile);
+        $.writeln("Stride: " + STRIDE);
+        $.writeln("Device: " + DEVICE);
+
+        // 步骤1: 导出图层
+        exportLayer(doc, activeLayer, inputFile);
+
+        // 步骤2: 调用Python
+        var pythonPath = findPython();
+        var cliPath = INSTALL_DIR + "/superstaroff_cli.py";
+
+        var command = '"' + pythonPath + '" "' + cliPath + '" ' +
+                      '"' + inputFile + '" "' + outputFile + '" ' +
+                      '--stride ' + STRIDE + ' --device ' + DEVICE;
+
+        $.writeln("执行命令: " + command);
+
+        var logFile = tempDirPath + "log_" + timestamp + ".txt";
+        var fullCommand = command + ' > "' + logFile + '" 2>&1';
+
+        var exitCode = system(fullCommand);
+        $.writeln("退出代码: " + exitCode);
+
+        // 检查输出
+        var outputFileObj = new File(outputFile);
+        if (!outputFileObj.exists) {
+            // 读取日志文件获取错误信息
+            var logFileObj = new File(logFile);
+            var errorDetails = "";
+
+            if (logFileObj.exists) {
+                logFileObj.open("r");
+                var logContent = logFileObj.read();
+                logFileObj.close();
+
+                // 获取日志的最后30行或最后2000字符
+                var lines = logContent.split("\n");
+                var startLine = Math.max(0, lines.length - 30);
+                errorDetails = lines.slice(startLine).join("\n");
+
+                // 如果还是太长，只取最后2000字符
+                if (errorDetails.length > 2000) {
+                    errorDetails = "...\n" + errorDetails.substring(errorDetails.length - 2000);
+                }
+            } else {
+                errorDetails = "未找到日志文件";
+            }
+
+            // 显示详细错误信息
+            app.displayDialogs = DialogModes.ALL;
+            alert("处理失败，未生成输出文件\n\n" +
+                  "退出代码: " + exitCode + "\n\n" +
+                  "错误详情:\n" + errorDetails + "\n\n" +
+                  "完整日志位置:\n" + logFile);
+            throw new Error("处理失败");
+        }
+
+        // 步骤3: 导入结果
+        var tempDoc = app.open(outputFileObj);
+        app.activeDocument = tempDoc;
+        tempDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
+        tempDoc.close(SaveOptions.DONOTSAVECHANGES);
+
+        app.activeDocument = doc;
+        doc.activeLayer.name = "去星";
+
+        // 步骤4: 创建星点图层
+        var starlessLayer = doc.activeLayer;
+        starlessLayer.blendMode = BlendMode.DIFFERENCE;
+
+        var desc = new ActionDescriptor();
+        desc.putBoolean(charIDToTypeID("Dplc"), true);
+        executeAction(charIDToTypeID("MrgV"), desc, DialogModes.NO);
+
+        var starsLayer = doc.activeLayer;
+        starsLayer.name = "星点";
+        starsLayer.blendMode = BlendMode.LINEARDODGE;
+        starsLayer.visible = false;
+
+        starlessLayer.blendMode = BlendMode.NORMAL;
+
+        // 清理临时文件
+        var input = new File(inputFile);
+        if (input.exists) input.remove();
+        var output = new File(outputFile);
+        if (output.exists) output.remove();
+        var log = new File(logFile);
+        if (log.exists) log.remove();
+
+        app.displayDialogs = DialogModes.ALL;
+        alert("处理完成！\n\n已创建:\n• 去星图层\n• 星点图层（已隐藏）\n\n詹姆斯祝你晴空万里！Clear Night!");
+
+    } catch (e) {
+        app.displayDialogs = DialogModes.ALL;
+        throw e;
+    }
+}
+
+function exportLayer(doc, layer, filePath) {
     app.activeDocument = doc;
 
-    // 创建一个临时文档，只包含当前图层
+    // 直接使用 doc.width/height
     var tempDoc = app.documents.add(
         doc.width,
         doc.height,
@@ -153,20 +268,15 @@ function exportLayerAsTiff(doc, layer, filePath) {
         DocumentFill.TRANSPARENT
     );
 
-    // 复制图层到临时文档（需要原文档在前台）
     app.activeDocument = doc;
     layer.duplicate(tempDoc, ElementPlacement.INSIDE);
 
-    // 切换到临时文档
     app.activeDocument = tempDoc;
-
-    // 合并所有图层
     tempDoc.flatten();
 
-    // 保存为TIFF
     var tiffFile = new File(filePath);
     var tiffOptions = new TiffSaveOptions();
-    tiffOptions.byteOrder = ByteOrder.IBM;  // PC byte order
+    tiffOptions.byteOrder = ByteOrder.IBM;
     tiffOptions.embedColorProfile = true;
     tiffOptions.imageCompression = TIFFEncoding.NONE;
     tiffOptions.layers = false;
@@ -174,194 +284,25 @@ function exportLayerAsTiff(doc, layer, filePath) {
     tempDoc.saveAs(tiffFile, tiffOptions, true);
     tempDoc.close(SaveOptions.DONOTSAVECHANGES);
 
-    // 切换回原文档
     app.activeDocument = doc;
-
-    $.writeln("Exported to: " + filePath);
+    $.writeln("导出完成: " + filePath);
 }
 
-/**
- * 调用Python CLI工具
- */
-function callPythonCLI(inputFile, outputFile) {
-    var command = PYTHON_INTERPRETER + ' "' + PYTHON_CLI_PATH + '" ' +
-                  '"' + inputFile + '" ' +
-                  '"' + outputFile + '" ' +
-                  '--stride ' + STRIDE + ' ' +
-                  '--device ' + DEVICE;
+function findPython() {
+    var paths = [
+        INSTALL_DIR + "/.venv/bin/python",
+        "/usr/bin/python3",
+        "/usr/local/bin/python3"
+    ];
 
-    $.writeln("Executing command: " + command);
-
-    // 检查输入文件
-    var inputFileObj = new File(inputFile);
-    var inputExists = inputFileObj.exists;
-    $.writeln("Input file exists: " + inputExists);
-
-    // 创建一个包装脚本来捕获输出
-    var logFile = TEMP_DIR + "python_log_" + new Date().getTime() + ".txt";
-    var wrapperCommand = command + ' > "' + logFile + '" 2>&1';
-
-    $.writeln("Running with logging to: " + logFile);
-
-    // 执行命令
-    var exitCode;
-    if ($.os.indexOf("Windows") != -1) {
-        // Windows
-        exitCode = system("cmd /c " + wrapperCommand);
-    } else {
-        // macOS / Linux
-        exitCode = system(wrapperCommand);
+    for (var i = 0; i < paths.length; i++) {
+        if (new File(paths[i]).exists) {
+            $.writeln("找到Python: " + paths[i]);
+            return paths[i];
+        }
     }
 
-    $.writeln("Command exit code: " + exitCode);
-
-    // 读取日志文件
-    var logFileObj = new File(logFile);
-    var logContent = "";
-    if (logFileObj.exists) {
-        logFileObj.open("r");
-        logContent = logFileObj.read();
-        logFileObj.close();
-        $.writeln("Python output:\n" + logContent);
-    }
-
-    // 检查输出文件是否存在
-    var outputFileObj = new File(outputFile);
-    var outputExists = outputFileObj.exists;
-    $.writeln("Output file exists: " + outputExists);
-
-    return {
-        success: outputExists,
-        command: command,
-        exitCode: exitCode,
-        inputExists: inputExists,
-        outputExists: outputExists,
-        logContent: logContent.substring(0, 500)  // 只取前500字符
-    };
-}
-
-/**
- * 导入文件作为新图层
- */
-function importAsNewLayer(doc, filePath, layerName) {
-    var fileObj = new File(filePath);
-
-    if (!fileObj.exists) {
-        throw new Error("输出文件不存在: " + filePath);
-    }
-
-    // 打开文件
-    var tempDoc = app.open(fileObj);
-
-    // 确保临时文档是活动的
-    app.activeDocument = tempDoc;
-
-    // 复制到原文档
-    tempDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
-
-    // 关闭临时文档
-    tempDoc.close(SaveOptions.DONOTSAVECHANGES);
-
-    // 切换回原文档并重命名新图层
-    app.activeDocument = doc;
-    doc.activeLayer.name = layerName;
-
-    $.writeln("Imported as new layer: " + layerName);
-}
-
-/**
- * 创建星点图层
- * 从原图层和去星图层提取星点
- */
-function createStarsLayer(doc, starlessLayerName) {
-    try {
-        $.writeln("Creating stars layer...");
-
-        // 找到去星图层
-        var starlessLayer = null;
-        for (var i = 0; i < doc.layers.length; i++) {
-            if (doc.layers[i].name == starlessLayerName) {
-                starlessLayer = doc.layers[i];
-                break;
-            }
-        }
-
-        if (!starlessLayer) {
-            $.writeln("Error: Starless layer not found");
-            return;
-        }
-
-        $.writeln("Found starless layer: " + starlessLayer.name);
-
-        // 获取背景层（原图）
-        var backgroundLayer;
-        try {
-            backgroundLayer = doc.backgroundLayer;
-            $.writeln("Found background layer: " + backgroundLayer.name);
-        } catch (e) {
-            $.writeln("No background layer found");
-            return;
-        }
-
-        // 1. 复制背景层（原图）作为普通图层
-        var originalLayerCopy = backgroundLayer.duplicate();
-        originalLayerCopy.name = "temp_original";
-        $.writeln("Background duplicated as temp layer");
-
-        // 2. 复制去星图层，设置为 Difference 混合模式
-        var diffLayer = starlessLayer.duplicate();
-        diffLayer.name = "temp_difference";
-        diffLayer.blendMode = BlendMode.DIFFERENCE;
-        $.writeln("Difference layer created");
-
-        // 3. 合并这两个临时图层得到星点
-        // 先选中 diffLayer，然后向下合并
-        app.activeDocument.activeLayer = diffLayer;
-
-        // 向下合并 (Merge Down - Cmd+E)
-        var idMrg = charIDToTypeID("Mrg ");
-        executeAction(idMrg, undefined, DialogModes.NO);
-
-        $.writeln("Layers merged to create stars");
-
-        // 现在 originalLayerCopy 包含了星点结果
-        var starsLayer = originalLayerCopy;
-        starsLayer.name = "星点";
-
-        // 4. 设置星点图层为 Screen 混合模式
-        starsLayer.blendMode = BlendMode.SCREEN;
-
-        // 5. 调整图层顺序：星点在最上面，去星在中间
-        starsLayer.move(doc, ElementPlacement.PLACEATBEGINNING);
-        starlessLayer.move(starsLayer, ElementPlacement.PLACEAFTER);
-
-        $.writeln("Stars layer completed successfully");
-        $.writeln("Layer order: 星点 (top, Screen) -> " + starlessLayerName + " (middle) -> Background (bottom)");
-
-    } catch (e) {
-        $.writeln("Error creating stars layer: " + e.toString());
-    }
-}
-
-/**
- * 清理临时文件
- */
-function cleanupTempFiles(inputFile, outputFile) {
-    try {
-        var input = new File(inputFile);
-        if (input.exists) {
-            input.remove();
-        }
-
-        var output = new File(outputFile);
-        if (output.exists) {
-            output.remove();
-        }
-
-        $.writeln("Cleaned up temp files");
-    } catch (e) {
-        $.writeln("Cleanup error: " + e.toString());
-    }
+    throw new Error("找不到Python解释器！");
 }
 
 // 运行主函数
