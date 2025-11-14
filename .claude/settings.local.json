@@ -96,7 +96,8 @@
       "Bash(cpio:*)",
       "Bash(do codesign -dvv \"$f\")",
       "Bash(xargs:*)",
-      "Bash(do echo \"File: $f\")"
+      "Bash(do echo \"File: $f\")",
+      "Bash(./build_pkg_with_distribution.sh:*)"
     ],
     "deny": [],
     "ask": []
