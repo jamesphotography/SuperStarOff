@@ -663,6 +663,38 @@ body {
     color: var(--success-color);
 }
 
+/* 版本特点 */
+.version-features {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.version-features h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 1.1rem;
+}
+
+.version-features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.version-features li {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+    padding-left: 1.5rem;
+    position: relative;
+    line-height: 1.6;
+}
+
+.version-features li::before {
+    position: absolute;
+    left: 0;
+    font-size: 1rem;
+}
+
 /* 使用指南 */
 .guide {
     padding: var(--spacing-xl) 0;
