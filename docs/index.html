@@ -407,40 +407,88 @@
             <h2 class="section-title">效果展示</h2>
             <p class="section-subtitle">看看 SuperStarOff 的实际处理效果</p>
 
-            <div class="gallery-grid">
-                <!-- 船底座星云 -->
-                <div class="gallery-item">
-                    <div class="gallery-image">
-                        <img src="images/example-1.jpg" alt="船底座星云 Carina Nebula">
+            <!-- 处理前后对比 -->
+            <div class="featured-comparison">
+                <div class="comparison-container">
+                    <div class="comparison-image before">
+                        <img src="images/example-before.jpg" alt="处理前">
+                        <span class="comparison-label">处理前</span>
                     </div>
-                    <h4>船底座星云 Carina Nebula</h4>
-                    <p>展示 SuperStarOff 处理深空天体的卓越效果</p>
+                    <div class="comparison-image after">
+                        <img src="images/example-after.jpg" alt="处理后">
+                        <span class="comparison-label">处理后</span>
+                    </div>
+                </div>
+                <div class="comparison-info">
+                    <h3>海豚星云 Sh2-308</h3>
+                    <p>完美去除星点，保留星云细节。左右对比可以清晰看到 SuperStarOff 的处理效果。</p>
+                </div>
+            </div>
+
+            <!-- 更多示例作品 -->
+            <div class="gallery-showcase">
+                <h3 class="showcase-title">更多处理案例</h3>
+                <p class="showcase-subtitle">点击图片查看大图</p>
+
+                <div class="thumbnail-grid">
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-1.jpg', '船底座星云 Carina Nebula')">
+                        <img src="images/example-1.jpg" alt="船底座星云">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-2.jpg', '深空天体示例 2')">
+                        <img src="images/example-2.jpg" alt="深空天体示例 2">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-3.jpg', '深空天体示例 3')">
+                        <img src="images/example-3.jpg" alt="深空天体示例 3">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-4.jpg', '深空天体示例 4')">
+                        <img src="images/example-4.jpg" alt="深空天体示例 4">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-5.jpg', '深空天体示例 5')">
+                        <img src="images/example-5.jpg" alt="深空天体示例 5">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-6.jpg', '深空天体示例 6')">
+                        <img src="images/example-6.jpg" alt="深空天体示例 6">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    <div class="thumbnail-item" onclick="openLightbox('images/example-7.jpg', '深空天体示例 7')">
+                        <img src="images/example-7.jpg" alt="深空天体示例 7">
+                        <div class="thumbnail-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 海豚星云对比图 -->
-                <div class="gallery-item">
-                    <div class="gallery-comparison">
-                        <div class="gallery-image before">
-                            <img src="images/example-before.jpg" alt="处理前" onerror="this.src='https://via.placeholder.com/600x400?text=Before'">
-                            <span class="gallery-label">处理前</span>
-                        </div>
-                        <div class="gallery-image after">
-                            <img src="images/example-after.jpg" alt="处理后" onerror="this.src='https://via.placeholder.com/600x400?text=After'">
-                            <span class="gallery-label">处理后</span>
-                        </div>
-                    </div>
-                    <h4>海豚星云 Sh2-308</h4>
-                    <p>完美去除星点，保留星云细节</p>
-                </div>
-
-                <div class="gallery-note">
-                    <i class="fas fa-images"></i>
-                    <p>更多示例图片即将添加...</p>
-                    <p class="small-text">如果你有使用 SuperStarOff 处理的优秀作品，欢迎分享！</p>
-                </div>
+                <p class="gallery-note-text">
+                    <i class="fas fa-camera"></i>
+                    如果你有使用 SuperStarOff 处理的优秀作品，欢迎分享！
+                </p>
             </div>
         </div>
     </section>
+
+    <!-- 图片灯箱 -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
 
     <!-- 使用教程截图 -->
     <section class="tutorial-screenshots" style="padding: 4rem 0; background: var(--dark-bg);">
