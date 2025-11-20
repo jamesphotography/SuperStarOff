@@ -43,7 +43,7 @@
             <p class="hero-subtitle">AI驱动的天文图像星点去除工具</p>
             <p class="hero-description">
                 采用深度学习技术，智能去除星点，完美保留星云细节<br>
-                专为天文摄影爱好者打造的专业工具
+                <strong style="color: var(--primary-color);">无缝集成 Photoshop，一键调用</strong> | 独立 GUI 版本即将推出
             </p>
             <div class="hero-buttons">
                 <a href="#download" class="btn btn-primary">
@@ -168,19 +168,20 @@
     <section id="download" class="download">
         <div class="container">
             <h2 class="section-title">下载 SuperStarOff</h2>
-            <p class="section-subtitle">选择适合你的平台，开始星点去除之旅</p>
+            <p class="section-subtitle">两个版本可选，推荐使用 Photoshop 插件版本</p>
 
             <div class="download-options">
-                <!-- macOS 安装包 -->
+                <!-- Photoshop 插件版本 - 主推 -->
                 <div class="download-card featured">
                     <div class="download-header">
-                        <i class="fab fa-apple"></i>
-                        <h3>macOS 安装包</h3>
+                        <i class="fab fa-adobe"></i>
+                        <h3>Photoshop 插件版本</h3>
                         <span class="badge">推荐</span>
                     </div>
                     <div class="download-info">
                         <p><strong>版本:</strong> V1.0 (2024-11-24)</p>
                         <p><strong>文件名:</strong> 慧眼去星_StarOFF_V1_20251124.pkg</p>
+                        <p><strong>支持:</strong> Photoshop 2023/2024/2025</p>
                         <p><strong>系统要求:</strong> macOS 11.0+</p>
                         <p><strong>最佳设备:</strong> Apple Silicon (M1/M2/M3/M4)</p>
                     </div>
@@ -194,31 +195,50 @@
                     </div>
                     <p class="download-note">
                         <i class="fas fa-info-circle"></i>
-                        安装包已通过 Apple Developer ID 签名和公证 | 百度网盘提取码: <strong>f3am</strong>
+                        已通过 Apple Developer ID 签名和公证 | 百度网盘提取码: <strong>f3am</strong>
                     </p>
+                    <div class="version-features">
+                        <h4>✨ 插件版本特点</h4>
+                        <ul>
+                            <li>✅ 在 Photoshop 中直接使用</li>
+                            <li>✅ 无缝集成工作流程</li>
+                            <li>✅ 支持图层和选区</li>
+                            <li>✅ 一键调用，操作简单</li>
+                            <li>✅ 支持多版本 Photoshop</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- Photoshop 插件 -->
+                <!-- 独立 GUI 版本 -->
                 <div class="download-card">
                     <div class="download-header">
-                        <i class="fas fa-plug"></i>
-                        <h3>Photoshop 插件</h3>
-                        <span class="badge badge-beta">Beta</span>
+                        <i class="fas fa-desktop"></i>
+                        <h3>独立 GUI 版本</h3>
+                        <span class="badge badge-beta">测试中</span>
                     </div>
                     <div class="download-info">
-                        <p><strong>版本:</strong> V1.0-beta</p>
-                        <p><strong>支持版本:</strong> PS 2023-2025</p>
+                        <p><strong>状态:</strong> 内部测试</p>
+                        <p><strong>说明:</strong> 独立应用程序版本</p>
                         <p><strong>平台:</strong> macOS</p>
                     </div>
                     <div class="download-buttons">
-                        <a href="https://github.com/jamesphotography/SuperStarOff" class="btn btn-secondary" target="_blank">
-                            <i class="fab fa-github"></i> GitHub 下载
+                        <a href="#" class="btn btn-secondary" onclick="alert('独立 GUI 版本正在内部测试中，即将推出。\n\n目前请使用 Photoshop 插件版本。'); return false;">
+                            <i class="fas fa-flask"></i> 测试中
                         </a>
                     </div>
                     <p class="download-note">
                         <i class="fas fa-info-circle"></i>
-                        需要先安装 macOS 主程序
+                        独立界面版本，无需 Photoshop。即将推出，敬请期待！
                     </p>
+                    <div class="version-features">
+                        <h4>🚧 即将推出</h4>
+                        <ul>
+                            <li>⏳ 独立运行，无需 Photoshop</li>
+                            <li>⏳ 拖放式操作</li>
+                            <li>⏳ 批量处理支持</li>
+                            <li>⏳ 更多参数调整选项</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -295,18 +315,25 @@
     <section id="guide" class="guide">
         <div class="container">
             <h2 class="section-title">使用指南</h2>
-            <p class="section-subtitle">3步轻松去除星点</p>
+            <p class="section-subtitle">Photoshop 插件版本使用教程 - 3步轻松去除星点</p>
+
+            <div class="ps-version-note" style="background: rgba(74, 144, 226, 0.1); border-left: 3px solid var(--primary-color); padding: 1rem; margin-bottom: 2rem; border-radius: 8px;">
+                <p style="color: var(--text-primary); margin: 0;">
+                    <i class="fab fa-adobe" style="color: var(--primary-color);"></i>
+                    <strong>说明：</strong>以下使用指南针对 <strong>Photoshop 插件版本</strong>。独立 GUI 版本正在测试中，即将推出。
+                </p>
+            </div>
 
             <div class="guide-steps">
                 <div class="guide-step">
                     <div class="guide-step-header">
                         <span class="guide-step-number">01</span>
-                        <h3>加载图片</h3>
+                        <h3>在 Photoshop 中打开图片</h3>
                     </div>
                     <div class="guide-step-content">
-                        <p>将图片拖放到窗口，或点击"打开图片"按钮选择文件</p>
+                        <p>在 Photoshop 中打开你要处理的天文图像</p>
                         <div class="guide-tips">
-                            <strong>支持格式：</strong>TIFF (8-bit/16-bit)、JPG、PNG
+                            <strong>支持格式：</strong>TIFF (8-bit/16-bit)、JPG、PNG、PSD 等 Photoshop 支持的格式
                         </div>
                     </div>
                 </div>
@@ -314,16 +341,16 @@
                 <div class="guide-step">
                     <div class="guide-step-header">
                         <span class="guide-step-number">02</span>
-                        <h3>选择参数</h3>
+                        <h3>调用 SuperStarOff 插件</h3>
                     </div>
                     <div class="guide-step-content">
-                        <p>选择处理步长和设备（推荐使用默认设置）</p>
+                        <p>在 Photoshop 菜单栏选择：<strong>文件 → 脚本 → SuperStarOff</strong></p>
                         <div class="guide-tips">
-                            <strong>参数建议：</strong>
+                            <strong>快速访问：</strong>
                             <ul>
-                                <li><strong>步长 256</strong> - 日常使用，平衡速度与质量</li>
-                                <li><strong>步长 128</strong> - 精细处理，最佳质量</li>
-                                <li><strong>步长 512</strong> - 快速预览</li>
+                                <li>也可以通过 <strong>窗口 → 扩展</strong> 找到插件</li>
+                                <li>支持 Photoshop 2023、2024、2025</li>
+                                <li>首次使用会自动检测并选择最佳处理设备</li>
                             </ul>
                         </div>
                     </div>
@@ -332,12 +359,18 @@
                 <div class="guide-step">
                     <div class="guide-step-header">
                         <span class="guide-step-number">03</span>
-                        <h3>处理并保存</h3>
+                        <h3>等待处理完成</h3>
                     </div>
                     <div class="guide-step-content">
-                        <p>点击"去除星点"，等待处理完成，保存结果</p>
+                        <p>插件会自动处理当前图层，完成后生成去除星点的新图层</p>
                         <div class="guide-tips">
-                            <strong>提示：</strong>可以在预览窗口中对比原图和处理后的效果
+                            <strong>处理说明：</strong>
+                            <ul>
+                                <li>处理时间取决于图像大小（通常几秒到几分钟）</li>
+                                <li>支持图层和选区操作</li>
+                                <li>原图层保持不变，方便对比效果</li>
+                                <li>可以使用图层蒙版进一步调整</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
