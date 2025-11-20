@@ -384,21 +384,22 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
-.perf-number {
+.perf-time {
     font-size: 3rem;
     font-weight: 700;
+    line-height: 1;
+    margin-bottom: var(--spacing-sm);
+}
+
+.perf-number {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    line-height: 1;
 }
 
-.perf-unit {
-    font-size: 1.2rem;
+.perf-time {
     color: var(--primary-color);
-    font-weight: 600;
-    margin-bottom: var(--spacing-sm);
 }
 
 .perf-label {
