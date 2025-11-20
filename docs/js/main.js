@@ -295,3 +295,35 @@ if (window.performance && window.performance.timing) {
         }, 0);
     });
 }
+
+// 图片灯箱功能
+function openLightbox(imageSrc, caption) {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+
+    lightbox.classList.add('active');
+    lightboxImg.src = imageSrc;
+    lightboxCaption.textContent = caption;
+
+    // 防止背景滚动
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.remove('active');
+
+    // 恢复背景滚动
+    document.body.style.overflow = '';
+}
+
+// ESC 键关闭灯箱
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox.classList.contains('active')) {
+            closeLightbox();
+        }
+    }
+});
