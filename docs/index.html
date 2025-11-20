@@ -455,12 +455,6 @@
                             <i class="fas fa-search-plus"></i>
                         </div>
                     </div>
-                    <div class="thumbnail-item" onclick="openLightbox('images/example-5.jpg', '星空摄影作品示例 5')">
-                        <img src="images/example-5.jpg" alt="星空摄影作品示例 5">
-                        <div class="thumbnail-overlay">
-                            <i class="fas fa-search-plus"></i>
-                        </div>
-                    </div>
                     <div class="thumbnail-item" onclick="openLightbox('images/example-6.jpg', '星空摄影作品示例 6')">
                         <img src="images/example-6.jpg" alt="星空摄影作品示例 6">
                         <div class="thumbnail-overlay">
@@ -528,71 +522,78 @@
 
             <div class="tutorial-grid" style="display: grid; gap: 2rem; margin-top: 2rem;">
 
-                <!-- 安装教程占位符 -->
+                <!-- 步骤 1: 打开图片 -->
                 <div class="tutorial-section" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
                     <h3 style="color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-download" style="color: var(--primary-color);"></i>
-                        安装教程
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--primary-color); color: white; border-radius: 50%; font-weight: 700; font-size: 1rem;">1</span>
+                        在 Photoshop 中打开图片
                     </h3>
-                    <div class="screenshot-placeholder" style="background: rgba(74, 144, 226, 0.05); border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 4rem 2rem; text-align: center; margin-bottom: 1rem;">
-                        <i class="fas fa-image" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 1rem;"></i>
-                        <p style="color: var(--text-secondary); margin: 0;">安装步骤截图</p>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">即将添加详细的安装过程截图</p>
+                    <div style="margin-bottom: 1rem;">
+                        <img src="images/howto-1.png" alt="在 Photoshop 中打开图片" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color);" onclick="openLightbox('images/howto-1.png', '步骤 1: 在 Photoshop 中打开图片')">
                     </div>
-                    <ul style="color: var(--text-secondary); line-height: 1.8;">
-                        <li>下载 .pkg 安装包</li>
-                        <li>双击运行安装程序</li>
-                        <li>按照向导完成安装</li>
-                        <li>在 Photoshop 中验证插件</li>
-                    </ul>
+                    <p style="color: var(--text-secondary); line-height: 1.8;">
+                        在 Photoshop 中打开需要处理的星空摄影作品。支持 TIFF (8-bit/16-bit)、JPG、PNG、PSD 等格式。
+                    </p>
                 </div>
 
-                <!-- 使用教程占位符 -->
+                <!-- 步骤 2: 调用插件 -->
                 <div class="tutorial-section" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
                     <h3 style="color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fab fa-adobe" style="color: var(--primary-color);"></i>
-                        Photoshop 中使用
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--primary-color); color: white; border-radius: 50%; font-weight: 700; font-size: 1rem;">2</span>
+                        调用 SuperStarOff 插件
                     </h3>
-                    <div class="screenshot-placeholder" style="background: rgba(74, 144, 226, 0.05); border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 4rem 2rem; text-align: center; margin-bottom: 1rem;">
-                        <i class="fas fa-image" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 1rem;"></i>
-                        <p style="color: var(--text-secondary); margin: 0;">PS 插件使用截图</p>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">即将添加在 Photoshop 中调用插件的截图</p>
+                    <div style="margin-bottom: 1rem;">
+                        <img src="images/howto-2.png" alt="调用 SuperStarOff 插件" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color);" onclick="openLightbox('images/howto-2.png', '步骤 2: 调用 SuperStarOff 插件')">
                     </div>
-                    <ul style="color: var(--text-secondary); line-height: 1.8;">
-                        <li>在 PS 中打开图片</li>
-                        <li>菜单：文件 → 脚本 → SuperStarOff</li>
-                        <li>选择 Photoshop 版本</li>
-                        <li>等待处理完成</li>
-                    </ul>
+                    <p style="color: var(--text-secondary); line-height: 1.8;">
+                        点击菜单：<strong>文件 → 脚本 → SuperStarOff</strong>，选择你的 Photoshop 版本（支持 PS 2019-2026）。
+                    </p>
                 </div>
 
-                <!-- 效果对比占位符 -->
+                <!-- 步骤 3: 等待处理 -->
                 <div class="tutorial-section" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
                     <h3 style="color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <i class="fas fa-layer-group" style="color: var(--primary-color);"></i>
-                        结果查看
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--primary-color); color: white; border-radius: 50%; font-weight: 700; font-size: 1rem;">3</span>
+                        等待 AI 处理完成
                     </h3>
-                    <div class="screenshot-placeholder" style="background: rgba(74, 144, 226, 0.05); border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 4rem 2rem; text-align: center; margin-bottom: 1rem;">
-                        <i class="fas fa-image" style="font-size: 3rem; color: var(--text-muted); display: block; margin-bottom: 1rem;"></i>
-                        <p style="color: var(--text-secondary); margin: 0;">处理结果截图</p>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">即将添加处理前后对比截图</p>
+                    <div style="margin-bottom: 1rem;">
+                        <img src="images/howto-3.png" alt="等待 AI 处理完成" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color);" onclick="openLightbox('images/howto-3.png', '步骤 3: 等待 AI 处理完成')">
                     </div>
-                    <ul style="color: var(--text-secondary); line-height: 1.8;">
-                        <li>查看新生成的图层</li>
-                        <li>对比原图和去星结果</li>
-                        <li>使用图层蒙版精细调整</li>
-                        <li>保存处理后的图片</li>
-                    </ul>
+                    <p style="color: var(--text-secondary); line-height: 1.8;">
+                        插件会自动处理当前图层，处理时间取决于图像大小（通常几秒到几分钟）。原图层保持不变，方便对比效果。
+                    </p>
                 </div>
 
             </div>
 
-            <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(74, 144, 226, 0.05); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                <p style="color: var(--text-secondary); margin: 0;">
-                    <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
-                    <strong>提示：</strong>详细的使用教程截图正在制作中，即将更新。如有问题请查看
-                    <a href="https://github.com/jamesphotography/SuperStarOff/tree/master/docs" target="_blank" style="color: var(--primary-color); text-decoration: none;">完整文档</a>
+            <!-- 处理前后效果对比 -->
+            <div style="margin-top: 3rem;">
+                <h3 style="color: var(--text-primary); font-size: 1.8rem; text-align: center; margin-bottom: 1rem;">
+                    <i class="fas fa-magic" style="color: var(--primary-color);"></i>
+                    处理前后效果对比
+                </h3>
+                <p style="color: var(--text-muted); text-align: center; margin-bottom: 2rem;">
+                    完美去除星点，保留星云细节
                 </p>
+
+                <div class="tutorial-comparison" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0;">
+                        <div style="position: relative; overflow: hidden; cursor: pointer;" onclick="openLightbox('images/example-5.jpg', '处理前')">
+                            <img src="images/example-5.jpg" alt="处理前" style="width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease;">
+                            <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(10, 14, 39, 0.9); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; backdrop-filter: blur(10px);">处理前</span>
+                        </div>
+                        <div style="position: relative; overflow: hidden; cursor: pointer;" onclick="openLightbox('images/howto-4.jpg', '处理后')">
+                            <img src="images/howto-4.jpg" alt="处理后" style="width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease;">
+                            <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(74, 144, 226, 0.9); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; backdrop-filter: blur(10px);">处理后 ✨</span>
+                        </div>
+                    </div>
+                    <div style="padding: 1.5rem; text-align: center; border-top: 1px solid var(--border-color);">
+                        <p style="color: var(--text-secondary); margin: 0; line-height: 1.6;">
+                            <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                            点击图片可放大查看细节。SuperStarOff 智能去除星点的同时，完美保留星云的层次和色彩。
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
