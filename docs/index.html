@@ -542,8 +542,8 @@
                         <span style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--primary-color); color: white; border-radius: 50%; font-weight: 700; font-size: 1rem;">2</span>
                         调用 SuperStarOff 插件
                     </h3>
-                    <div style="margin-bottom: 1rem;">
-                        <img src="images/howto-2.png" alt="调用 SuperStarOff 插件" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color);" onclick="openLightbox('images/howto-2.png', '步骤 2: 调用 SuperStarOff 插件')">
+                    <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+                        <img src="images/howto-2.png" alt="调用 SuperStarOff 插件" style="max-width: 100%; height: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color); cursor: pointer;" onclick="openLightbox('images/howto-2.png', '步骤 2: 调用 SuperStarOff 插件')">
                     </div>
                     <p style="color: var(--text-secondary); line-height: 1.8;">
                         点击菜单：<strong>文件 → 脚本 → SuperStarOff</strong>，选择你的 Photoshop 版本（支持 PS 2019-2026）。
@@ -556,8 +556,8 @@
                         <span style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background: var(--primary-color); color: white; border-radius: 50%; font-weight: 700; font-size: 1rem;">3</span>
                         等待 AI 处理完成
                     </h3>
-                    <div style="margin-bottom: 1rem;">
-                        <img src="images/howto-3.png" alt="等待 AI 处理完成" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color);" onclick="openLightbox('images/howto-3.png', '步骤 3: 等待 AI 处理完成')">
+                    <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+                        <img src="images/howto-3.png" alt="等待 AI 处理完成" style="max-width: 100%; height: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color); cursor: pointer;" onclick="openLightbox('images/howto-3.png', '步骤 3: 等待 AI 处理完成')">
                     </div>
                     <p style="color: var(--text-secondary); line-height: 1.8;">
                         插件会自动处理当前图层，处理时间取决于图像大小（通常几秒到几分钟）。原图层保持不变，方便对比效果。
@@ -591,6 +591,42 @@
                         <p style="color: var(--text-secondary); margin: 0; line-height: 1.6;">
                             <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
                             点击图片可放大查看细节。SuperStarOff 智能去除星点的同时，完美保留星云的层次和色彩。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 视频教程 -->
+            <div style="margin-top: 3rem;">
+                <h3 style="color: var(--text-primary); font-size: 1.8rem; text-align: center; margin-bottom: 1rem;">
+                    <i class="fab fa-youtube" style="color: var(--primary-color);"></i>
+                    视频教程
+                </h3>
+                <p style="color: var(--text-muted); text-align: center; margin-bottom: 2rem;">
+                    观看完整的操作演示，更直观地了解 SuperStarOff 的使用方法
+                </p>
+
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
+                    <!-- YouTube 视频嵌入 -->
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--radius-md); margin-bottom: 1.5rem;">
+                        <iframe
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                            src="https://www.youtube.com/embed/_a7CB8ZO2hg"
+                            title="SuperStarOff 使用教程"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+
+                    <!-- B站链接提示 -->
+                    <div style="text-align: center; padding: 1rem; background: rgba(74, 144, 226, 0.05); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+                        <p style="color: var(--text-secondary); margin: 0; line-height: 1.6;">
+                            <i class="fas fa-flag" style="color: var(--warning-color);"></i>
+                            <strong>国内用户提示：</strong>如果无法观看 YouTube 视频，请访问
+                            <a href="https://www.bilibili.com/video/BV1PAC9BAEcp" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">
+                                <i class="fab fa-bilibili"></i> Bilibili 观看
+                            </a>
                         </p>
                     </div>
                 </div>
