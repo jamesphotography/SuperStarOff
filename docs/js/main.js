@@ -132,11 +132,31 @@ animateElements.forEach(el => {
     observer.observe(el);
 });
 
-// 性能数字动画
-const animateNumber = (element, target, duration = 2000) => {
-    const start = 0;
+// 性能数字倒计时动画
+const animateCountdown = (element, target, duration = 2000) => {
+    let current = target;
+    const decrement = target / (duration / 50);
+
+    element.textContent = target;
+
+    const timer = setInterval(() => {
+        current -= decrement;
+        if (current <= 0) {
+            current = 0;
+            clearInterval(timer);
+            // 倒计时完成后从0数到目标值
+            setTimeout(() => {
+                animateCountUp(element, target, 1000);
+            }, 100);
+        }
+        element.textContent = Math.floor(current);
+    }, 50);
+};
+
+// 正向计数动画
+const animateCountUp = (element, target, duration = 1000) => {
+    let current = 0;
     const increment = target / (duration / 16);
-    let current = start;
 
     const timer = setInterval(() => {
         current += increment;
@@ -148,18 +168,16 @@ const animateNumber = (element, target, duration = 2000) => {
     }, 16);
 };
 
-// 当性能卡片进入视野时触发数字动画
+// 当性能卡片进入视野时触发倒计时动画
 const perfObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const numberElement = entry.target.querySelector('.perf-number');
             if (numberElement && !numberElement.classList.contains('animated')) {
                 numberElement.classList.add('animated');
-                const text = numberElement.textContent;
-                const match = text.match(/\d+/);
-                if (match) {
-                    const number = parseInt(match[0]);
-                    animateNumber(numberElement, number);
+                const target = parseInt(numberElement.textContent);
+                if (!isNaN(target)) {
+                    animateCountdown(numberElement, target, 2000);
                 }
             }
         }
