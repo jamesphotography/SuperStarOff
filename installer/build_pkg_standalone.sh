@@ -282,7 +282,7 @@ fi
 
 echo ""
 echo "检测 Photoshop 安装..."
-PS_VERSIONS=("2025" "2024" "2023" "2022" "CC 2021" "CC 2020" "CC 2019")
+PS_VERSIONS=("2026" "2025" "2024" "2023" "2022" "CC 2021" "CC 2020" "CC 2019")
 INSTALLED=0
 
 for VERSION in "${PS_VERSIONS[@]}"; do
@@ -291,7 +291,7 @@ for VERSION in "${PS_VERSIONS[@]}"; do
         if [ -d "$PS_SCRIPTS_DIR" ]; then
             # 复制打包好的 JSX（已修复 findPython 函数）
             if [ -f "$INSTALL_DIR/SuperStarOff_PS_V10.jsx" ]; then
-                cp "$INSTALL_DIR/SuperStarOff_PS_V10.jsx" "$PS_SCRIPTS_DIR/SuperStarOff.jsx"
+                cp "$INSTALL_DIR/SuperStarOff_PS_V10.jsx" "$PS_SCRIPTS_DIR/慧眼去星.jsx"
                 echo "✓ 已安装到 Adobe Photoshop $VERSION"
                 INSTALLED=1
             else
@@ -317,7 +317,7 @@ echo "==================================================="
 echo ""
 echo "使用方法:"
 echo "  1. 启动 Adobe Photoshop"
-echo "  2. 文件 > 脚本 > SuperStarOff"
+echo "  2. 文件 > 脚本 > 慧眼去星"
 echo ""
 
 exit 0
