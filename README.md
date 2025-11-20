@@ -27,7 +27,7 @@ SuperStarOff/
 ├── models/                # 预训练模型权重
 │   └── SuperStarOff2025.pt       (168MB) - 加密模型权重
 ├── src/                   # 源代码
-│   ├── starnet_v2_pytorch.py     # 深度学习模型实现
+│   ├── model_processor.py        # 深度学习模型实现
 │   ├── app.py                    # GUI 应用入口
 │   └── gui/                      # GUI 相关代码
 │       ├── main_window.py        # 主窗口
@@ -83,7 +83,7 @@ python src/app.py
 ```python
 import sys
 sys.path.insert(0, 'src')
-from starnet_v2_pytorch import StarNetV2
+from model_processor import StarNetV2
 
 # 初始化处理器
 processor = StarNetV2(device='mps', stride=256)  # 或 'cpu'

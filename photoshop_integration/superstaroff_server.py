@@ -21,7 +21,7 @@ current_dir = Path(__file__).parent
 src_dir = current_dir.parent / "src"
 sys.path.insert(0, str(src_dir))
 
-from starnet_v2_pytorch import StarNetV2
+from model_processor import StarNetV2
 
 
 class StarOffHandler(BaseHTTPRequestHandler):

@@ -86,7 +86,7 @@ class SuperStarOff:
 
         # 尝试解密加载
         try:
-            from model_crypto import ModelCrypto
+            from core_utils import ModelCrypto
 
             print("正在解密模型...")
             buffer = ModelCrypto.decrypt_to_memory(str(self.model_path))
@@ -155,6 +155,9 @@ class SuperStarOff:
         print(f"正在加载图片: {input_path}")
         input_path_lower = str(input_path).lower()
 
+        # Store color profile for later
+        color_profile = None
+
         if input_path_lower.endswith(('.tif', '.tiff')):
             # TIFF 文件
             data = tiff.imread(input_path)
@@ -163,9 +166,24 @@ class SuperStarOff:
             if len(data.shape) > 3:
                 print(f"TIFF 有 {data.shape[0]} 层，使用第一层")
                 data = data[0]
+
+            # Try to extract ICC profile from TIFF using PIL
+            try:
+                pil_image = Image.open(input_path)
+                color_profile = pil_image.info.get('icc_profile')
+                if color_profile:
+                    print(f"检测到嵌入的ICC色彩配置文件 ({len(color_profile)} bytes)")
+            except:
+                pass
         else:
             # PNG/JPEG 文件
             pil_image = Image.open(input_path)
+
+            # Extract ICC profile if present
+            color_profile = pil_image.info.get('icc_profile')
+            if color_profile:
+                print(f"检测到嵌入的ICC色彩配置文件 ({len(color_profile)} bytes)")
+
             data = np.array(pil_image)
 
         # 记录输入类型
@@ -211,10 +229,25 @@ class SuperStarOff:
         output_path_lower = str(output_path).lower()
 
         if output_path_lower.endswith(('.tif', '.tiff')):
-            tiff.imwrite(output_path, output_data)
-        else:
+            # Save as TIFF with PIL to preserve ICC profile
             output_image = Image.fromarray(output_data)
-            output_image.save(output_path)
+
+            # Embed original color profile if available
+            if color_profile:
+                print("嵌入原始ICC色彩配置文件")
+                output_image.save(output_path, 'TIFF', icc_profile=color_profile, compression='none')
+            else:
+                tiff.imwrite(output_path, output_data)
+        else:
+            # Save as PNG/JPEG using PIL
+            output_image = Image.fromarray(output_data)
+
+            # Embed original color profile if available
+            if color_profile:
+                print("嵌入原始ICC色彩配置文件")
+                output_image.save(output_path, icc_profile=color_profile)
+            else:
+                output_image.save(output_path)
 
         print("完成!")
 

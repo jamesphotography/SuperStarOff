@@ -93,7 +93,7 @@ class StarNetV2:
             # Load encrypted model
             print("Decrypting model...")
             try:
-                from model_crypto import ModelCrypto
+                from core_utils import ModelCrypto
 
                 # Decrypt to memory
                 buffer = ModelCrypto.decrypt_to_memory(str(self.model_path))
@@ -210,6 +210,9 @@ class StarNetV2:
         print(f"Loading image from {input_path}")
         input_path_lower = str(input_path).lower()
 
+        # Store color profile for later
+        color_profile = None
+
         if input_path_lower.endswith(('.tif', '.tiff')):
             # Load TIFF using tifffile
             data = tiff.imread(input_path)
@@ -218,9 +221,24 @@ class StarNetV2:
             if len(data.shape) > 3:
                 print(f"TIFF has {data.shape[0]} layers, using first layer")
                 data = data[0]
+
+            # Try to extract ICC profile from TIFF using PIL
+            try:
+                pil_image = Image.open(input_path)
+                color_profile = pil_image.info.get('icc_profile')
+                if color_profile:
+                    print(f"Detected embedded ICC color profile ({len(color_profile)} bytes)")
+            except:
+                pass
         else:
             # Load PNG/JPEG using PIL
             pil_image = Image.open(input_path)
+
+            # Extract ICC profile if present
+            color_profile = pil_image.info.get('icc_profile')
+            if color_profile:
+                print(f"Detected embedded ICC color profile ({len(color_profile)} bytes)")
+
             data = np.array(pil_image)
 
         # Determine input dtype
@@ -266,12 +284,25 @@ class StarNetV2:
         output_path_lower = str(output_path).lower()
 
         if output_path_lower.endswith(('.tif', '.tiff')):
-            # Save as TIFF
-            tiff.imwrite(output_path, output_data)
+            # Save as TIFF with PIL to preserve ICC profile
+            output_image = Image.fromarray(output_data)
+
+            # Embed original color profile if available
+            if color_profile:
+                print("Embedding original ICC color profile")
+                output_image.save(output_path, 'TIFF', icc_profile=color_profile, compression='none')
+            else:
+                tiff.imwrite(output_path, output_data)
         else:
             # Save as PNG/JPEG using PIL
             output_image = Image.fromarray(output_data)
-            output_image.save(output_path)
+
+            # Embed original color profile if available
+            if color_profile:
+                print("Embedding original ICC color profile")
+                output_image.save(output_path, icc_profile=color_profile)
+            else:
+                output_image.save(output_path)
 
         print("Done!")
 
