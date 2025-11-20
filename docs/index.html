@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="慧眼去星 SuperStarOff - 专业的天文图像星点去除工具，采用AI深度学习技术，智能去除星点，完美保留星云细节">
+    <meta name="keywords" content="天文摄影,星点去除,深度学习,AI,星云,深空摄影,SuperStarOff,慧眼去星">
+    <title>慧眼去星 SuperStarOff - AI驱动的天文图像星点去除工具</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-star"></i>
+                <span>慧眼去星 SuperStarOff</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home">首页</a></li>
+                <li><a href="#features">功能特性</a></li>
+                <li><a href="#download">下载</a></li>
+                <li><a href="#guide">使用指南</a></li>
+                <li><a href="#gallery">效果展示</a></li>
+                <li><a href="#contact">联系我们</a></li>
+                <li><a href="#" id="lang-switch">English</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主横幅 -->
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <h1 class="hero-title">
+                <span class="title-main">慧眼去星</span>
+                <span class="title-sub">SuperStarOff</span>
+            </h1>
+            <p class="hero-subtitle">AI驱动的天文图像星点去除工具</p>
+            <p class="hero-description">
+                采用深度学习技术，智能去除星点，完美保留星云细节<br>
+                专为天文摄影爱好者打造的专业工具
+            </p>
+            <div class="hero-buttons">
+                <a href="#download" class="btn btn-primary">
+                    <i class="fas fa-download"></i> 立即下载
+                </a>
+                <a href="#guide" class="btn btn-secondary">
+                    <i class="fas fa-book"></i> 使用指南
+                </a>
+                <a href="https://github.com/jamesphotography/SuperStarOff" class="btn btn-outline" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- 功能特性 -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">强大功能特性</h2>
+            <p class="section-subtitle">专业工具，简单易用</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI 深度学习</h3>
+                    <p>采用优化的深度学习模型 (2025v1)，智能识别并去除星点，保留星云细节</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>GPU 硬件加速</h3>
+                    <p>原生支持 Apple Silicon GPU 加速，处理速度提升 3-5 倍</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3>多格式支持</h3>
+                    <p>完整支持 RGB/灰度图像，8-bit/16-bit TIFF 格式</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>实时预览</h3>
+                    <p>原图与结果并排对比，效果一目了然，所见即所得</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3>现代界面</h3>
+                    <p>原生 macOS 应用，深色主题，拖放操作，简单直观</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>模型加密</h3>
+                    <p>采用 AES 加密保护模型权重，确保知识产权安全</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 性能展示 -->
+    <section class="performance">
+        <div class="container">
+            <h2 class="section-title">卓越性能表现</h2>
+            <p class="section-subtitle">在 MacBook Pro (M2) 上的真实测试数据</p>
+
+            <div class="performance-grid">
+                <div class="perf-card">
+                    <div class="perf-number">~5秒</div>
+                    <div class="perf-label">1048×712</div>
+                    <div class="perf-desc">小图快速处理</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-number">~30秒</div>
+                    <div class="perf-label">4096×2160</div>
+                    <div class="perf-desc">4K 高清图像</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-number">~2分钟</div>
+                    <div class="perf-label">8256×5504</div>
+                    <div class="perf-desc">超大尺寸图像</div>
+                </div>
+            </div>
+
+            <div class="device-support">
+                <h3>设备支持</h3>
+                <div class="devices">
+                    <div class="device-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Apple Silicon (M1/M2/M3/M4)</span>
+                    </div>
+                    <div class="device-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>NVIDIA CUDA GPU</span>
+                    </div>
+                    <div class="device-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Intel/AMD CPU</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section id="download" class="download">
+        <div class="container">
+            <h2 class="section-title">下载 SuperStarOff</h2>
+            <p class="section-subtitle">选择适合你的平台，开始星点去除之旅</p>
+
+            <div class="download-options">
+                <!-- macOS 安装包 -->
+                <div class="download-card featured">
+                    <div class="download-header">
+                        <i class="fab fa-apple"></i>
+                        <h3>macOS 安装包</h3>
+                        <span class="badge">推荐</span>
+                    </div>
+                    <div class="download-info">
+                        <p><strong>版本:</strong> V1.0 (2024-11-24)</p>
+                        <p><strong>文件名:</strong> 慧眼去星_StarOFF_V1_20251124.pkg</p>
+                        <p><strong>系统要求:</strong> macOS 11.0+</p>
+                        <p><strong>最佳设备:</strong> Apple Silicon (M1/M2/M3/M4)</p>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="https://drive.google.com/file/d/1TAVbps1afDb39nQjFqdGx7HlR2XGKzFw/view?usp=sharing" class="btn btn-primary" target="_blank">
+                            <i class="fab fa-google-drive"></i> Google Drive 下载
+                        </a>
+                        <a href="https://pan.baidu.com/s/15LXTcyd366JA3qknCfnY9g?pwd=f3am" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-cloud"></i> 百度网盘下载
+                        </a>
+                    </div>
+                    <p class="download-note">
+                        <i class="fas fa-info-circle"></i>
+                        安装包已通过 Apple Developer ID 签名和公证 | 百度网盘提取码: <strong>f3am</strong>
+                    </p>
+                </div>
+
+                <!-- Photoshop 插件 -->
+                <div class="download-card">
+                    <div class="download-header">
+                        <i class="fas fa-plug"></i>
+                        <h3>Photoshop 插件</h3>
+                        <span class="badge badge-beta">Beta</span>
+                    </div>
+                    <div class="download-info">
+                        <p><strong>版本:</strong> V1.0-beta</p>
+                        <p><strong>支持版本:</strong> PS 2023-2025</p>
+                        <p><strong>平台:</strong> macOS</p>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="https://github.com/jamesphotography/SuperStarOff" class="btn btn-secondary" target="_blank">
+                            <i class="fab fa-github"></i> GitHub 下载
+                        </a>
+                    </div>
+                    <p class="download-note">
+                        <i class="fas fa-info-circle"></i>
+                        需要先安装 macOS 主程序
+                    </p>
+                </div>
+            </div>
+
+            <!-- 下载说明 -->
+            <div class="download-instructions">
+                <h3><i class="fas fa-question-circle"></i> 下载链接说明</h3>
+                <div class="instructions-grid">
+                    <div class="instruction-item">
+                        <h4>Google Drive (国际用户)</h4>
+                        <p>下载速度快，无需登录，适合海外用户</p>
+                    </div>
+                    <div class="instruction-item">
+                        <h4>百度网盘 (国内用户)</h4>
+                        <p>国内访问速度更快，需要百度网盘账号</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 安装步骤 -->
+            <div class="install-steps">
+                <h3><i class="fas fa-cog"></i> 安装步骤</h3>
+                <div class="steps-grid">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h4>下载安装包</h4>
+                        <p>从上方选择下载源下载安装包</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h4>打开安装包</h4>
+                        <p>双击 .pkg 文件开始安装</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h4>按提示安装</h4>
+                        <p>跟随安装向导完成安装</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h4>启动应用</h4>
+                        <p>从启动台或应用程序文件夹启动</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统要求 -->
+            <div class="system-requirements">
+                <h3><i class="fas fa-laptop"></i> 系统要求</h3>
+                <div class="requirements-grid">
+                    <div class="req-column">
+                        <h4>最低配置</h4>
+                        <ul>
+                            <li>macOS 11.0 或更高版本</li>
+                            <li>8GB RAM</li>
+                            <li>2GB 可用磁盘空间</li>
+                            <li>任意处理器</li>
+                        </ul>
+                    </div>
+                    <div class="req-column recommended">
+                        <h4>推荐配置</h4>
+                        <ul>
+                            <li>macOS 12.0 或更高版本</li>
+                            <li>16GB RAM</li>
+                            <li>5GB 可用磁盘空间</li>
+                            <li>Apple Silicon (M1/M2/M3/M4)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使用指南 -->
+    <section id="guide" class="guide">
+        <div class="container">
+            <h2 class="section-title">使用指南</h2>
+            <p class="section-subtitle">3步轻松去除星点</p>
+
+            <div class="guide-steps">
+                <div class="guide-step">
+                    <div class="guide-step-header">
+                        <span class="guide-step-number">01</span>
+                        <h3>加载图片</h3>
+                    </div>
+                    <div class="guide-step-content">
+                        <p>将图片拖放到窗口，或点击"打开图片"按钮选择文件</p>
+                        <div class="guide-tips">
+                            <strong>支持格式：</strong>TIFF (8-bit/16-bit)、JPG、PNG
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-header">
+                        <span class="guide-step-number">02</span>
+                        <h3>选择参数</h3>
+                    </div>
+                    <div class="guide-step-content">
+                        <p>选择处理步长和设备（推荐使用默认设置）</p>
+                        <div class="guide-tips">
+                            <strong>参数建议：</strong>
+                            <ul>
+                                <li><strong>步长 256</strong> - 日常使用，平衡速度与质量</li>
+                                <li><strong>步长 128</strong> - 精细处理，最佳质量</li>
+                                <li><strong>步长 512</strong> - 快速预览</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-header">
+                        <span class="guide-step-number">03</span>
+                        <h3>处理并保存</h3>
+                    </div>
+                    <div class="guide-step-content">
+                        <p>点击"去除星点"，等待处理完成，保存结果</p>
+                        <div class="guide-tips">
+                            <strong>提示：</strong>可以在预览窗口中对比原图和处理后的效果
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photoshop 集成 -->
+            <div class="ps-integration">
+                <h3><i class="fab fa-adobe"></i> Photoshop 集成</h3>
+                <p>SuperStarOff 提供无缝的 Photoshop 集成，让你在 PS 中直接使用星点去除功能</p>
+                <div class="ps-features">
+                    <div class="ps-feature">
+                        <i class="fas fa-check"></i>
+                        <span>在 Photoshop 中直接调用</span>
+                    </div>
+                    <div class="ps-feature">
+                        <i class="fas fa-check"></i>
+                        <span>支持图层和选区</span>
+                    </div>
+                    <div class="ps-feature">
+                        <i class="fas fa-check"></i>
+                        <span>非破坏性编辑</span>
+                    </div>
+                    <div class="ps-feature">
+                        <i class="fas fa-check"></i>
+                        <span>支持 PS 2023-2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 效果展示 -->
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <h2 class="section-title">效果展示</h2>
+            <p class="section-subtitle">看看 SuperStarOff 的实际处理效果</p>
+
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="gallery-comparison">
+                        <div class="gallery-image before">
+                            <img src="images/example-before.jpg" alt="处理前" onerror="this.src='https://via.placeholder.com/600x400?text=Before'">
+                            <span class="gallery-label">处理前</span>
+                        </div>
+                        <div class="gallery-image after">
+                            <img src="images/example-after.jpg" alt="处理后" onerror="this.src='https://via.placeholder.com/600x400?text=After'">
+                            <span class="gallery-label">处理后</span>
+                        </div>
+                    </div>
+                    <h4>海豚星云 Sh2-308</h4>
+                    <p>完美去除星点，保留星云细节</p>
+                </div>
+
+                <div class="gallery-note">
+                    <i class="fas fa-images"></i>
+                    <p>更多示例图片即将添加...</p>
+                    <p class="small-text">如果你有使用 SuperStarOff 处理的优秀作品，欢迎分享！</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="container">
+            <h2 class="section-title">常见问题</h2>
+
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3><i class="fas fa-question-circle"></i> SuperStarOff 是免费的吗？</h3>
+                    <p>是的，SuperStarOff 目前完全免费供个人和非商业用途使用。</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3><i class="fas fa-question-circle"></i> 支持 Windows 系统吗？</h3>
+                    <p>目前仅支持 macOS 系统。Windows 版本在计划中，敬请期待。</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3><i class="fas fa-question-circle"></i> 可以批量处理图片吗？</h3>
+                    <p>批量处理功能计划在 V1.1 版本中推出。</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3><i class="fas fa-question-circle"></i> 支持 FITS 格式吗？</h3>
+                    <p>FITS 格式支持计划在 V1.1 版本中添加。</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3><i class="fas fa-question-circle"></i> 为什么首次运行会有安全提示？</h3>
+                    <p>这是 macOS 的正常安全机制。请右键点击应用图标选择"打开"，在弹出对话框中点击"打开"即可。</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3><i class="fas fa-question-circle"></i> 如何获取技术支持？</h3>
+                    <p>请访问我们的 <a href="https://github.com/jamesphotography/SuperStarOff/issues" target="_blank">GitHub Issues</a> 页面提交问题。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">联系我们</h2>
+            <p class="section-subtitle">有问题或建议？我们很乐意听到你的反馈</p>
+
+            <div class="contact-grid">
+                <div class="contact-card">
+                    <i class="fab fa-github"></i>
+                    <h3>GitHub</h3>
+                    <p>查看源代码、提交问题和建议</p>
+                    <a href="https://github.com/jamesphotography/SuperStarOff" target="_blank" class="btn btn-outline">
+                        访问 GitHub
+                    </a>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-bug"></i>
+                    <h3>问题反馈</h3>
+                    <p>遇到 bug 或有功能建议？</p>
+                    <a href="https://github.com/jamesphotography/SuperStarOff/issues" target="_blank" class="btn btn-outline">
+                        提交 Issue
+                    </a>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-book"></i>
+                    <h3>文档</h3>
+                    <p>查看详细的使用文档和技术说明</p>
+                    <a href="https://github.com/jamesphotography/SuperStarOff/tree/master/docs" target="_blank" class="btn btn-outline">
+                        查看文档
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>慧眼去星 SuperStarOff</h4>
+                    <p>AI驱动的专业天文图像星点去除工具</p>
+                    <div class="social-links">
+                        <a href="https://github.com/jamesphotography/SuperStarOff" target="_blank">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>快速链接</h4>
+                    <ul>
+                        <li><a href="#features">功能特性</a></li>
+                        <li><a href="#download">下载</a></li>
+                        <li><a href="#guide">使用指南</a></li>
+                        <li><a href="https://github.com/jamesphotography/SuperStarOff" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>资源</h4>
+                    <ul>
+                        <li><a href="https://github.com/jamesphotography/SuperStarOff/tree/master/docs" target="_blank">文档</a></li>
+                        <li><a href="https://github.com/jamesphotography/SuperStarOff/issues" target="_blank">问题反馈</a></li>
+                        <li><a href="https://github.com/jamesphotography/SuperStarOff/releases" target="_blank">更新日志</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>关于</h4>
+                    <ul>
+                        <li><a href="https://github.com/jamesphotography/SuperStarOff#readme" target="_blank">项目介绍</a></li>
+                        <li><a href="https://github.com/jamesphotography/SuperStarOff/blob/master/LICENSE" target="_blank">开源许可</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 SuperStarOff. Made with <i class="fas fa-heart"></i> for astronomy photography enthusiasts.</p>
+                <p class="footer-note">本网站使用 GitHub Pages 托管 |
+                    <a href="http://superstaroff.jamesphotography.com.au">superstaroff.jamesphotography.com.au</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

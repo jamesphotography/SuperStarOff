@@ -290,7 +290,8 @@ function exportLayer(doc, layer, filePath) {
 
 function findPython() {
     var paths = [
-        INSTALL_DIR + "/.venv/bin/python",
+        INSTALL_DIR + "/bin/python",              // V10 新路径
+        INSTALL_DIR + "/.venv/bin/python",        // 旧版本兼容
         "/usr/bin/python3",
         "/usr/local/bin/python3"
     ];

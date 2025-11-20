@@ -75,3 +75,22 @@ docs/_templates/
 *.swp
 *~.nib
 *.pkg
+
+# Installer temporary files and logs
+installer/build/
+installer/release_pkg/
+installer/*_log.txt
+installer/*_error*.json
+installer/build_*.txt
+installer/notarize_*.txt
+installer/*.sh.bak
+installer/*-Info.txt
+
+# Audit and cleanup reports (temporary)
+AUDIT_*.md
+CLEANUP_*.md
+FINAL_CLEANUP_STATUS.md
+REVIEW_GUIDE.txt
+
+# Test files
+test_*.py

@@ -12,6 +12,9 @@ import sys
 import argparse
 from pathlib import Path
 
+# 添加当前脚本所在目录到Python路径，确保可以找到superstaroff_core模块
+sys.path.insert(0, str(Path(__file__).parent))
+
 # 直接导入同目录下的核心模块
 from superstaroff_core import SuperStarOff
 
