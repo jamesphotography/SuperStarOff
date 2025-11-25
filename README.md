@@ -1,5 +1,11 @@
 # 慧眼去星 SuperStarOff
 
+谷歌网盘下载地址：
+https://drive.google.com/file/d/1EFLgytKdr_GCL615biQH9WyTN4xvTNPw/view?usp=sharing
+
+通过百度网盘分享的文件：SuperStarOff-PS-Installer-v11-COMPLETE.pkg
+链接: https://pan.baidu.com/s/1qmnQmUQHGT6vsjHd0ccEEg?pwd=nxj7 提取码: nxj7 
+
 基于深度学习的天文图像星点去除工具
 
 ## 项目简介
