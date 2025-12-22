@@ -1,25 +1,14 @@
-# SuperStarOff 依赖列表
+# SuperStarOff - Photoshop 插件依赖
 # Python 3.9+ required
 
-# 核心依赖
-torch>=2.0.0  # PyTorch for V2 model
+# 核心深度学习
+torch>=2.0.0
 
 # 图像处理
 numpy>=1.24.0,<2.0
 Pillow>=10.0.0
 tifffile>=2023.0.0
-imagecodecs>=2023.0.0  # TIFF 压缩格式支持 (LZW, JPEG, etc.)
+imagecodecs>=2023.0.0  # TIFF 压缩格式支持
 
-# 加密
-cryptography>=41.0.0  # Model encryption
-
-# 工具库
-tqdm>=4.60.0  # 进度条
-
-# GPU 支持 (macOS Apple Silicon)
-# tensorflow-metal>=1.0.0  # 取消注释以启用 GPU 加速
-
-# 注意事项：
-# 1. macOS Apple Silicon 用户建议使用 tensorflow-macos + tensorflow-metal
-# 2. Windows/Linux 用户使用标准 tensorflow 即可自动支持 GPU
-# 3. 如遇到 numpy 版本冲突，优先满足 TensorFlow 的版本要求
+# 模型加密
+cryptography>=41.0.0

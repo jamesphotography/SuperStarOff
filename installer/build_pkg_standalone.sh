@@ -151,11 +151,47 @@ echo "  安装到: $SITE_PACKAGES"
 echo "  这需要几分钟..."
 
 # 使用系统 Python 安装依赖到目标目录
-/Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
-    -r "$PROJECT_ROOT/requirements_minimal.txt" \
-    --target "$SITE_PACKAGES" \
-    --upgrade \
-    --quiet
+# 检测当前系统架构
+CURRENT_ARCH=$(uname -m)
+echo "  当前系统架构: $CURRENT_ARCH"
+
+if [ "$CURRENT_ARCH" = "arm64" ]; then
+    # M系列芯片 - 强制使用 ARM64 架构
+    echo "  使用 ARM64 原生安装（使用缓存加速）..."
+
+    # 设置更长的超时时间
+    export PIP_DEFAULT_TIMEOUT=300
+
+    # 第一次尝试：使用缓存安装
+    arch -arm64 /Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
+        -r "$PROJECT_ROOT/requirements_minimal.txt" \
+        --target "$SITE_PACKAGES" \
+        --upgrade \
+        --quiet 2>&1 | grep -v "Ignoring invalid distribution" || true
+
+    INSTALL_RESULT=$?
+
+    # 如果失败，重试一次（不使用缓存）
+    if [ $INSTALL_RESULT -ne 0 ]; then
+        echo "  第一次安装失败，重试（清除缓存）..."
+        arch -arm64 /Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
+            -r "$PROJECT_ROOT/requirements_minimal.txt" \
+            --target "$SITE_PACKAGES" \
+            --upgrade \
+            --no-cache-dir \
+            --quiet 2>&1 | grep -v "Ignoring invalid distribution" || true
+    fi
+else
+    # Intel 芯片 - 使用默认架构
+    echo "  使用 x86_64 安装..."
+    export PIP_DEFAULT_TIMEOUT=300
+
+    /Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
+        -r "$PROJECT_ROOT/requirements_minimal.txt" \
+        --target "$SITE_PACKAGES" \
+        --upgrade \
+        --quiet 2>&1 | grep -v "Ignoring invalid distribution" || true
+fi
 
 if [ $? -ne 0 ]; then
     echo "❌ 依赖安装失败"

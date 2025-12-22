@@ -97,7 +97,21 @@
       "Bash(do codesign -dvv \"$f\")",
       "Bash(xargs:*)",
       "Bash(do echo \"File: $f\")",
-      "Bash(./build_pkg_with_distribution.sh:*)"
+      "Bash(./build_pkg_with_distribution.sh:*)",
+      "Bash(git pull:*)",
+      "WebFetch(domain:ai.meta.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(git clone:*)",
+      "Bash(../.venv/bin/pip install:*)",
+      "Bash(/opt/miniconda3/bin/python:*)",
+      "Bash(lipo:*)",
+      "Bash(while true)",
+      "Bash(do sleep 60)",
+      "Bash(break)",
+      "Bash(git branch:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
