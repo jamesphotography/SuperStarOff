@@ -1,44 +1,30 @@
 /*
- * SuperStarOff for Photoshop
- * 去星工具 - Photoshop集成脚本
+ * 慧眼去星 for Photoshop
+ * AI 星点去除工具 - Photoshop 集成脚本
  *
- * 使用方法：
- * 1. 在Photoshop中打开图片
- * 2. 运行此脚本（文件 > 脚本 > SuperStarOff）
- * 3. 选择处理参数，等待处理完成
- * 4. 结果会作为新图层出现（去星图层 + 星点图层）
- *
- * 安装方法：
- * 将此脚本放到 Photoshop/Presets/Scripts 文件夹，
- * 然后可以从 文件 > 脚本 菜单直接运行
+ * 作者：詹姆斯
+ * 版本：1.0.2
  */
 
 // ============== 配置 ==============
-var INSTALL_DIR = "/usr/local/SuperStarOff";  // 默认安装路径
-var STRIDE = 256;
-var DEVICE = "auto";
+var VERSION = "1.0.2";
+var INSTALL_DIR = "/usr/local/SuperStarOff";
+var STRIDE = 256;   // 默认平衡模式
+var DEVICE = "auto"; // 自动检测设备
 // ==================================
 
 function main() {
     try {
         // 检查文档
         if (app.documents.length == 0) {
-            alert("请先在Photoshop中打开一张图片！");
+            alert("请先在 Photoshop 中打开一张星空图片！");
             return;
         }
 
-        // 显示参数选择对话框
-        var params = showParamsDialog();
-        if (!params) {
-            // 用户取消
-            return;
+        // 显示对话框
+        if (showDialog()) {
+            processImage();
         }
-
-        // 使用用户选择的参数
-        STRIDE = params.stride;
-        DEVICE = params.device;
-
-        processImage();
 
     } catch (e) {
         alert("错误:\n\n" + e.toString());
@@ -46,57 +32,45 @@ function main() {
     }
 }
 
-function showParamsDialog() {
-    // 创建对话框，设置最小尺寸
-    var dlg = new Window("dialog", "慧眼去星 - 处理参数");
-    dlg.preferredSize = [450, 300];
+function showDialog() {
+    // 创建对话框
+    var dlg = new Window("dialog", "慧眼去星 v" + VERSION);
+    dlg.preferredSize = [380, 320];
     dlg.alignChildren = ["fill", "top"];
-    dlg.spacing = 15;
+    dlg.spacing = 12;
     dlg.margins = 20;
 
-    // 标题说明
-    var titleGroup = dlg.add("group");
-    titleGroup.alignment = ["fill", "top"];
-    var titleText = titleGroup.add("statictext", undefined, "请选择处理参数：");
-    titleText.graphics.font = ScriptUI.newFont(titleText.graphics.font.name, "BOLD", 14);
+    // 使用说明面板
+    var helpPanel = dlg.add("panel", undefined, "使用说明");
+    helpPanel.alignChildren = ["left", "top"];
+    helpPanel.spacing = 8;
+    helpPanel.margins = 15;
+
+    helpPanel.add("statictext", undefined, "1. 打开星空图片");
+    helpPanel.add("statictext", undefined, "2. 点击「开始处理」");
+    helpPanel.add("statictext", undefined, "3. 等待约 1 分钟（首次可能更久）");
+    helpPanel.add("statictext", undefined, "4. 自动生成「去星」和「星点」图层");
 
     dlg.add("panel", undefined, undefined, {borderStyle: "black"});
 
-    // Stride 选择
-    var stridePanel = dlg.add("panel", undefined, "处理质量");
-    stridePanel.alignChildren = ["left", "top"];
-    stridePanel.spacing = 10;
-    stridePanel.margins = 15;
-
-    var strideRadio1 = stridePanel.add("radiobutton", undefined, "快速模式 (stride=512) - 约30秒");
-    var strideRadio2 = stridePanel.add("radiobutton", undefined, "平衡模式 (stride=256) - 约1分钟 【推荐】");
-    var strideRadio3 = stridePanel.add("radiobutton", undefined, "精细模式 (stride=128) - 约2分钟");
-    strideRadio2.value = true;  // 默认选择平衡
-
-    // 设备选择
-    var devicePanel = dlg.add("panel", undefined, "计算设备");
-    devicePanel.alignChildren = ["left", "top"];
-    devicePanel.spacing = 10;
-    devicePanel.margins = 15;
-
-    var deviceRadio1 = devicePanel.add("radiobutton", undefined, "自动检测 【推荐】");
-    var deviceRadio2 = devicePanel.add("radiobutton", undefined, "强制使用 GPU (MPS) - Apple Silicon");
-    var deviceRadio3 = devicePanel.add("radiobutton", undefined, "仅使用 CPU");
-    deviceRadio1.value = true;  // 默认自动
+    // 提示信息
+    var noteGroup = dlg.add("group");
+    noteGroup.alignment = ["fill", "top"];
+    var noteText = noteGroup.add("statictext", undefined, "提示：处理过程中请勿操作 Photoshop", {multiline: false});
+    noteText.graphics.foregroundColor = noteText.graphics.newPen(noteText.graphics.PenType.SOLID_COLOR, [0.6, 0.6, 0.6], 1);
 
     dlg.add("panel", undefined, undefined, {borderStyle: "black"});
 
     // 教程链接
     var tutorialGroup = dlg.add("group");
     tutorialGroup.alignment = ["center", "top"];
-    tutorialGroup.spacing = 5;
+    tutorialGroup.spacing = 8;
 
-    var tutorialText = tutorialGroup.add("statictext", undefined, "教程：请访问詹姆斯油管频道");
+    tutorialGroup.add("statictext", undefined, "视频教程：");
 
-    var linkButton = tutorialGroup.add("button", undefined, "YouTube");
-    linkButton.preferredSize = [80, 25];
+    var linkButton = tutorialGroup.add("button", undefined, "詹姆斯 YouTube");
+    linkButton.preferredSize = [140, 28];
     linkButton.onClick = function() {
-        // 在浏览器中打开链接
         var url = "https://www.youtube.com/@JamesZhenYu";
         if ($.os.indexOf("Windows") != -1) {
             system("start " + url);
@@ -108,32 +82,20 @@ function showParamsDialog() {
     // 按钮
     var btnGroup = dlg.add("group");
     btnGroup.alignment = ["center", "top"];
-    btnGroup.spacing = 10;
+    btnGroup.spacing = 15;
+
     var okBtn = btnGroup.add("button", undefined, "开始处理", {name: "ok"});
     var cancelBtn = btnGroup.add("button", undefined, "取消", {name: "cancel"});
     okBtn.preferredSize = [120, 35];
     cancelBtn.preferredSize = [120, 35];
 
-    if (dlg.show() == 1) {
-        // 获取 stride
-        var stride = 256;
-        if (strideRadio1.value) stride = 512;
-        else if (strideRadio2.value) stride = 256;
-        else if (strideRadio3.value) stride = 128;
+    // 版权信息
+    var copyrightGroup = dlg.add("group");
+    copyrightGroup.alignment = ["center", "bottom"];
+    var copyrightText = copyrightGroup.add("statictext", undefined, "© 2025 詹姆斯 JamesZhenYu");
+    copyrightText.graphics.foregroundColor = copyrightText.graphics.newPen(copyrightText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
 
-        // 获取 device
-        var device = "auto";
-        if (deviceRadio1.value) device = "auto";
-        else if (deviceRadio2.value) device = "mps";
-        else if (deviceRadio3.value) device = "cpu";
-
-        return {
-            stride: stride,
-            device: device
-        };
-    }
-
-    return null;
+    return dlg.show() == 1;
 }
 
 function processImage() {
@@ -155,16 +117,14 @@ function processImage() {
         var inputFile = tempDirPath + "input_" + timestamp + ".tif";
         var outputFile = tempDirPath + "output_" + timestamp + ".tif";
 
-        $.writeln("=== SuperStarOff 开始处理 ===");
+        $.writeln("=== 慧眼去星 v" + VERSION + " 开始处理 ===");
         $.writeln("输入: " + inputFile);
         $.writeln("输出: " + outputFile);
-        $.writeln("Stride: " + STRIDE);
-        $.writeln("Device: " + DEVICE);
 
         // 步骤1: 导出图层
         exportLayer(doc, activeLayer, inputFile);
 
-        // 步骤2: 调用Python
+        // 步骤2: 调用 Python
         var pythonPath = findPython();
         var cliPath = INSTALL_DIR + "/superstaroff_cli.py";
 
@@ -183,7 +143,6 @@ function processImage() {
         // 检查输出
         var outputFileObj = new File(outputFile);
         if (!outputFileObj.exists) {
-            // 读取日志文件获取错误信息
             var logFileObj = new File(logFile);
             var errorDetails = "";
 
@@ -192,12 +151,10 @@ function processImage() {
                 var logContent = logFileObj.read();
                 logFileObj.close();
 
-                // 获取日志的最后30行或最后2000字符
                 var lines = logContent.split("\n");
                 var startLine = Math.max(0, lines.length - 30);
                 errorDetails = lines.slice(startLine).join("\n");
 
-                // 如果还是太长，只取最后2000字符
                 if (errorDetails.length > 2000) {
                     errorDetails = "...\n" + errorDetails.substring(errorDetails.length - 2000);
                 }
@@ -205,7 +162,6 @@ function processImage() {
                 errorDetails = "未找到日志文件";
             }
 
-            // 显示详细错误信息
             app.displayDialogs = DialogModes.ALL;
             alert("处理失败，未生成输出文件\n\n" +
                   "退出代码: " + exitCode + "\n\n" +
@@ -247,7 +203,11 @@ function processImage() {
         if (log.exists) log.remove();
 
         app.displayDialogs = DialogModes.ALL;
-        alert("处理完成！\n\n已创建:\n• 去星图层\n• 星点图层（已隐藏）\n\n詹姆斯祝你晴空万里！Clear Night!");
+        alert("处理完成！\n\n" +
+              "已创建图层：\n" +
+              "  • 去星 - 去除星点后的图像\n" +
+              "  • 星点 - 提取的星点（已隐藏）\n\n" +
+              "詹姆斯祝你晴空万里！Clear Skies!");
 
     } catch (e) {
         app.displayDialogs = DialogModes.ALL;
@@ -258,7 +218,6 @@ function processImage() {
 function exportLayer(doc, layer, filePath) {
     app.activeDocument = doc;
 
-    // 直接使用 doc.width/height
     var tempDoc = app.documents.add(
         doc.width,
         doc.height,
@@ -290,6 +249,7 @@ function exportLayer(doc, layer, filePath) {
 
 function findPython() {
     var paths = [
+        INSTALL_DIR + "/bin/python",
         INSTALL_DIR + "/.venv/bin/python",
         "/usr/bin/python3",
         "/usr/local/bin/python3"
@@ -297,12 +257,12 @@ function findPython() {
 
     for (var i = 0; i < paths.length; i++) {
         if (new File(paths[i]).exists) {
-            $.writeln("找到Python: " + paths[i]);
+            $.writeln("找到 Python: " + paths[i]);
             return paths[i];
         }
     }
 
-    throw new Error("找不到Python解释器！");
+    throw new Error("找不到 Python 解释器！请检查慧眼去星是否正确安装。");
 }
 
 // 运行主函数

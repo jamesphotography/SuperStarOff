@@ -32,7 +32,7 @@ echo "=== 检查必需文件 ==="
 [ -f "$PROJECT_ROOT/src/core_utils.py" ] && echo "✓ core_utils.py" || { echo "❌ core_utils.py"; exit 1; }
 [ -f "$PROJECT_ROOT/photoshop_integration/superstaroff_cli.py" ] && echo "✓ superstaroff_cli.py" || { echo "❌ superstaroff_cli.py"; exit 1; }
 [ -d "$PROJECT_ROOT/models" ] && echo "✓ models/" || { echo "❌ models/"; exit 1; }
-[ -f "$PROJECT_ROOT/requirements_minimal.txt" ] && echo "✓ requirements_minimal.txt" || { echo "❌ requirements_minimal.txt"; exit 1; }
+[ -f "$PROJECT_ROOT/requirements.txt" ] && echo "✓ requirements.txt" || { echo "❌ requirements.txt"; exit 1; }
 echo ""
 
 # 复制核心文件
@@ -42,8 +42,8 @@ cp "$PROJECT_ROOT/src/core_utils.py" "$APP_DIR/"
 cp "$PROJECT_ROOT/photoshop_integration/superstaroff_cli.py" "$APP_DIR/"
 cp -r "$PROJECT_ROOT/models" "$APP_DIR/"
 
-# 复制修复的 JSX 脚本
-cp "$INSTALLER_DIR/SuperStarOff_PS_V10.jsx" "$APP_DIR/"
+# 复制 JSX 脚本
+cp "$PROJECT_ROOT/photoshop_integration/慧眼去星.jsx" "$APP_DIR/"
 echo "✓ 核心文件已复制（包含 JSX）"
 echo ""
 
@@ -59,14 +59,24 @@ fi
 
 mkdir -p "$FRAMEWORK_DST"
 
-echo "  复制 Framework（保留所有扩展模块）..."
+echo "  复制 Framework（排除已有 site-packages，从干净状态开始）..."
 rsync -a \
     --exclude='*.pyc' \
     --exclude='__pycache__' \
     --exclude='*.a' \
     --exclude='lib/python3.11/test' \
     --exclude='lib/python3.11/tkinter' \
+    --exclude='lib/python3.11/site-packages/*' \
+    --exclude='lib/python3.11/ensurepip' \
+    --exclude='lib/python3.11/idlelib' \
+    --exclude='lib/python3.11/turtle*' \
+    --exclude='lib/python3.11/turtledemo' \
+    --exclude='share' \
     "$FRAMEWORK_SRC/" "$FRAMEWORK_DST/"
+
+# 创建空的 site-packages 目录
+mkdir -p "$FRAMEWORK_DST/lib/python3.11/site-packages"
+echo "  ✓ 创建干净的 site-packages 目录"
 
 FRAMEWORK_SIZE=$(du -sh "$FRAMEWORK_DST" | cut -f1)
 SO_COUNT=$(find "$FRAMEWORK_DST/lib/python3.11/lib-dynload" -name "*.so" 2>/dev/null | wc -l | tr -d ' ')
@@ -164,7 +174,7 @@ if [ "$CURRENT_ARCH" = "arm64" ]; then
 
     # 第一次尝试：使用缓存安装
     arch -arm64 /Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
-        -r "$PROJECT_ROOT/requirements_minimal.txt" \
+        -r "$PROJECT_ROOT/requirements.txt" \
         --target "$SITE_PACKAGES" \
         --upgrade \
         --quiet 2>&1 | grep -v "Ignoring invalid distribution" || true
@@ -175,7 +185,7 @@ if [ "$CURRENT_ARCH" = "arm64" ]; then
     if [ $INSTALL_RESULT -ne 0 ]; then
         echo "  第一次安装失败，重试（清除缓存）..."
         arch -arm64 /Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
-            -r "$PROJECT_ROOT/requirements_minimal.txt" \
+            -r "$PROJECT_ROOT/requirements.txt" \
             --target "$SITE_PACKAGES" \
             --upgrade \
             --no-cache-dir \
@@ -187,7 +197,7 @@ else
     export PIP_DEFAULT_TIMEOUT=300
 
     /Library/Frameworks/Python.framework/Versions/3.11/bin/python3.11 -m pip install \
-        -r "$PROJECT_ROOT/requirements_minimal.txt" \
+        -r "$PROJECT_ROOT/requirements.txt" \
         --target "$SITE_PACKAGES" \
         --upgrade \
         --quiet 2>&1 | grep -v "Ignoring invalid distribution" || true
@@ -325,9 +335,9 @@ for VERSION in "${PS_VERSIONS[@]}"; do
     PS_SCRIPTS_DIR="/Applications/Adobe Photoshop $VERSION/Presets/Scripts"
     if [ -d "/Applications/Adobe Photoshop $VERSION" ]; then
         if [ -d "$PS_SCRIPTS_DIR" ]; then
-            # 复制打包好的 JSX（已修复 findPython 函数）
-            if [ -f "$INSTALL_DIR/SuperStarOff_PS_V10.jsx" ]; then
-                cp "$INSTALL_DIR/SuperStarOff_PS_V10.jsx" "$PS_SCRIPTS_DIR/慧眼去星.jsx"
+            # 复制 JSX 脚本
+            if [ -f "$INSTALL_DIR/慧眼去星.jsx" ]; then
+                cp "$INSTALL_DIR/慧眼去星.jsx" "$PS_SCRIPTS_DIR/慧眼去星.jsx"
                 echo "✓ 已安装到 Adobe Photoshop $VERSION"
                 INSTALLED=1
             else

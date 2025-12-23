@@ -200,26 +200,21 @@ fi
 echo "✓ 找到 JSX 文件: $JSX_SOURCE"
 echo ""
 
-# 系统级 Photoshop Scripts 目录（所有用户共享）
-PS_DIRS=(
-    "/Library/Application Support/Adobe/Adobe Photoshop 2025/Presets/Scripts"
-    "/Library/Application Support/Adobe/Adobe Photoshop 2024/Presets/Scripts"
-    "/Library/Application Support/Adobe/Adobe Photoshop 2023/Presets/Scripts"
-    "/Library/Application Support/Adobe/Adobe Photoshop 2022/Presets/Scripts"
+# Photoshop Scripts 目录（应用程序内部）
+PS_APPS=(
+    "/Applications/Adobe Photoshop 2026/Presets/Scripts"
+    "/Applications/Adobe Photoshop 2025/Presets/Scripts"
+    "/Applications/Adobe Photoshop 2024/Presets/Scripts"
+    "/Applications/Adobe Photoshop 2023/Presets/Scripts"
 )
 
-echo "正在安装 JSX 脚本到系统级目录（所有用户可用）..."
+echo "正在安装 JSX 脚本到 Photoshop..."
 INSTALLED=0
 
-for PS_DIR in "${PS_DIRS[@]}"; do
+for PS_DIR in "${PS_APPS[@]}"; do
     # 检查 Photoshop 版本是否存在
-    PS_VERSION_DIR="$(dirname "$(dirname "$PS_DIR")")"
-
-    if [ -d "$PS_VERSION_DIR" ]; then
-        echo "  找到 Photoshop: $PS_VERSION_DIR"
-
-        # 创建 Scripts 目录
-        mkdir -p "$PS_DIR"
+    if [ -d "$PS_DIR" ]; then
+        echo "  找到 Photoshop: $PS_DIR"
 
         # 复制 JSX 文件
         cp "$JSX_SOURCE" "$PS_DIR/SuperStarOff_PS.jsx"
@@ -239,10 +234,10 @@ if [ $INSTALLED -eq 0 ]; then
     echo ""
     echo "请手动安装 JSX 脚本："
     echo "  1. 复制: $JSX_SOURCE"
-    echo "  2. 到: /Library/Application Support/Adobe/Adobe Photoshop 202X/Presets/Scripts/"
+    echo "  2. 到: /Applications/Adobe Photoshop 202X/Presets/Scripts/"
     echo ""
 else
-    echo "✓ JSX 脚本已安装到 $INSTALLED 个 Photoshop 版本（系统级，所有用户可用）"
+    echo "✓ JSX 脚本已安装到 $INSTALLED 个 Photoshop 版本"
 fi
 
 # 设置 SuperStarOff 目录权限
@@ -307,16 +302,15 @@ fi
 # 删除 JSX 脚本
 echo ""
 echo "正在删除 Photoshop 脚本..."
-CURRENT_USER=$(stat -f "%Su" /dev/console)
-USER_HOME=$(eval echo ~$CURRENT_USER)
 
-PS_DIRS=(
-    "$USER_HOME/Library/Application Support/Adobe/Adobe Photoshop 2024/Presets/Scripts"
-    "$USER_HOME/Library/Application Support/Adobe/Adobe Photoshop 2023/Presets/Scripts"
-    "$USER_HOME/Library/Application Support/Adobe/Adobe Photoshop 2022/Presets/Scripts"
+PS_APPS=(
+    "/Applications/Adobe Photoshop 2026/Presets/Scripts"
+    "/Applications/Adobe Photoshop 2025/Presets/Scripts"
+    "/Applications/Adobe Photoshop 2024/Presets/Scripts"
+    "/Applications/Adobe Photoshop 2023/Presets/Scripts"
 )
 
-for PS_DIR in "${PS_DIRS[@]}"; do
+for PS_DIR in "${PS_APPS[@]}"; do
     if [ -f "$PS_DIR/SuperStarOff_PS.jsx" ]; then
         rm -f "$PS_DIR/SuperStarOff_PS.jsx"
         echo "✓ 已删除: $PS_DIR/SuperStarOff_PS.jsx"

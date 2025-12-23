@@ -150,7 +150,10 @@
       "Bash(/Users/jameszhenyu/PycharmProjects/SuperStarOff/test_color_profile.py )",
       "Bash(/Users/jameszhenyu/PycharmProjects/SuperStarOff/test_device.py )",
       "Bash(/Users/jameszhenyu/PycharmProjects/SuperStarOff/test_encrypted_model.py )",
-      "Bash(/Users/jameszhenyu/PycharmProjects/SuperStarOff/encrypt_model.py)"
+      "Bash(/Users/jameszhenyu/PycharmProjects/SuperStarOff/encrypt_model.py)",
+      "Bash(/usr/local/SuperStarOff/.venv/bin/python --version)",
+      "Bash(/usr/local/SuperStarOff/bin/python:*)",
+      "Bash(du:*)"
     ],
     "deny": [],
     "ask": []
