@@ -3,11 +3,11 @@
  * AI 星点去除工具 - Photoshop 集成脚本
  *
  * 作者：詹姆斯
- * 版本：1.0.2
+ * 版本：1.1.0
  */
 
 // ============== 配置 ==============
-var VERSION = "1.0.2";
+var VERSION = "1.1.0";
 var INSTALL_DIR = "/usr/local/SuperStarOff";
 var STRIDE = 256;   // 默认平衡模式
 var DEVICE = "auto"; // 自动检测设备
@@ -46,10 +46,10 @@ function showDialog() {
     helpPanel.spacing = 8;
     helpPanel.margins = 15;
 
-    helpPanel.add("statictext", undefined, "1. 打开星空图片");
-    helpPanel.add("statictext", undefined, "2. 点击「开始处理」");
-    helpPanel.add("statictext", undefined, "3. 等待约 1 分钟（首次可能更久）");
-    helpPanel.add("statictext", undefined, "4. 自动生成「去星」和「星点」图层");
+    helpPanel.add("statictext", undefined, "• 选中要处理的图层，点击「开始处理」");
+    helpPanel.add("statictext", undefined, "• AI 将自动分离星点与背景");
+    helpPanel.add("statictext", undefined, "• 处理完成后生成「去星」与「星点」图层");
+    helpPanel.add("statictext", undefined, "• 首次运行需加载模型，请耐心等待");
 
     dlg.add("panel", undefined, undefined, {borderStyle: "black"});
 
@@ -92,7 +92,7 @@ function showDialog() {
     // 版权信息
     var copyrightGroup = dlg.add("group");
     copyrightGroup.alignment = ["center", "bottom"];
-    var copyrightText = copyrightGroup.add("statictext", undefined, "© 2025 詹姆斯 JamesZhenYu");
+    var copyrightText = copyrightGroup.add("statictext", undefined, "© 2025 詹姆斯·于震 版权所有");
     copyrightText.graphics.foregroundColor = copyrightText.graphics.newPen(copyrightText.graphics.PenType.SOLID_COLOR, [0.5, 0.5, 0.5], 1);
 
     return dlg.show() == 1;
@@ -124,11 +124,10 @@ function processImage() {
         // 步骤1: 导出图层
         exportLayer(doc, activeLayer, inputFile);
 
-        // 步骤2: 调用 Python
-        var pythonPath = findPython();
-        var cliPath = INSTALL_DIR + "/superstaroff_cli.py";
+        // 步骤2: 调用 superstaroff 可执行文件
+        var execPath = INSTALL_DIR + "/superstaroff";
 
-        var command = '"' + pythonPath + '" "' + cliPath + '" ' +
+        var command = '"' + execPath + '" ' +
                       '"' + inputFile + '" "' + outputFile + '" ' +
                       '--stride ' + STRIDE + ' --device ' + DEVICE;
 
@@ -245,24 +244,6 @@ function exportLayer(doc, layer, filePath) {
 
     app.activeDocument = doc;
     $.writeln("导出完成: " + filePath);
-}
-
-function findPython() {
-    var paths = [
-        INSTALL_DIR + "/bin/python",
-        INSTALL_DIR + "/.venv/bin/python",
-        "/usr/bin/python3",
-        "/usr/local/bin/python3"
-    ];
-
-    for (var i = 0; i < paths.length; i++) {
-        if (new File(paths[i]).exists) {
-            $.writeln("找到 Python: " + paths[i]);
-            return paths[i];
-        }
-    }
-
-    throw new Error("找不到 Python 解释器！请检查慧眼去星是否正确安装。");
 }
 
 // 运行主函数

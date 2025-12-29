@@ -58,14 +58,14 @@ else
     echo "   - 临时文件目录不存在"
 fi
 
-# 5. 删除 GUI 应用（如果存在）
+# 5. 删除命令行快捷方式
 echo ""
-echo "5. 检查 GUI 应用..."
-if [ -d "/Applications/慧眼去星V1.app" ]; then
-    rm -rf "/Applications/慧眼去星V1.app"
-    echo "   ✓ 已删除 GUI 应用"
+echo "5. 删除命令行快捷方式..."
+if [ -f "/usr/local/bin/superstaroff" ]; then
+    rm -f /usr/local/bin/superstaroff
+    echo "   ✓ 已删除 /usr/local/bin/superstaroff"
 else
-    echo "   - GUI 应用不存在"
+    echo "   - 命令行快捷方式不存在"
 fi
 
 echo ""
