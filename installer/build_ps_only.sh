@@ -2,7 +2,7 @@
 set -e
 
 echo "==================================================="
-echo "SuperStarOff - Photoshop插件轻量级安装包"
+echo "SuperStarOff - Photoshop 插件安装包构建"
 echo "==================================================="
 echo ""
 
@@ -11,48 +11,36 @@ BUILD_DIR="$PROJECT_ROOT/installer/build"
 PAYLOAD_DIR="$BUILD_DIR/payload"
 SCRIPTS_DIR="$BUILD_DIR/scripts"
 APP_DIR="$PAYLOAD_DIR/usr/local/SuperStarOff"
+DIST_DIR="$PROJECT_ROOT/dist/superstaroff"
+VERSION="1.1.0"
 
 echo "项目根目录: $PROJECT_ROOT"
 echo ""
 
 # 步骤1: 清理
 echo "=== 步骤 1: 清理旧的构建文件 ==="
-rm -rf "$BUILD_DIR/SuperStarOff-PS-Only.pkg" "$PAYLOAD_DIR" "$SCRIPTS_DIR" 2>/dev/null || true
+rm -rf "$BUILD_DIR" 2>/dev/null || true
 echo "✓ 清理完成"
 echo ""
 
-# 步骤2: 检查必需文件
-echo "=== 步骤 2: 检查必需文件 ==="
-if [ ! -f "$PROJECT_ROOT/photoshop_integration/SuperStarOff_PS.jsx" ]; then
-    echo "❌ 错误: 找不到 SuperStarOff_PS.jsx"
-    exit 1
-fi
-echo "✓ SuperStarOff_PS.jsx 存在"
+# 步骤2: 检查 PyInstaller 打包结果
+echo "=== 步骤 2: 检查打包文件 ==="
 
-if [ ! -f "$PROJECT_ROOT/photoshop_integration/superstaroff_core.py" ]; then
-    echo "❌ 错误: 找不到 superstaroff_core.py"
+if [ ! -f "$DIST_DIR/superstaroff" ]; then
+    echo "❌ 错误: 找不到 PyInstaller 打包的可执行文件"
+    echo "请先运行: .venv_build/bin/pyinstaller superstaroff.spec --clean"
     exit 1
 fi
-echo "✓ superstaroff_core.py 存在"
+echo "✓ superstaroff 可执行文件存在"
 
-if [ ! -f "$PROJECT_ROOT/src/core_utils.py" ]; then
-    echo "❌ 错误: 找不到 core_utils.py"
+if [ ! -f "$PROJECT_ROOT/src/慧眼去星.jsx" ]; then
+    echo "❌ 错误: 找不到 慧眼去星.jsx"
     exit 1
 fi
-echo "✓ core_utils.py 存在"
+echo "✓ 慧眼去星.jsx 存在"
 
-if [ ! -f "$PROJECT_ROOT/models/SuperStarOff2025.pt" ]; then
-    echo "❌ 错误: 找不到模型文件"
-    exit 1
-fi
-MODEL_SIZE=$(du -h "$PROJECT_ROOT/models/SuperStarOff2025.pt" | cut -f1)
-echo "✓ 模型文件存在 (大小: $MODEL_SIZE)"
-
-if [ ! -f "$PROJECT_ROOT/photoshop_integration/superstaroff_cli.py" ]; then
-    echo "❌ 错误: 找不到 superstaroff_cli.py"
-    exit 1
-fi
-echo "✓ superstaroff_cli.py 存在"
+DIST_SIZE=$(du -sh "$DIST_DIR" | cut -f1)
+echo "✓ 打包目录大小: $DIST_SIZE"
 echo ""
 
 # 步骤3: 创建目录结构
@@ -62,93 +50,63 @@ mkdir -p "$SCRIPTS_DIR"
 echo "✓ 目录结构创建完成"
 echo ""
 
-# 步骤4: 复制核心文件（不包含GUI）
-echo "=== 步骤 4: 复制核心文件 ==="
-echo "  - 复制核心 Python 模块..."
-cp "$PROJECT_ROOT/photoshop_integration/superstaroff_core.py" "$APP_DIR/"
-echo "    ✓ 已复制: superstaroff_core.py"
+# 步骤4: 复制文件
+echo "=== 步骤 4: 复制文件 ==="
 
-cp "$PROJECT_ROOT/src/core_utils.py" "$APP_DIR/"
-echo "    ✓ 已复制: core_utils.py"
-
-echo "  - 复制 models 目录..."
-cp -r "$PROJECT_ROOT/models" "$APP_DIR/"
-echo "    ✓ 已复制: models/ ($MODEL_SIZE)"
-
-echo "  - 复制 CLI 脚本..."
-cp "$PROJECT_ROOT/photoshop_integration/superstaroff_cli.py" "$APP_DIR/"
-echo "    ✓ 已复制: superstaroff_cli.py"
+echo "  - 复制 PyInstaller 打包结果..."
+cp -R "$DIST_DIR/"* "$APP_DIR/"
+echo "    ✓ 可执行文件和依赖已复制"
 
 echo "  - 复制 JSX 脚本..."
-cp "$PROJECT_ROOT/photoshop_integration/SuperStarOff_PS.jsx" "$APP_DIR/"
-echo "    ✓ 已复制: SuperStarOff_PS.jsx"
+cp "$PROJECT_ROOT/src/慧眼去星.jsx" "$APP_DIR/"
+echo "    ✓ 慧眼去星.jsx"
 
-echo "  - 打包 Python framework (真正独立)..."
-# 使用 Python.org Python
-PYTHON_BIN="/Library/Frameworks/Python.framework/Versions/3.11/bin/python3"
-if [ ! -f "$PYTHON_BIN" ]; then
-    echo "❌ 错误: 找不到 Python.org Python 3.11"
-    echo "请从 https://www.python.org 安装 Python 3.11"
-    exit 1
-fi
+echo "  - 编译 GUI 安装工具..."
+osacompile -o "$APP_DIR/安装到Photoshop.app" "$PROJECT_ROOT/installer/setup_photoshop_gui.scpt"
+echo "    ✓ 安装到Photoshop.app (编译完成)"
 
-# 创建 Python framework 目录
-mkdir -p "$APP_DIR/Python.framework/Versions/3.11"
-
-echo "    复制 Python framework（这需要几分钟）..."
-# 复制整个 Python framework
-rsync -a --exclude='*.pyc' --exclude='__pycache__' \
-    /Library/Frameworks/Python.framework/Versions/3.11/ \
-    "$APP_DIR/Python.framework/Versions/3.11/"
-
-FRAMEWORK_SIZE=$(du -sh "$APP_DIR/Python.framework" | cut -f1)
-echo "    ✓ Python framework 已打包 (大小: $FRAMEWORK_SIZE)"
-
-echo "  - 创建独立的虚拟环境..."
-
-echo "    使用 Python.org Python 3.11"
-PYTHON_VERSION=$($PYTHON_BIN --version)
-echo "    Python 版本: $PYTHON_VERSION"
-
-echo "    创建虚拟环境..."
-$PYTHON_BIN -m venv "$APP_DIR/.venv" --copies
-echo "    ✓ 虚拟环境独立，不依赖 conda"
-
-# 验证虚拟环境的 base prefix
-VENV_PREFIX=$("$APP_DIR/.venv/bin/python" -c "import sys; print(sys.base_prefix)")
-echo "    Base prefix: $VENV_PREFIX"
-
-echo "    升级 pip..."
-"$APP_DIR/.venv/bin/python" -m pip install --upgrade pip > /dev/null 2>&1
-
-echo "    安装依赖（这需要几分钟）..."
-"$APP_DIR/.venv/bin/pip" install -r "$PROJECT_ROOT/requirements.txt" > /dev/null 2>&1
-
-VENV_SIZE=$(du -sh "$APP_DIR/.venv" | cut -f1)
-echo "    ✓ 虚拟环境创建完成 (大小: $VENV_SIZE)"
-
-# 签名虚拟环境中的二进制文件
+APP_SIZE=$(du -sh "$APP_DIR" | cut -f1)
+echo "  ✓ 应用目录大小: $APP_SIZE"
 echo ""
-echo "  - 签名虚拟环境中的二进制文件（这需要几分钟）..."
-echo "    正在扫描和签名..."
+
+# 步骤5: 签名所有二进制文件
+echo "=== 步骤 5: 签名二进制文件 ==="
 
 CERT_NAME="Developer ID Application: James Zhen Yu (JWR6FDB52H)"
-SIGNED_COUNT=0
+echo "  证书: $CERT_NAME"
 
-# 查找并签名所有二进制文件
-find "$APP_DIR/.venv" -type f \( -name "*.so" -o -name "*.dylib" -o -perm +111 \) | while read binary; do
-    # 检查是否是真正的二进制文件
+# 签名主可执行文件
+echo "  签名主可执行文件..."
+codesign --force --sign "$CERT_NAME" --timestamp --options runtime "$APP_DIR/superstaroff" 2>/dev/null || true
+echo "    ✓ superstaroff"
+
+# 签名 _internal 目录中的所有二进制文件
+echo "  签名 _internal 目录中的二进制文件..."
+BINARY_COUNT=0
+find "$APP_DIR/_internal" -type f \( -name "*.so" -o -name "*.dylib" \) | while read binary; do
+    codesign --force --sign "$CERT_NAME" --timestamp --options runtime "$binary" 2>/dev/null || true
+done
+echo "    ✓ 动态库签名完成"
+
+# 签名可执行文件
+find "$APP_DIR/_internal" -type f -perm +111 | while read binary; do
     if file "$binary" | grep -q "Mach-O"; then
         codesign --force --sign "$CERT_NAME" --timestamp --options runtime "$binary" 2>/dev/null || true
-        SIGNED_COUNT=$((SIGNED_COUNT + 1))
     fi
 done
+echo "    ✓ 可执行文件签名完成"
 
-echo "    ✓ 二进制文件签名完成"
+# 签名 GUI 安装工具
+echo "  签名 GUI 安装工具..."
+codesign --force --deep --sign "$CERT_NAME" --timestamp --options runtime "$APP_DIR/安装到Photoshop.app" 2>/dev/null || true
+echo "    ✓ 安装到Photoshop.app"
+
+echo "  ✓ 签名完成"
 echo ""
 
-# 步骤5: 创建安装脚本
-echo "=== 步骤 5: 创建安装脚本 ==="
+# 步骤6: 创建 postinstall 脚本
+echo "=== 步骤 6: 创建安装脚本 ==="
+
 cat > "$SCRIPTS_DIR/postinstall" << 'POSTINSTALL_EOF'
 #!/bin/bash
 
@@ -156,117 +114,65 @@ LOG_FILE="/tmp/superstaroff_install.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "==================================================="
-echo "SuperStarOff - 安装 Photoshop 插件"
+echo "SuperStarOff - 安装核心组件"
 echo "开始时间: $(date)"
 echo "==================================================="
 echo ""
 
-# 步骤1: 安装 Python framework 到系统目录
-echo "=== 步骤 1: 安装 Python framework ==="
-FRAMEWORK_SOURCE="/usr/local/SuperStarOff/Python.framework"
-FRAMEWORK_TARGET="/Library/Frameworks/Python.framework"
+APP_DIR="/usr/local/SuperStarOff"
 
-if [ -d "$FRAMEWORK_SOURCE" ]; then
-    echo "正在安装 Python 3.11 framework..."
+# 设置权限
+echo "设置权限..."
+chown -R root:wheel "$APP_DIR"
+chmod -R 755 "$APP_DIR"
+chmod +x "$APP_DIR/superstaroff"
 
-    # 创建目标目录
-    mkdir -p "$FRAMEWORK_TARGET/Versions"
+# 创建命令行快捷方式
+echo "创建命令行快捷方式..."
+mkdir -p /usr/local/bin
+ln -sf "$APP_DIR/superstaroff" /usr/local/bin/superstaroff
 
-    # 复制 framework
-    rsync -a "$FRAMEWORK_SOURCE/Versions/3.11/" "$FRAMEWORK_TARGET/Versions/3.11/"
-
-    # 创建符号链接（如果不存在）
-    if [ ! -e "$FRAMEWORK_TARGET/Versions/Current" ]; then
-        ln -sf 3.11 "$FRAMEWORK_TARGET/Versions/Current"
-    fi
-
-    echo "✓ Python framework 已安装到 $FRAMEWORK_TARGET"
-else
-    echo "⚠️  警告: Python framework 未找到，虚拟环境可能无法工作"
-fi
+# 扫描 Photoshop 版本
 echo ""
+echo "扫描已安装的 Photoshop 版本..."
 
-# 步骤2: 安装 JSX 脚本到系统级目录（所有用户可用）
-echo "=== 步骤 2: 安装 JSX 脚本 ==="
-
-# JSX 源文件
-JSX_SOURCE="/usr/local/SuperStarOff/SuperStarOff_PS.jsx"
-
-# 检查 JSX 文件是否存在
-if [ ! -f "$JSX_SOURCE" ]; then
-    echo "❌ 错误: JSX 文件不存在: $JSX_SOURCE"
-    exit 1
-fi
-echo "✓ 找到 JSX 文件: $JSX_SOURCE"
-echo ""
-
-# Photoshop Scripts 目录（应用程序内部）
-PS_APPS=(
-    "/Applications/Adobe Photoshop 2026/Presets/Scripts"
-    "/Applications/Adobe Photoshop 2025/Presets/Scripts"
-    "/Applications/Adobe Photoshop 2024/Presets/Scripts"
-    "/Applications/Adobe Photoshop 2023/Presets/Scripts"
-)
-
-echo "正在安装 JSX 脚本到 Photoshop..."
-INSTALLED=0
-
-for PS_DIR in "${PS_APPS[@]}"; do
-    # 检查 Photoshop 版本是否存在
-    if [ -d "$PS_DIR" ]; then
-        echo "  找到 Photoshop: $PS_DIR"
-
-        # 复制 JSX 文件
-        cp "$JSX_SOURCE" "$PS_DIR/SuperStarOff_PS.jsx"
-
-        # 设置权限（所有用户可读）
-        chown root:wheel "$PS_DIR/SuperStarOff_PS.jsx"
-        chmod 644 "$PS_DIR/SuperStarOff_PS.jsx"
-
-        echo "  ✓ JSX 已安装到: $PS_DIR/SuperStarOff_PS.jsx"
-        INSTALLED=$((INSTALLED + 1))
+PS_FOUND=""
+for YEAR in 2026 2025 2024 2023 2022; do
+    PS_PATH="/Applications/Adobe Photoshop $YEAR/Presets/Scripts"
+    if [ -d "$PS_PATH" ]; then
+        PS_FOUND="$PS_FOUND $YEAR"
     fi
 done
 
 echo ""
-if [ $INSTALLED -eq 0 ]; then
-    echo "⚠️  警告: 未找到 Photoshop 安装"
+echo "==================================================="
+echo "✅ SuperStarOff 核心组件安装完成！"
+echo "==================================================="
+echo ""
+
+if [ -n "$PS_FOUND" ]; then
+    echo "检测到 Photoshop 版本:$PS_FOUND"
     echo ""
-    echo "请手动安装 JSX 脚本："
-    echo "  1. 复制: $JSX_SOURCE"
-    echo "  2. 到: /Applications/Adobe Photoshop 202X/Presets/Scripts/"
+    echo "即将打开安装工具，请选择要安装插件的版本..."
     echo ""
 else
-    echo "✓ JSX 脚本已安装到 $INSTALLED 个 Photoshop 版本"
+    echo "⚠️  未检测到已安装的 Photoshop"
+    echo ""
+    echo "安装 Photoshop 后，请打开以下工具安装插件:"
+    echo "    /usr/local/SuperStarOff/安装到Photoshop.app"
+    echo ""
 fi
 
-# 设置 SuperStarOff 目录权限
-echo "设置权限..."
-chown -R root:wheel /usr/local/SuperStarOff
-chmod -R 755 /usr/local/SuperStarOff
-chmod 644 /usr/local/SuperStarOff/SuperStarOff_PS.jsx
-echo "✓ 权限设置完成"
+echo "命令行使用:"
+echo "  superstaroff input.tif output.tif"
 echo ""
+echo "==================================================="
 
-echo "==================================================="
-echo "✅ SuperStarOff 安装完成！"
-echo "==================================================="
-echo ""
-echo "安装位置:"
-echo "  核心文件: /usr/local/SuperStarOff/"
-if [ $INSTALLED -gt 0 ]; then
-    echo "  JSX 脚本: Photoshop Scripts 目录"
+# 获取当前登录用户并打开 GUI 安装工具
+CURRENT_USER=$(stat -f "%Su" /dev/console)
+if [ -n "$CURRENT_USER" ] && [ "$CURRENT_USER" != "root" ]; then
+    sudo -u "$CURRENT_USER" open "$APP_DIR/安装到Photoshop.app" &
 fi
-echo ""
-echo "使用方法:"
-echo "  1. 重启 Adobe Photoshop"
-echo "  2. 打开星空图片"
-echo "  3. 菜单: 文件 > 脚本 > SuperStarOff_PS"
-echo "  4. 选择参数，等待处理完成"
-echo ""
-echo "日志文件: $LOG_FILE"
-echo "==================================================="
-echo ""
 
 exit 0
 POSTINSTALL_EOF
@@ -275,110 +181,44 @@ chmod +x "$SCRIPTS_DIR/postinstall"
 echo "✓ postinstall 脚本已创建"
 echo ""
 
-# 步骤6: 创建卸载脚本
-echo "=== 步骤 6: 创建卸载脚本 ==="
-cat > "$BUILD_DIR/uninstall.sh" << 'UNINSTALL_EOF'
-#!/bin/bash
-
-echo "==================================================="
-echo "SuperStarOff Photoshop插件 - 卸载程序"
-echo "==================================================="
-echo ""
-
-# 检查是否以 root 运行
-if [ "$EUID" -ne 0 ]; then
-    echo "❌ 请使用 sudo 运行此脚本"
-    echo "用法: sudo ./uninstall.sh"
-    exit 1
-fi
-
-# 删除核心文件
-echo "正在删除核心文件..."
-if [ -d "/usr/local/SuperStarOff" ]; then
-    rm -rf /usr/local/SuperStarOff
-    echo "✓ 已删除: /usr/local/SuperStarOff"
-fi
-
-# 删除 JSX 脚本
-echo ""
-echo "正在删除 Photoshop 脚本..."
-
-PS_APPS=(
-    "/Applications/Adobe Photoshop 2026/Presets/Scripts"
-    "/Applications/Adobe Photoshop 2025/Presets/Scripts"
-    "/Applications/Adobe Photoshop 2024/Presets/Scripts"
-    "/Applications/Adobe Photoshop 2023/Presets/Scripts"
-)
-
-for PS_DIR in "${PS_APPS[@]}"; do
-    if [ -f "$PS_DIR/SuperStarOff_PS.jsx" ]; then
-        rm -f "$PS_DIR/SuperStarOff_PS.jsx"
-        echo "✓ 已删除: $PS_DIR/SuperStarOff_PS.jsx"
-    fi
-done
-
-echo ""
-echo "✓ SuperStarOff 已完全卸载"
-echo ""
-
-exit 0
-UNINSTALL_EOF
-
-chmod +x "$BUILD_DIR/uninstall.sh"
-echo "✓ uninstall.sh 脚本已创建"
-echo ""
-
 # 步骤7: 构建 PKG
-echo "=== 步骤 7: 构建 PKG 组件 ==="
+echo "=== 步骤 7: 构建 PKG ==="
+
 pkgbuild --root "$PAYLOAD_DIR" \
     --scripts "$SCRIPTS_DIR" \
-    --identifier "com.jameszhenyu.superstaroff.ps" \
-    --version "1.0.0" \
+    --identifier "com.jameszhenyu.superstaroff" \
+    --version "$VERSION" \
     --install-location "/" \
-    "$BUILD_DIR/SuperStarOff-PS-Component.pkg"
+    "$BUILD_DIR/SuperStarOff-Component.pkg"
 
 echo "✓ 组件包构建完成"
 echo ""
 
-# 步骤8: 创建最终安装包
-echo "=== 步骤 8: 创建最终安装包 ==="
-productbuild --package "$BUILD_DIR/SuperStarOff-PS-Component.pkg" \
-    "$PROJECT_ROOT/installer/SuperStarOff-PS-Only.pkg"
+# 步骤8: 签名 PKG
+echo "=== 步骤 8: 签名安装包 ==="
 
-echo "✓ 最终安装包创建完成"
-echo ""
-echo ""
+INSTALLER_CERT="Developer ID Installer: James Zhen Yu (JWR6FDB52H)"
+
+productbuild --package "$BUILD_DIR/SuperStarOff-Component.pkg" \
+    --sign "$INSTALLER_CERT" \
+    "$PROJECT_ROOT/installer/SuperStarOff-Installer-$VERSION.pkg"
+
+echo "✓ 安装包签名完成"
 
 # 计算大小
-PKG_SIZE=$(du -h "$PROJECT_ROOT/installer/SuperStarOff-PS-Only.pkg" | cut -f1)
+PKG_FILE="$PROJECT_ROOT/installer/SuperStarOff-Installer-$VERSION.pkg"
+PKG_SIZE=$(du -h "$PKG_FILE" | cut -f1)
 
-echo "==================================================="
-echo "✅ Photoshop插件安装包构建成功！"
-echo "==================================================="
-echo ""
-echo "安装包信息:"
-echo "  文件: $PROJECT_ROOT/installer/SuperStarOff-PS-Only.pkg"
-echo "  大小: $PKG_SIZE"
-echo "  版本: 1.0.0"
-echo ""
-echo "包含内容:"
-echo "  • Photoshop JSX 脚本"
-echo "  • Python 核心模块 (core_utils.py)"
-echo "  • 加密模型文件"
-echo "  • CLI 工具"
-echo "  • 独立虚拟环境"
-echo ""
-echo "不包含:"
-echo "  ✗ GUI 应用 (减少 6GB)"
-echo ""
-echo "卸载脚本:"
-echo "  位置: $BUILD_DIR/uninstall.sh"
-echo "  使用: sudo $BUILD_DIR/uninstall.sh"
-echo ""
-echo "用户安装方法:"
-echo "  1. 双击 SuperStarOff-PS-Only.pkg"
-echo "  2. 按照提示完成安装"
-echo "  3. 重启 Photoshop"
 echo ""
 echo "==================================================="
+echo "✅ 构建成功！"
+echo "==================================================="
 echo ""
+echo "版本: $VERSION"
+echo "安装包: $PKG_FILE"
+echo "大小: $PKG_SIZE"
+echo ""
+echo "下一步: 公证安装包"
+echo "  xcrun notarytool submit SuperStarOff-Installer-$VERSION.pkg --keychain-profile notarytool-password --wait"
+echo ""
+echo "==================================================="
