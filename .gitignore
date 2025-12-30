@@ -40,9 +40,9 @@ examples/*_mask.tif
 *.tif_starless.tif
 *.tif_mask.tif
 
-# Model files (too large for GitHub)
-models/*.pt
-*.pt
+# Model files - now tracked by Git LFS
+# models/*.pt  # Removed - using Git LFS
+# *.pt  # Removed - using Git LFS
 
 # Training checkpoints and logs
 checkpoints/
