@@ -1,15 +1,29 @@
 /*
  * 慧眼去星 for Photoshop - 开发测试版
  * 版本：1.1.0-DEV
+ *
+ * 支持: Windows / macOS
  */
 
 // ============== 开发配置 ==============
 var VERSION = "1.1.0-DEV";
-var DEV_DIR = "/Users/jameszhenyu/PycharmProjects/SuperStarOff";
-var PYTHON_PATH = DEV_DIR + "/.venv/bin/python";
-var CLI_PATH = DEV_DIR + "/src/superstaroff_cli.py";
 var STRIDE = 256;
 var DEVICE = "auto";
+
+// 平台检测
+var IS_WINDOWS = ($.os.indexOf("Windows") != -1);
+var PATH_SEP = IS_WINDOWS ? "\\" : "/";
+
+// 开发目录 - 根据平台设置
+var DEV_DIR = IS_WINDOWS
+    ? "C:\\Users\\jorda\\PycharmProjects\\SuperStarOff"
+    : "/Users/jameszhenyu/PycharmProjects/SuperStarOff";
+
+var PYTHON_PATH = IS_WINDOWS
+    ? (DEV_DIR + "\\.venv\\Scripts\\python.exe")
+    : (DEV_DIR + "/.venv/bin/python");
+
+var CLI_PATH = DEV_DIR + PATH_SEP + "src" + PATH_SEP + "superstaroff_cli.py";
 // ======================================
 
 function main() {
@@ -28,7 +42,7 @@ function main() {
 
 function showDialog() {
     var dlg = new Window("dialog", "慧眼去星 v" + VERSION + " [DEV]");
-    dlg.preferredSize = [380, 280];
+    dlg.preferredSize = [420, 300];
     dlg.alignChildren = ["fill", "top"];
     dlg.spacing = 12;
     dlg.margins = 20;
@@ -36,8 +50,15 @@ function showDialog() {
     var devPanel = dlg.add("panel", undefined, "开发测试版");
     devPanel.alignChildren = ["left", "top"];
     devPanel.margins = 10;
-    devPanel.add("statictext", undefined, "Python: .venv/bin/python");
-    devPanel.add("statictext", undefined, "项目: " + DEV_DIR);
+    devPanel.add("statictext", undefined, "平台: " + (IS_WINDOWS ? "Windows" : "macOS"));
+    devPanel.add("statictext", undefined, "Python: " + PYTHON_PATH);
+
+    // 显示项目路径（可能很长，所以截断）
+    var devDirDisplay = DEV_DIR;
+    if (devDirDisplay.length > 45) {
+        devDirDisplay = "..." + devDirDisplay.substring(devDirDisplay.length - 42);
+    }
+    devPanel.add("statictext", undefined, "项目: " + devDirDisplay);
 
     var helpPanel = dlg.add("panel", undefined, "使用说明");
     helpPanel.alignChildren = ["left", "top"];
@@ -63,7 +84,7 @@ function processImage() {
     app.displayDialogs = DialogModes.NO;
 
     try {
-        var tempDirPath = Folder.temp.fsName + "/SuperStarOff/";
+        var tempDirPath = Folder.temp.fsName + PATH_SEP + "SuperStarOff" + PATH_SEP;
         var tempFolder = new Folder(tempDirPath);
         if (!tempFolder.exists) tempFolder.create();
 
@@ -71,13 +92,37 @@ function processImage() {
         var inputFile = tempDirPath + "input_" + timestamp + ".tif";
         var outputFile = tempDirPath + "output_" + timestamp + ".tif";
 
+        $.writeln("=== 慧眼去星 DEV v" + VERSION + " ===");
+        $.writeln("平台: " + (IS_WINDOWS ? "Windows" : "macOS"));
+        $.writeln("Python: " + PYTHON_PATH);
+        $.writeln("CLI: " + CLI_PATH);
+
         exportLayer(doc, activeLayer, inputFile);
+
+        // 检查 Python 是否存在
+        var pythonFile = new File(PYTHON_PATH);
+        if (!pythonFile.exists) {
+            app.displayDialogs = DialogModes.ALL;
+            alert("错误: 找不到 Python\n\n" + PYTHON_PATH + "\n\n请检查虚拟环境是否已创建。");
+            throw new Error("Python 未找到");
+        }
+
+        // 检查 CLI 脚本是否存在
+        var cliFile = new File(CLI_PATH);
+        if (!cliFile.exists) {
+            app.displayDialogs = DialogModes.ALL;
+            alert("错误: 找不到 CLI 脚本\n\n" + CLI_PATH);
+            throw new Error("CLI 脚本未找到");
+        }
 
         var command = '"' + PYTHON_PATH + '" "' + CLI_PATH + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE;
         var logFile = tempDirPath + "log_" + timestamp + ".txt";
         var fullCommand = command + ' > "' + logFile + '" 2>&1';
 
+        $.writeln("执行: " + command);
+
         var exitCode = system(fullCommand);
+        $.writeln("退出代码: " + exitCode);
 
         var outputFileObj = new File(outputFile);
         if (!outputFileObj.exists) {

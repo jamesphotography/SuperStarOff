@@ -4,13 +4,22 @@
  *
  * 作者：詹姆斯
  * 版本：1.1.0
+ *
+ * 支持: Windows / macOS
  */
 
 // ============== 配置 ==============
 var VERSION = "1.1.0";
-var INSTALL_DIR = "/usr/local/SuperStarOff";
 var STRIDE = 256;   // 默认平衡模式
 var DEVICE = "auto"; // 自动检测设备
+
+// 平台检测与安装目录
+var IS_WINDOWS = ($.os.indexOf("Windows") != -1);
+var INSTALL_DIR = IS_WINDOWS
+    ? "C:\\Program Files\\SuperStarOff"
+    : "/usr/local/SuperStarOff";
+var EXEC_NAME = IS_WINDOWS ? "superstaroff.exe" : "superstaroff";
+var PATH_SEP = IS_WINDOWS ? "\\" : "/";
 // ==================================
 
 function main() {
@@ -72,11 +81,7 @@ function showDialog() {
     linkButton.preferredSize = [140, 28];
     linkButton.onClick = function() {
         var url = "https://www.youtube.com/@JamesZhenYu";
-        if ($.os.indexOf("Windows") != -1) {
-            system("start " + url);
-        } else {
-            system("open " + url);
-        }
+        openURL(url);
     };
 
     // 按钮
@@ -98,6 +103,15 @@ function showDialog() {
     return dlg.show() == 1;
 }
 
+function openURL(url) {
+    // 跨平台打开 URL
+    if (IS_WINDOWS) {
+        system('start "" "' + url + '"');
+    } else {
+        system('open "' + url + '"');
+    }
+}
+
 function processImage() {
     var doc = app.activeDocument;
     var activeLayer = doc.activeLayer;
@@ -106,7 +120,7 @@ function processImage() {
 
     try {
         // 获取临时目录路径
-        var tempDirPath = Folder.temp.fsName + "/SuperStarOff/";
+        var tempDirPath = Folder.temp.fsName + PATH_SEP + "SuperStarOff" + PATH_SEP;
         var tempFolder = new Folder(tempDirPath);
         if (!tempFolder.exists) {
             tempFolder.create();
@@ -118,6 +132,7 @@ function processImage() {
         var outputFile = tempDirPath + "output_" + timestamp + ".tif";
 
         $.writeln("=== 慧眼去星 v" + VERSION + " 开始处理 ===");
+        $.writeln("平台: " + (IS_WINDOWS ? "Windows" : "macOS"));
         $.writeln("输入: " + inputFile);
         $.writeln("输出: " + outputFile);
 
@@ -125,16 +140,38 @@ function processImage() {
         exportLayer(doc, activeLayer, inputFile);
 
         // 步骤2: 调用 superstaroff 可执行文件
-        var execPath = INSTALL_DIR + "/superstaroff";
+        var execPath = INSTALL_DIR + PATH_SEP + EXEC_NAME;
 
-        var command = '"' + execPath + '" ' +
-                      '"' + inputFile + '" "' + outputFile + '" ' +
-                      '--stride ' + STRIDE + ' --device ' + DEVICE;
+        // 检查可执行文件是否存在
+        var execFile = new File(execPath);
+        if (!execFile.exists) {
+            app.displayDialogs = DialogModes.ALL;
+            alert("错误: 找不到 SuperStarOff 程序\n\n" +
+                  "请确保已正确安装 SuperStarOff:\n" +
+                  execPath + "\n\n" +
+                  "请运行安装程序或检查安装路径。");
+            throw new Error("SuperStarOff 未安装");
+        }
+
+        var command;
+        if (IS_WINDOWS) {
+            // Windows 命令
+            command = '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE;
+        } else {
+            // macOS/Linux 命令
+            command = '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE;
+        }
 
         $.writeln("执行命令: " + command);
 
         var logFile = tempDirPath + "log_" + timestamp + ".txt";
-        var fullCommand = command + ' > "' + logFile + '" 2>&1';
+        var fullCommand;
+
+        if (IS_WINDOWS) {
+            fullCommand = command + ' > "' + logFile + '" 2>&1';
+        } else {
+            fullCommand = command + ' > "' + logFile + '" 2>&1';
+        }
 
         var exitCode = system(fullCommand);
         $.writeln("退出代码: " + exitCode);
