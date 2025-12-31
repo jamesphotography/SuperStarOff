@@ -1,0 +1,23 @@
+慧眼去星 (SuperStarOff) v1.1.0
+
+AI 星点去除工具 - Photoshop 集成版
+
+功能特点：
+• 使用深度学习模型自动去除星点
+• 保留背景星云和深空天体
+• 支持 8-bit 和 16-bit TIFF/PNG/JPG 格式
+• 自动检测并安装到 Photoshop
+
+安装内容：
+• SuperStarOff 命令行工具
+• AI 模型文件
+• Photoshop 脚本插件
+
+安装后使用方法：
+1. 打开 Photoshop
+2. 打开星空图片
+3. 菜单：文件 > 脚本 > 慧眼去星
+4. 点击"开始处理"
+
+© 2025 詹姆斯·于震 版权所有
+YouTube: @JamesZhenYu
