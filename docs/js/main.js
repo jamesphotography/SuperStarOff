@@ -67,9 +67,9 @@ const backToTopBtn = document.getElementById('back-to-top');
 
 window.addEventListener('scroll', () => {
     if (window.scrollY > 500) {
-        backToTopBtn.classList.add('show');
+        backToTopBtn.classList.add('visible');
     } else {
-        backToTopBtn.classList.remove('show');
+        backToTopBtn.classList.remove('visible');
     }
 });
 

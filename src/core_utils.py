@@ -8,10 +8,35 @@ Model Encryption/Decryption Module
 import os
 import io
 import hashlib
+import logging
 from pathlib import Path
-from cryptography.fernet import Fernet
+
+from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+# Configure module logger
+logger = logging.getLogger(__name__)
+
+
+class ModelCryptoError(Exception):
+    """Base exception for model encryption/decryption errors"""
+    pass
+
+
+class ModelEncryptionError(ModelCryptoError):
+    """Raised when model encryption fails"""
+    pass
+
+
+class ModelDecryptionError(ModelCryptoError):
+    """Raised when model decryption fails"""
+    pass
+
+
+class ModelFileNotFoundError(ModelCryptoError):
+    """Raised when model file is not found"""
+    pass
 
 
 class ModelCrypto:
@@ -92,35 +117,66 @@ class ModelCrypto:
 
         Returns:
             加密是否成功
-        """
-        try:
-            print(f"正在加密文件: {input_path}")
 
+        Raises:
+            ModelFileNotFoundError: 输入文件不存在
+            ModelEncryptionError: 加密过程失败
+        """
+        input_file = Path(input_path)
+        output_file = Path(output_path)
+
+        logger.info(f"开始加密文件: {input_path}")
+
+        # Validate input file exists
+        if not input_file.exists():
+            logger.error(f"输入文件不存在: {input_path}")
+            raise ModelFileNotFoundError(f"输入文件不存在: {input_path}")
+
+        if not input_file.is_file():
+            logger.error(f"输入路径不是文件: {input_path}")
+            raise ModelEncryptionError(f"输入路径不是文件: {input_path}")
+
+        # Validate output directory exists
+        if not output_file.parent.exists():
+            logger.error(f"输出目录不存在: {output_file.parent}")
+            raise ModelEncryptionError(f"输出目录不存在: {output_file.parent}")
+
+        try:
             # 读取原始文件
+            logger.debug(f"读取文件: {input_path}")
             with open(input_path, 'rb') as f:
                 data = f.read()
 
-            print(f"文件大小: {len(data) / (1024*1024):.2f} MB")
+            file_size_mb = len(data) / (1024 * 1024)
+            logger.info(f"文件大小: {file_size_mb:.2f} MB")
 
             # 获取密钥并加密
+            logger.debug("正在派生加密密钥...")
             key = ModelCrypto._get_key()
             fernet = Fernet(key)
 
-            print("正在加密...")
+            logger.info("正在加密数据...")
             encrypted_data = fernet.encrypt(data)
 
             # 写入加密文件
+            logger.debug(f"写入加密文件: {output_path}")
             with open(output_path, 'wb') as f:
                 f.write(encrypted_data)
 
-            print(f"加密完成: {output_path}")
-            print(f"加密后大小: {len(encrypted_data) / (1024*1024):.2f} MB")
+            encrypted_size_mb = len(encrypted_data) / (1024 * 1024)
+            logger.info(f"加密完成: {output_path} ({encrypted_size_mb:.2f} MB)")
 
             return True
 
+        except PermissionError as e:
+            logger.error(f"权限错误，无法读取或写入文件: {e}")
+            raise ModelEncryptionError(f"权限错误: {e}") from e
+        except IOError as e:
+            logger.error(f"IO错误: {e}")
+            raise ModelEncryptionError(f"文件读写错误: {e}") from e
         except Exception as e:
-            print(f"加密失败: {e}")
-            return False
+            logger.exception(f"加密过程中发生未知错误: {e}")
+            raise ModelEncryptionError(f"加密失败: {e}") from e
 
     @staticmethod
     def decrypt_file(input_path: str, output_path: str = None) -> bytes:
