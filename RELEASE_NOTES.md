@@ -6,7 +6,7 @@
 
 ## 概述
 
-慧眼去星 V1.1.0 是一次重要更新，带来了全新的安装体验和更稳定的运行环境。本版本采用独立打包技术，无需依赖系统 Python 环境，真正实现开箱即用。
+慧眼去星 V1.1.0 是一次重要更新，带来了全新的安装体验和更稳定的运行环境。本版本采用独立打包技术，无需依赖系统 Python 环境，真正实现开箱即用。**现已支持 macOS 和 Windows 双平台！**
 
 ---
 
@@ -27,11 +27,36 @@
 - 兼容 Intel 处理器 Mac
 - 通过 Apple 公证，确保 macOS 安全运行
 
+### Windows 支持
+- 全新 Windows 版本，支持 Windows 10/11
+- 独立打包，无需安装 Python 环境
+- 简单的 EXE 安装程序，一键安装
+
+---
+
+## 下载地址
+
+### macOS
+- [Google Drive](https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing)
+- [百度网盘 (提取码: jhx5)](https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5)
+
+### Windows
+- [GitHub 下载](https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-v1.1.0.exe)
+- [百度网盘 (提取码: 2p2s)](https://pan.baidu.com/s/10nxAvYcfZaJBkRH1c3Zdqw?pwd=2p2s)
+
 ---
 
 ## 系统要求
 
+### macOS
 - **操作系统**：macOS 11.0 (Big Sur) 或更高版本
+- **处理器**：Apple Silicon (M1/M2/M3/M4) 或 Intel
+- **Photoshop**：Adobe Photoshop 2022 / 2023 / 2024 / 2025 / 2026
+- **存储空间**：约 500MB
+
+### Windows
+- **操作系统**：Windows 10 / 11
+- **架构**：x64
 - **Photoshop**：Adobe Photoshop 2022 / 2023 / 2024 / 2025 / 2026
 - **存储空间**：约 500MB
 
@@ -39,9 +64,16 @@
 
 ## 安装说明
 
+### macOS
 1. 双击 `SuperStarOff-Installer-1.1.0.pkg` 运行安装程序
 2. 按照提示完成核心组件安装
 3. 在弹出的工具中选择要安装插件的 Photoshop 版本
+4. 重启 Photoshop，通过 `文件 > 脚本 > 慧眼去星` 使用
+
+### Windows
+1. 下载 `SuperStarOff-Installer-v1.1.0.exe`
+2. 右键以管理员身份运行安装程序
+3. 按照提示选择要安装插件的 Photoshop 版本
 4. 重启 Photoshop，通过 `文件 > 脚本 > 慧眼去星` 使用
 
 ---

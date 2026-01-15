@@ -656,31 +656,60 @@
     <section id="download" class="download">
         <div class="container">
             <h2 class="section-title">下载安装</h2>
-            <p class="section-subtitle">macOS 版本 · 已通过 Apple 公证</p>
+            <p class="section-subtitle">支持 macOS 与 Windows 双平台</p>
 
-            <div class="download-card-main">
-                <div class="header">
-                    <i class="fab fa-apple"></i>
-                    <h3>慧眼去星 V1.1.0</h3>
+            <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; max-width: 1000px; margin: 0 auto;">
+                <!-- macOS 版本 -->
+                <div class="download-card-main" style="flex: 1; min-width: 320px;">
+                    <div class="header">
+                        <i class="fab fa-apple"></i>
+                        <h3>macOS 版 V1.1.0</h3>
+                    </div>
+                    <div class="info">
+                        <div class="info-item"><strong>系统：</strong>macOS 11.0+</div>
+                        <div class="info-item"><strong>大小：</strong>约 240MB</div>
+                        <div class="info-item"><strong>芯片：</strong>Apple Silicon</div>
+                        <div class="info-item"><strong>PS：</strong>2022 - 2026</div>
+                    </div>
+                    <div class="buttons">
+                        <a href="https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing" class="btn btn-primary" target="_blank">
+                            <i class="fab fa-google-drive"></i> Google Drive
+                        </a>
+                        <a href="https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5" class="btn btn-secondary" target="_blank">
+                            <i class="fas fa-cloud"></i> 百度网盘 (jhx5)
+                        </a>
+                    </div>
+                    <p class="note">
+                        <i class="fas fa-shield-alt"></i>
+                        已签名并通过 Apple 公证
+                    </p>
                 </div>
-                <div class="info">
-                    <div class="info-item"><strong>系统：</strong>macOS 11.0+</div>
-                    <div class="info-item"><strong>大小：</strong>约 240MB</div>
-                    <div class="info-item"><strong>芯片：</strong>Apple Silicon</div>
-                    <div class="info-item"><strong>PS：</strong>2022 - 2026</div>
+
+                <!-- Windows 版本 -->
+                <div class="download-card-main" style="flex: 1; min-width: 320px; border-color: #0078d4;">
+                    <div class="header">
+                        <i class="fab fa-windows" style="color: #0078d4;"></i>
+                        <h3>Windows 版 V1.1.0</h3>
+                    </div>
+                    <div class="info">
+                        <div class="info-item"><strong>系统：</strong>Windows 10/11</div>
+                        <div class="info-item"><strong>大小：</strong>约 300MB</div>
+                        <div class="info-item"><strong>架构：</strong>x64</div>
+                        <div class="info-item"><strong>PS：</strong>2022 - 2026</div>
+                    </div>
+                    <div class="buttons">
+                        <a href="https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-v1.1.0.exe" class="btn btn-primary" target="_blank" style="background: linear-gradient(135deg, #0078d4 0%, #00bcf2 100%);">
+                            <i class="fab fa-github"></i> GitHub 下载
+                        </a>
+                        <a href="https://pan.baidu.com/s/10nxAvYcfZaJBkRH1c3Zdqw?pwd=2p2s" class="btn btn-secondary" target="_blank">
+                            <i class="fas fa-cloud"></i> 百度网盘 (2p2s)
+                        </a>
+                    </div>
+                    <p class="note">
+                        <i class="fas fa-info-circle"></i>
+                        首次运行需右键以管理员身份运行
+                    </p>
                 </div>
-                <div class="buttons">
-                    <a href="https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing" class="btn btn-primary" target="_blank">
-                        <i class="fab fa-google-drive"></i> Google Drive 下载
-                    </a>
-                    <a href="https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5" class="btn btn-secondary" target="_blank">
-                        <i class="fas fa-cloud"></i> 百度网盘 (提取码: jhx5)
-                    </a>
-                </div>
-                <p class="note">
-                    <i class="fas fa-shield-alt"></i>
-                    已签名并通过 Apple 公证，可安全安装
-                </p>
             </div>
 
             <!-- 安装步骤 -->
@@ -843,7 +872,7 @@
                 </div>
                 <div class="faq-item-simple">
                     <h3><i class="fas fa-question-circle"></i> 支持 Windows 吗？</h3>
-                    <p>目前仅支持 macOS，Windows 版本开发中。</p>
+                    <p>支持！同时提供 macOS 和 Windows 版本。</p>
                 </div>
                 <div class="faq-item-simple">
                     <h3><i class="fas fa-question-circle"></i> 需要联网吗？</h3>
