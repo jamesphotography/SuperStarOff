@@ -1,932 +1,611 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-lang="cn">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="慧眼去星 SuperStarOff - 专业的天文图像星点去除工具，采用AI深度学习技术，智能去除星点，完美保留星云细节">
-    <meta name="keywords" content="天文摄影,星点去除,深度学习,AI,星云,深空摄影,SuperStarOff,慧眼去星">
-    <title>慧眼去星 SuperStarOff - AI驱动的天文图像星点去除工具</title>
+    <title>SuperStarOff - 慧眼去星 | AI Star Removal for Astrophotography</title>
+    <meta name="description"
+        content="慧眼去星 - AI驱动的天文图像星点去除工具，Photoshop插件。AI-powered star removal tool for astrophotography.">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* 页面美化补充样式 */
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 4rem;
-            align-items: center;
-            text-align: left;
-        }
-
-        .hero-image-container {
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .hero-comparison {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .hero-comparison-item {
-            position: relative;
-        }
-
-        .hero-comparison-item img {
-            width: 100%;
-            display: block;
-        }
-
-        .hero-comparison-label {
-            position: absolute;
-            bottom: 12px;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .hero-comparison-item:first-child .hero-comparison-label {
-            left: 12px;
-            background: rgba(0,0,0,0.75);
-            color: #fff;
-        }
-
-        .hero-comparison-item:last-child .hero-comparison-label {
-            right: 12px;
-            background: var(--primary-color);
-            color: #fff;
-        }
-
-        /* 功能卡片优化 */
-        .features-grid-compact {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .feature-card-compact {
-            background: var(--card-bg);
-            padding: 2rem 1.5rem;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .feature-card-compact:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 15px 40px rgba(74, 144, 226, 0.15);
-        }
-
-        .feature-card-compact .icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .feature-card-compact h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .feature-card-compact p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* 下载卡片优化 */
-        .download-card-main {
-            max-width: 480px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 2px solid var(--primary-color);
-            border-radius: 16px;
-            padding: 2.5rem;
-            box-shadow: 0 0 40px rgba(74, 144, 226, 0.2);
-        }
-
-        .download-card-main .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .download-card-main .header i {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 0.75rem;
-        }
-
-        .download-card-main .header h3 {
-            font-size: 1.8rem;
-            color: var(--text-primary);
-        }
-
-        .download-card-main .info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-        }
-
-        .download-card-main .info-item {
-            color: var(--text-secondary);
-        }
-
-        .download-card-main .info-item strong {
-            color: var(--text-primary);
-        }
-
-        .download-card-main .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .download-card-main .note {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .download-card-main .note i {
-            color: var(--success-color);
-            margin-right: 0.5rem;
-        }
-
-        /* 安装步骤简化 */
-        .install-steps-simple {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .install-step-simple {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            color: var(--text-secondary);
-        }
-
-        .install-step-simple .num {
-            width: 36px;
-            height: 36px;
-            background: var(--primary-color);
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .install-step-simple span {
-            font-size: 0.95rem;
-        }
-
-        .install-step-arrow {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-        }
-
-        /* 使用指南卡片优化 */
-        .guide-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .guide-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .guide-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        }
-
-        .guide-card img {
-            width: 100%;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .guide-card:hover img {
-            transform: scale(1.02);
-        }
-
-        .guide-card-content {
-            padding: 1.25rem;
-        }
-
-        .guide-card-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .guide-card-num {
-            width: 32px;
-            height: 32px;
-            background: var(--gradient-primary);
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .guide-card-header h3 {
-            font-size: 1.15rem;
-            color: var(--text-primary);
-            margin: 0;
-        }
-
-        .guide-card-content p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        /* 视频教程优化 */
-        .video-section {
-            margin-top: 4rem;
-            text-align: center;
-        }
-
-        .video-section h3 {
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .video-section h3 i {
-            color: #ff0000;
-            margin-right: 0.5rem;
-        }
-
-        .video-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-        }
-
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
-        .video-alt {
-            padding: 1rem;
-            text-align: center;
-            background: rgba(0,0,0,0.2);
-        }
-
-        .video-alt a {
-            color: var(--primary-color);
-        }
-
-        /* 卸载区域简化 */
-        .uninstall-box {
-            max-width: 600px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 2rem;
-        }
-
-        .uninstall-method {
-            margin-bottom: 1.5rem;
-        }
-
-        .uninstall-method:last-child {
-            margin-bottom: 0;
-        }
-
-        .uninstall-method h4 {
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-            font-size: 1rem;
-        }
-
-        .uninstall-method h4 i {
-            color: var(--primary-color);
-            margin-right: 0.5rem;
-        }
-
-        .uninstall-method p, .uninstall-method ol {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .uninstall-method ol {
-            padding-left: 1.25rem;
-            line-height: 1.8;
-        }
-
-        .uninstall-method code {
-            display: block;
-            background: rgba(0,0,0,0.3);
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
-            color: var(--primary-color);
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        /* FAQ 简化 */
-        .faq-simple {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .faq-item-simple {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .faq-item-simple:hover {
-            border-color: var(--primary-color);
-        }
-
-        .faq-item-simple h3 {
-            color: var(--text-primary);
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .faq-item-simple h3 i {
-            color: var(--primary-color);
-            margin-right: 0.5rem;
-        }
-
-        .faq-item-simple p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        /* 效果展示优化 */
-        .gallery-main {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .gallery-featured {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .gallery-featured-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .gallery-featured-item {
-            position: relative;
-        }
-
-        .gallery-featured-item img {
-            width: 100%;
-            display: block;
-        }
-
-        .gallery-featured-label {
-            position: absolute;
-            top: 1rem;
-            padding: 0.5rem 1rem;
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .gallery-featured-item:first-child .gallery-featured-label {
-            left: 1rem;
-        }
-
-        .gallery-featured-item:last-child .gallery-featured-label {
-            right: 1rem;
-            background: var(--primary-color);
-        }
-
-        .gallery-thumbnails {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 1rem;
-        }
-
-        .gallery-thumb {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .gallery-thumb:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
-
-        .gallery-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* 页脚优化 */
-        .footer-simple {
-            text-align: center;
-            padding: 3rem 0;
-        }
-
-        .footer-links {
-            margin-bottom: 1.5rem;
-        }
-
-        .footer-links a {
-            color: var(--text-muted);
-            margin: 0 1rem;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: var(--primary-color);
-        }
-
-        .footer-links i {
-            margin-right: 0.5rem;
-        }
-
-        .footer-copyright {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .footer-copyright a {
-            color: var(--primary-color);
-        }
-
-        /* 响应式优化 */
-        @media (max-width: 900px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 2rem;
-            }
-
-            .hero-grid > div:first-child {
-                order: 1;
-            }
-
-            .hero-grid > div:last-child {
-                order: 0;
-            }
-
-            .hero-buttons {
-                justify-content: center !important;
-            }
-
-            .features-grid-compact {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-            }
-
-            .guide-grid {
-                grid-template-columns: 1fr;
-                max-width: 500px;
-            }
-
-            .faq-simple {
-                grid-template-columns: 1fr;
-            }
-
-            .gallery-thumbnails {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .install-steps-simple {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .install-step-arrow {
-                transform: rotate(90deg);
-            }
-        }
-    </style>
+    <link rel="icon" href="images/icon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <!-- 导航栏 -->
-    <nav class="navbar">
+    <!-- Subtle grain overlay -->
+    <div class="grain"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-inner">
+            <a href="#" class="logo">
+                <span class="star-icon" style="color: var(--accent);">✦</span>
+                <span>慧眼去星 SuperStarOff</span>
+            </a>
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="setLang('cn')">中</button>
+                <button class="lang-btn" onclick="setLang('en')">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
         <div class="container">
-            <div class="nav-brand">
-                <i class="fas fa-star"></i>
-                <span>慧眼去星</span>
+            <div class="hero-badge">
+                <span class="lang-cn">AI 天文图像处理</span>
+                <span class="lang-en">AI Astrophotography Tool</span>
             </div>
-            <ul class="nav-menu">
-                <li><a href="#home">首页</a></li>
-                <li><a href="#download">下载</a></li>
-                <li><a href="#guide">使用</a></li>
-                <li><a href="#gallery">效果</a></li>
-            </ul>
-            <div class="nav-toggle">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </nav>
+            <h1>
+                <span class="lang-cn">慧眼去星</span>
+                <span class="lang-en">SuperStarOff</span>
+            </h1>
+            <p class="tagline">
+                <span class="lang-cn">一键去除星点，完美保留星云细节</span>
+                <span class="lang-en">Remove stars with one click, preserve nebula details perfectly</span>
+            </p>
 
-    <!-- 主横幅 -->
-    <section id="home" class="hero">
-        <div class="hero-overlay"></div>
-        <div class="container hero-content hero-grid">
-            <!-- 左侧文字 -->
-            <div>
-                <h1 class="hero-title" style="text-align: inherit;">
-                    <span class="title-main">慧眼去星</span>
-                    <span class="title-sub">SuperStarOff</span>
-                </h1>
-                <p class="hero-subtitle" style="text-align: inherit;">AI 驱动的天文图像星点去除工具</p>
-                <p class="hero-description" style="text-align: inherit; margin-left: 0;">
-                    Photoshop 插件，一键去除星点，完美保留星云细节
-                </p>
-                <div class="hero-buttons" style="justify-content: flex-start;">
-                    <a href="#download" class="btn btn-primary">
-                        <i class="fas fa-download"></i> 下载 V1.1.0
-                    </a>
-                    <a href="#guide" class="btn btn-secondary">
-                        <i class="fas fa-play-circle"></i> 使用指南
-                    </a>
-                </div>
+            <div class="hero-cta">
+                <a href="#download" class="btn btn-primary">
+                    <span class="lang-cn">下载 macOS 版</span>
+                    <span class="lang-en">Download for macOS</span>
+                    <span class="btn-version">v1.1.0</span>
+                </a>
+                <a href="#download" class="btn btn-windows">
+                    <span class="lang-cn">下载 Windows 版</span>
+                    <span class="lang-en">Download for Windows</span>
+                    <span class="btn-version">v1.1.0</span>
+                </a>
+                <a href="#guide" class="btn btn-ghost">
+                    <span class="lang-cn">使用指南</span>
+                    <span class="lang-en">User Guide</span>
+                </a>
             </div>
-            <!-- 右侧对比图 -->
-            <div class="hero-image-container">
-                <div class="hero-comparison">
-                    <div class="hero-comparison-item">
-                        <img src="images/example-before.jpg" alt="处理前">
-                        <span class="hero-comparison-label">处理前</span>
+
+            <!-- Before/After Comparison -->
+            <div class="hero-preview">
+                <div class="hero-preview-frame">
+                    <div class="comparison-grid">
+                        <div class="comparison-item">
+                            <img src="images/example-before.jpg" alt="Before">
+                            <span class="comparison-label">
+                                <span class="lang-cn">处理前</span>
+                                <span class="lang-en">Before</span>
+                            </span>
+                        </div>
+                        <div class="comparison-item">
+                            <img src="images/example-after.jpg" alt="After">
+                            <span class="comparison-label">
+                                <span class="lang-cn">处理后</span>
+                                <span class="lang-en">After</span>
+                            </span>
+                        </div>
                     </div>
-                    <div class="hero-comparison-item">
-                        <img src="images/example-after.jpg" alt="处理后">
-                        <span class="hero-comparison-label">处理后</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="scroll-indicator">
-            <i class="fas fa-chevron-down"></i>
-        </div>
-    </section>
-
-    <!-- 功能特性 -->
-    <section id="features" class="features">
-        <div class="container">
-            <h2 class="section-title">功能特性</h2>
-            <p class="section-subtitle">专业工具，简单易用</p>
-
-            <div class="features-grid-compact">
-                <div class="feature-card-compact">
-                    <div class="icon"><i class="fas fa-brain"></i></div>
-                    <h3>AI 深度学习</h3>
-                    <p>智能识别星点，完美保留星云细节</p>
-                </div>
-                <div class="feature-card-compact">
-                    <div class="icon"><i class="fas fa-wifi-slash"></i></div>
-                    <h3>离线运行</h3>
-                    <p>独立打包，无需 Python，开箱即用</p>
-                </div>
-                <div class="feature-card-compact">
-                    <div class="icon"><i class="fab fa-adobe"></i></div>
-                    <h3>Photoshop 集成</h3>
-                    <p>无缝集成工作流，支持图层操作</p>
+                    <div class="hero-preview-glow"></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 下载安装 -->
-    <section id="download" class="download">
+    <!-- Features Section -->
+    <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">下载安装</h2>
-            <p class="section-subtitle">支持 macOS 与 Windows 双平台</p>
-
-            <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; max-width: 1000px; margin: 0 auto;">
-                <!-- macOS 版本 -->
-                <div class="download-card-main" style="flex: 1; min-width: 320px;">
-                    <div class="header">
-                        <i class="fab fa-apple"></i>
-                        <h3>macOS 版 V1.1.0</h3>
-                    </div>
-                    <div class="info">
-                        <div class="info-item"><strong>系统：</strong>macOS 11.0+</div>
-                        <div class="info-item"><strong>大小：</strong>约 240MB</div>
-                        <div class="info-item"><strong>芯片：</strong>Apple Silicon</div>
-                        <div class="info-item"><strong>PS：</strong>2022 - 2026</div>
-                    </div>
-                    <div class="buttons">
-                        <a href="https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing" class="btn btn-primary" target="_blank">
-                            <i class="fab fa-google-drive"></i> Google Drive
-                        </a>
-                        <a href="https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5" class="btn btn-secondary" target="_blank">
-                            <i class="fas fa-cloud"></i> 百度网盘 (jhx5)
-                        </a>
-                    </div>
-                    <p class="note">
-                        <i class="fas fa-shield-alt"></i>
-                        已签名并通过 Apple 公证
+            <div class="section-header">
+                <span class="section-label">
+                    <span class="lang-cn">核心功能</span>
+                    <span class="lang-en">Features</span>
+                </span>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-number">01</div>
+                    <h3>
+                        <span class="lang-cn">AI 深度学习</span>
+                        <span class="lang-en">AI Deep Learning</span>
+                    </h3>
+                    <p>
+                        <span class="lang-cn">2025 新款训练模型，智能识别星点并精准去除</span>
+                        <span class="lang-en">2025 trained model for intelligent star detection and removal</span>
                     </p>
                 </div>
-
-                <!-- Windows 版本 -->
-                <div class="download-card-main" style="flex: 1; min-width: 320px; border-color: #0078d4;">
-                    <div class="header">
-                        <i class="fab fa-windows" style="color: #0078d4;"></i>
-                        <h3>Windows 版 V1.1.0</h3>
-                    </div>
-                    <div class="info">
-                        <div class="info-item"><strong>系统：</strong>Windows 10/11</div>
-                        <div class="info-item"><strong>大小：</strong>约 300MB</div>
-                        <div class="info-item"><strong>架构：</strong>x64</div>
-                        <div class="info-item"><strong>PS：</strong>2022 - 2026</div>
-                    </div>
-                    <div class="buttons">
-                        <a href="https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-v1.1.0.exe" class="btn btn-primary" target="_blank" style="background: linear-gradient(135deg, #0078d4 0%, #00bcf2 100%);">
-                            <i class="fab fa-github"></i> GitHub 下载
-                        </a>
-                        <a href="https://pan.baidu.com/s/10nxAvYcfZaJBkRH1c3Zdqw?pwd=2p2s" class="btn btn-secondary" target="_blank">
-                            <i class="fas fa-cloud"></i> 百度网盘 (2p2s)
-                        </a>
-                    </div>
-                    <p class="note">
-                        <i class="fas fa-info-circle"></i>
-                        首次运行需右键以管理员身份运行
+                <div class="feature-card">
+                    <div class="feature-number">02</div>
+                    <h3>
+                        <span class="lang-cn">Photoshop 集成</span>
+                        <span class="lang-en">Photoshop Plugin</span>
+                    </h3>
+                    <p>
+                        <span class="lang-cn">无缝集成 PS 工作流，支持图层操作和非破坏性编辑</span>
+                        <span class="lang-en">Seamless PS workflow integration with layer support</span>
                     </p>
                 </div>
-            </div>
-
-            <!-- 安装步骤 -->
-            <div class="install-steps-simple">
-                <div class="install-step-simple">
-                    <span class="num">1</span>
-                    <span>下载 PKG</span>
+                <div class="feature-card">
+                    <div class="feature-number">03</div>
+                    <h3>
+                        <span class="lang-cn">离线运行</span>
+                        <span class="lang-en">Offline Ready</span>
+                    </h3>
+                    <p>
+                        <span class="lang-cn">独立打包，无需 Python 环境，开箱即用</span>
+                        <span class="lang-en">Standalone package, no Python required, works out of the box</span>
+                    </p>
                 </div>
-                <i class="fas fa-arrow-right install-step-arrow"></i>
-                <div class="install-step-simple">
-                    <span class="num">2</span>
-                    <span>双击安装</span>
+                <div class="feature-card">
+                    <div class="feature-number">04</div>
+                    <h3>
+                        <span class="lang-cn">16-bit 支持</span>
+                        <span class="lang-en">16-bit Support</span>
+                    </h3>
+                    <p>
+                        <span class="lang-cn">完美支持 16-bit TIFF 高动态范围图像</span>
+                        <span class="lang-en">Full 16-bit TIFF high dynamic range support</span>
+                    </p>
                 </div>
-                <i class="fas fa-arrow-right install-step-arrow"></i>
-                <div class="install-step-simple">
-                    <span class="num">3</span>
-                    <span>选择 PS 版本</span>
+                <div class="feature-card">
+                    <div class="feature-number">05</div>
+                    <h3>
+                        <span class="lang-cn">Apple Silicon</span>
+                        <span class="lang-en">Apple Silicon</span>
+                    </h3>
+                    <p>
+                        <span class="lang-cn">原生支持 M1/M2/M3/M4 芯片 GPU 加速</span>
+                        <span class="lang-en">Native M1/M2/M3/M4 GPU acceleration</span>
+                    </p>
                 </div>
-                <i class="fas fa-arrow-right install-step-arrow"></i>
-                <div class="install-step-simple">
-                    <span class="num">4</span>
-                    <span>文件 → 脚本 → 慧眼去星</span>
+                <div class="feature-card">
+                    <div class="feature-number">06</div>
+                    <h3>
+                        <span class="lang-cn">星点图层</span>
+                        <span class="lang-en">Star Layer</span>
+                    </h3>
+                    <p>
+                        <span class="lang-cn">自动生成去星图层和星点图层，便于合成</span>
+                        <span class="lang-en">Generates starless and star-only layers for compositing</span>
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 使用指南 -->
-    <section id="guide" class="guide">
+    <!-- Guide Section -->
+    <section class="guide-section" id="guide">
         <div class="container">
-            <h2 class="section-title">使用指南</h2>
-            <p class="section-subtitle">四步完成星点去除</p>
-
-            <div class="guide-grid">
-                <div class="guide-card">
-                    <img src="images/Step-1.png" alt="打开图片">
-                    <div class="guide-card-content">
-                        <div class="guide-card-header">
-                            <span class="guide-card-num">1</span>
-                            <h3>打开图片</h3>
-                        </div>
-                        <p>在 Photoshop 中打开星空图片</p>
+            <div class="section-header">
+                <span class="section-label">
+                    <span class="lang-cn">使用指南</span>
+                    <span class="lang-en">User Guide</span>
+                </span>
+            </div>
+            <div class="guide-gallery">
+                <div class="guide-item">
+                    <img src="images/Step-1.png" alt="Step 1">
+                    <div class="guide-item-info">
+                        <div class="guide-step">STEP 01</div>
+                        <h4>
+                            <span class="lang-cn">打开图片</span>
+                            <span class="lang-en">Open Image</span>
+                        </h4>
+                        <p>
+                            <span class="lang-cn">在 Photoshop 中打开星空图片</span>
+                            <span class="lang-en">Open your astrophoto in Photoshop</span>
+                        </p>
                     </div>
                 </div>
-
-                <div class="guide-card">
-                    <img src="images/Step-2.png" alt="调用插件">
-                    <div class="guide-card-content">
-                        <div class="guide-card-header">
-                            <span class="guide-card-num">2</span>
-                            <h3>调用插件</h3>
-                        </div>
-                        <p>文件 → 脚本 → 慧眼去星</p>
+                <div class="guide-item">
+                    <img src="images/Step-2.png" alt="Step 2">
+                    <div class="guide-item-info">
+                        <div class="guide-step">STEP 02</div>
+                        <h4>
+                            <span class="lang-cn">调用插件</span>
+                            <span class="lang-en">Run Plugin</span>
+                        </h4>
+                        <p>
+                            <span class="lang-cn">文件 → 脚本 → 慧眼去星</span>
+                            <span class="lang-en">File → Scripts → SuperStarOff</span>
+                        </p>
                     </div>
                 </div>
-
-                <div class="guide-card">
-                    <img src="images/Step-3.png" alt="开始处理">
-                    <div class="guide-card-content">
-                        <div class="guide-card-header">
-                            <span class="guide-card-num">3</span>
-                            <h3>开始处理</h3>
-                        </div>
-                        <p>点击「开始处理」按钮</p>
+                <div class="guide-item">
+                    <img src="images/Step-3.png" alt="Step 3">
+                    <div class="guide-item-info">
+                        <div class="guide-step">STEP 03</div>
+                        <h4>
+                            <span class="lang-cn">开始处理</span>
+                            <span class="lang-en">Start Processing</span>
+                        </h4>
+                        <p>
+                            <span class="lang-cn">点击「开始处理」按钮</span>
+                            <span class="lang-en">Click "Start Processing" button</span>
+                        </p>
                     </div>
                 </div>
-
-                <div class="guide-card">
-                    <img src="images/Step-4.png" alt="完成">
-                    <div class="guide-card-content">
-                        <div class="guide-card-header">
-                            <span class="guide-card-num">4</span>
-                            <h3>完成</h3>
-                        </div>
-                        <p>自动生成「去星」和「星点」图层</p>
+                <div class="guide-item">
+                    <img src="images/Step-4.png" alt="Step 4">
+                    <div class="guide-item-info">
+                        <div class="guide-step">STEP 04</div>
+                        <h4>
+                            <span class="lang-cn">完成</span>
+                            <span class="lang-en">Done</span>
+                        </h4>
+                        <p>
+                            <span class="lang-cn">自动生成「去星」和「星点」图层</span>
+                            <span class="lang-en">Auto-generates "Starless" and "Stars" layers</span>
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- 视频教程 -->
+            <!-- Video Tutorial -->
             <div class="video-section">
-                <h3><i class="fab fa-youtube"></i> 视频教程</h3>
-                <div class="video-container">
+                <div class="section-header">
+                    <span class="section-label">
+                        <span class="lang-cn">视频教程</span>
+                        <span class="lang-en">Video Tutorial</span>
+                    </span>
+                </div>
+                <div class="video-card">
                     <div class="video-wrapper">
-                        <iframe
-                            src="https://www.youtube.com/embed/_a7CB8ZO2hg"
-                            title="SuperStarOff 使用教程"
+                        <iframe src="https://www.youtube.com/embed/_a7CB8ZO2hg" title="SuperStarOff Tutorial"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowfullscreen>
-                        </iframe>
+                            allowfullscreen></iframe>
                     </div>
                     <div class="video-alt">
-                        国内用户：<a href="https://www.bilibili.com/video/BV1PAC9BAEcp" target="_blank">Bilibili 观看</a>
+                        <span class="lang-cn">国内用户：</span>
+                        <span class="lang-en">China users: </span>
+                        <a href="https://www.bilibili.com/video/BV1placeholder" target="_blank">Bilibili</a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 效果展示 -->
-    <section id="gallery" class="gallery">
+    <!-- Download Section -->
+    <section class="download-section" id="download">
         <div class="container">
-            <h2 class="section-title">效果展示</h2>
-            <p class="section-subtitle">处理前后对比</p>
-
-            <div class="gallery-main">
-                <div class="gallery-featured">
-                    <div class="gallery-featured-grid">
-                        <div class="gallery-featured-item">
-                            <img src="images/example-before.jpg" alt="处理前">
-                            <span class="gallery-featured-label">处理前</span>
+            <div class="section-header">
+                <span class="section-label">
+                    <span class="lang-cn">下载</span>
+                    <span class="lang-en">Download</span>
+                </span>
+            </div>
+            <div class="download-cards">
+                <!-- macOS -->
+                <div class="download-card macos">
+                    <div class="download-info">
+                        <div class="download-icon macos">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+                            </svg>
                         </div>
-                        <div class="gallery-featured-item">
-                            <img src="images/example-after.jpg" alt="处理后">
-                            <span class="gallery-featured-label">处理后</span>
+                        <div class="download-meta">
+                            <h3>慧眼去星 <span class="platform-badge">macOS</span></h3>
+                            <p class="download-version">v1.1.0 · Apple Silicon (M1/M2/M3/M4)</p>
                         </div>
                     </div>
+                    <div class="download-specs">
+                        <div class="spec-item"><strong>
+                                <span class="lang-cn">系统：</span>
+                                <span class="lang-en">OS:</span>
+                            </strong>macOS 11.0+</div>
+                        <div class="spec-item"><strong>
+                                <span class="lang-cn">大小：</span>
+                                <span class="lang-en">Size:</span>
+                            </strong>~240MB</div>
+                        <div class="spec-item"><strong>
+                                <span class="lang-cn">芯片：</span>
+                                <span class="lang-en">Chip:</span>
+                            </strong>Apple Silicon</div>
+                        <div class="spec-item"><strong>PS:</strong>2022 - 2026</div>
+                    </div>
+                    <div class="download-links">
+                        <a href="https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing"
+                            class="btn btn-primary" target="_blank">
+                            Google Drive
+                        </a>
+                        <a href="https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-1.1.0.pkg"
+                            class="btn btn-secondary" target="_blank">
+                            GitHub
+                        </a>
+                        <a href="https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5" class="btn btn-secondary"
+                            target="_blank">
+                            <span class="lang-cn">百度网盘 (jhx5)</span>
+                            <span class="lang-en">Baidu Pan (jhx5)</span>
+                        </a>
+                    </div>
+                    <div class="download-note">
+                        <span class="icon">✓</span>
+                        <span class="lang-cn">已签名并通过 Apple 公证</span>
+                        <span class="lang-en">Signed and notarized by Apple</span>
+                    </div>
                 </div>
-
-                <div class="gallery-thumbnails">
-                    <div class="gallery-thumb" onclick="openLightbox('images/example-1.jpg', '船底座星云')">
-                        <img src="images/example-1.jpg" alt="船底座星云">
+                <!-- Windows -->
+                <div class="download-card windows">
+                    <div class="download-info">
+                        <div class="download-icon windows">⊞</div>
+                        <div class="download-meta">
+                            <h3>慧眼去星 <span class="platform-badge windows">Windows</span></h3>
+                            <p class="download-version">v1.1.0 · Windows 10/11 x64</p>
+                        </div>
                     </div>
-                    <div class="gallery-thumb" onclick="openLightbox('images/example-2.jpg', '深空作品')">
-                        <img src="images/example-2.jpg" alt="深空作品">
+                    <div class="download-specs">
+                        <div class="spec-item"><strong>
+                                <span class="lang-cn">系统：</span>
+                                <span class="lang-en">OS:</span>
+                            </strong>Windows 10/11</div>
+                        <div class="spec-item"><strong>
+                                <span class="lang-cn">大小：</span>
+                                <span class="lang-en">Size:</span>
+                            </strong>~300MB</div>
+                        <div class="spec-item"><strong>
+                                <span class="lang-cn">架构：</span>
+                                <span class="lang-en">Arch:</span>
+                            </strong>x64</div>
+                        <div class="spec-item"><strong>PS:</strong>2022 - 2026</div>
                     </div>
-                    <div class="gallery-thumb" onclick="openLightbox('images/example-3.jpg', '深空作品')">
-                        <img src="images/example-3.jpg" alt="深空作品">
+                    <div class="download-links">
+                        <a href="https://drive.google.com/file/d/1IV4kn3uCCPjiKoi9eD0sqW2AFuYleW8h/view?usp=drive_link"
+                            class="btn btn-windows" target="_blank">
+                            Google Drive
+                        </a>
+                        <a href="https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-v1.1.0.exe"
+                            class="btn btn-secondary" target="_blank">
+                            GitHub
+                        </a>
+                        <a href="https://pan.baidu.com/s/10nxAvYcfZaJBkRH1c3Zdqw?pwd=2p2s" class="btn btn-secondary"
+                            target="_blank">
+                            <span class="lang-cn">百度网盘 (2p2s)</span>
+                            <span class="lang-en">Baidu Pan (2p2s)</span>
+                        </a>
                     </div>
-                    <div class="gallery-thumb" onclick="openLightbox('images/example-4.jpg', '深空作品')">
-                        <img src="images/example-4.jpg" alt="深空作品">
-                    </div>
-                    <div class="gallery-thumb" onclick="openLightbox('images/example-6.jpg', '深空作品')">
-                        <img src="images/example-6.jpg" alt="深空作品">
-                    </div>
-                    <div class="gallery-thumb" onclick="openLightbox('images/example-7.jpg', '深空作品')">
-                        <img src="images/example-7.jpg" alt="深空作品">
+                    <div class="download-note">
+                        <span class="icon">ℹ</span>
+                        <span class="lang-cn">首次运行需右键以管理员身份运行</span>
+                        <span class="lang-en">Run as administrator for first time</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- 图片灯箱 -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-        <span class="lightbox-close">&times;</span>
-        <img class="lightbox-content" id="lightbox-img">
-        <div class="lightbox-caption" id="lightbox-caption"></div>
-    </div>
-
-    <!-- FAQ -->
-    <section class="faq">
-        <div class="container">
-            <h2 class="section-title">常见问题</h2>
-
-            <div class="faq-simple">
-                <div class="faq-item-simple">
-                    <h3><i class="fas fa-question-circle"></i> 免费吗？</h3>
-                    <p>是的，完全免费供个人使用。</p>
-                </div>
-                <div class="faq-item-simple">
-                    <h3><i class="fas fa-question-circle"></i> 支持 Windows 吗？</h3>
-                    <p>支持！同时提供 macOS 和 Windows 版本。</p>
-                </div>
-                <div class="faq-item-simple">
-                    <h3><i class="fas fa-question-circle"></i> 需要联网吗？</h3>
-                    <p>不需要，安装后可完全离线使用。</p>
-                </div>
-                <div class="faq-item-simple">
-                    <h3><i class="fas fa-question-circle"></i> 处理速度如何？</h3>
-                    <p>M 系列芯片处理 4K 图像约 30 秒。</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 卸载说明 -->
-    <section class="guide" style="padding-top: 2rem; padding-bottom: 4rem;">
-        <div class="container">
-            <h2 class="section-title">卸载说明</h2>
-
-            <div class="uninstall-box">
-                <div class="uninstall-method">
-                    <h4><i class="fas fa-mouse-pointer"></i> 图形界面</h4>
-                    <ol>
-                        <li>打开 <code style="display: inline; padding: 2px 6px;">/usr/local/SuperStarOff/</code></li>
-                        <li>运行「安装到Photoshop」应用</li>
-                        <li>点击「卸载」按钮</li>
-                    </ol>
-                </div>
-                <div class="uninstall-method">
-                    <h4><i class="fas fa-terminal"></i> 命令行</h4>
-                    <code>sudo /usr/local/SuperStarOff/uninstall_all.sh</code>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 页脚 -->
-    <footer class="footer">
-        <div class="container footer-simple">
-            <div class="footer-links">
-                <a href="https://www.youtube.com/@JamesZhenYu" target="_blank"><i class="fab fa-youtube"></i>YouTube</a>
-                <a href="https://www.bilibili.com/video/BV1PAC9BAEcp" target="_blank"><i class="fab fa-bilibili"></i>Bilibili</a>
-                <a href="https://github.com/jamesphotography/SuperStarOff" target="_blank"><i class="fab fa-github"></i>GitHub</a>
-            </div>
-            <p class="footer-copyright">
-                &copy; 2025 詹姆斯·于震 版权所有
+            <p class="requirements">
+                <span class="lang-cn">安装步骤：下载 PKG/EXE → 双击安装 → 选择 PS 版本 → 文件 → 脚本 → 慧眼去星</span>
+                <span class="lang-en">Install: Download PKG/EXE → Install → Select PS Version → File → Scripts →
+                    SuperStarOff</span>
             </p>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section" id="gallery">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">
+                    <span class="lang-cn">效果展示</span>
+                    <span class="lang-en">Gallery</span>
+                </span>
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="images/example-1.jpg" alt="Example 1">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-2.jpg" alt="Example 2">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-3.jpg" alt="Example 3">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-4.jpg" alt="Example 4">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-5.jpg" alt="Example 5">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-6.jpg" alt="Example 6">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-7.jpg" alt="Example 7">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/example-8.jpg" alt="Example 8">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- More Tools Section -->
+    <section class="tools-section" id="tools">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">
+                    <span class="lang-cn">更多免费工具</span>
+                    <span class="lang-en">More Free Tools</span>
+                </span>
+            </div>
+            <div class="tools-grid">
+                <a href="https://superpicky.jamesphotography.com.au/" class="tool-item" target="_blank">
+                    <span class="tool-name">
+                        <span class="lang-cn">慧眼选鸟</span>
+                        <span class="lang-en">SuperPicky</span>
+                    </span>
+                    <span class="tool-desc">
+                        <span class="lang-cn">AI 鸟类摄影选片 (Mac/Win)</span>
+                        <span class="lang-en">AI Bird Photo Selector (Mac/Win)</span>
+                    </span>
+                </a>
+                <a href="https://apps.apple.com/au/app/%E6%85%A7%E7%9C%BC%E8%A7%82%E9%B8%9F/id6756405107"
+                    class="tool-item" target="_blank">
+                    <span class="tool-name">
+                        <span class="lang-cn">慧眼观鸟</span>
+                        <span class="lang-en">BirdID</span>
+                    </span>
+                    <span class="tool-desc">
+                        <span class="lang-cn">AI 鸟种识别 (iOS)</span>
+                        <span class="lang-en">AI Species ID (iOS)</span>
+                    </span>
+                </a>
+                <a href="https://superstartrail.jamesphotography.com.au/" class="tool-item" target="_blank">
+                    <span class="tool-name">
+                        <span class="lang-cn">彗星星轨</span>
+                        <span class="lang-en">StarTrail</span>
+                    </span>
+                    <span class="tool-desc">
+                        <span class="lang-cn">星轨合成 (Mac/Win)</span>
+                        <span class="lang-en">Star Trail (Mac/Win)</span>
+                    </span>
+                </a>
+                <a href="https://tuiportfolio.com/" class="tool-item" target="_blank">
+                    <span class="tool-name">
+                        <span class="lang-cn">图忆</span>
+                        <span class="lang-en">TUI Portfolio</span>
+                    </span>
+                    <span class="tool-desc">
+                        <span class="lang-cn">摄影师离线作品集 (iOS)</span>
+                        <span class="lang-en">Offline Portfolio (iOS)</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section" id="team">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">
+                    <span class="lang-cn">开发者</span>
+                    <span class="lang-en">Developer</span>
+                </span>
+            </div>
+            <div class="team-grid">
+                <a href="https://github.com/jamesphotography" class="team-card" target="_blank">
+                    <div class="team-role">
+                        <span class="lang-cn">开发者</span>
+                        <span class="lang-en">Developer</span>
+                    </div>
+                    <div class="team-name">
+                        <span class="lang-cn">詹姆斯·于震</span>
+                        <span class="lang-en">James Yu</span>
+                    </div>
+                    <div class="team-desc">
+                        <span class="lang-cn">澳籍华裔职业摄影师</span>
+                        <span class="lang-en">Professional Photographer</span>
+                    </div>
+                </a>
+                <a href="https://www.youtube.com/@JamesZhenYu" class="team-card" target="_blank">
+                    <div class="team-role">YouTube</div>
+                    <div class="team-name">
+                        <span class="lang-cn">摄影教程</span>
+                        <span class="lang-en">Tutorials</span>
+                    </div>
+                    <div class="team-desc">
+                        <span class="lang-cn">天文摄影后期技巧</span>
+                        <span class="lang-en">Astrophotography Tips</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <span class="star-icon" style="color: var(--accent);">✦</span>
+                    <div class="footer-brand-text">
+                        <span>慧眼去星 SuperStarOff</span>
+                        <span class="footer-author">by James Yu (詹姆斯·于震)</span>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/jamesphotography/SuperStarOff">GitHub</a>
+                    <a href="https://www.youtube.com/@JamesZhenYu">YouTube</a>
+                    <a href="mailto:james@jamesphotography.com.au">
+                        <span class="lang-cn">联系</span>
+                        <span class="lang-en">Contact</span>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="credits">
+                    <span class="lang-cn">致谢：PyTorch · StarNet</span>
+                    <span class="lang-en">Credits: PyTorch · StarNet</span>
+                </p>
+                <p class="copyright">© 2024-2025 James Yu · jamesphotography.com.au</p>
+            </div>
         </div>
     </footer>
 
-    <!-- 返回顶部按钮 -->
-    <button id="back-to-top" class="back-to-top">
-        <i class="fas fa-arrow-up"></i>
-    </button>
+    <!-- Language Toggle Script -->
+    <script>
+        function setLang(lang) {
+            document.documentElement.setAttribute('data-lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            localStorage.setItem('lang', lang);
+        }
 
-    <script src="js/main.js"></script>
+        // Load saved language
+        const savedLang = localStorage.getItem('lang') || 'cn';
+        document.documentElement.setAttribute('data-lang', savedLang);
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                const isCN = btn.textContent.includes('中');
+                if ((savedLang === 'cn' && isCN) || (savedLang === 'en' && !isCN)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        });
+
+        // Lightbox functionality
+        (function () {
+            // Create lightbox elements
+            const lightbox = document.createElement('div');
+            lightbox.id = 'lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-overlay"></div>
+                <div class="lightbox-content">
+                    <img src="" alt="">
+                    <button class="lightbox-close">&times;</button>
+                </div>
+            `;
+            document.body.appendChild(lightbox);
+
+            const lightboxImg = lightbox.querySelector('img');
+            const overlay = lightbox.querySelector('.lightbox-overlay');
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+
+            // Open lightbox on image click
+            document.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG' &&
+                    (e.target.closest('.gallery-item') ||
+                        e.target.closest('.hero-preview-frame') ||
+                        e.target.closest('.guide-item'))) {
+                    lightboxImg.src = e.target.src;
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+
+            // Close lightbox
+            function closeLightbox() {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            overlay.addEventListener('click', closeLightbox);
+            closeBtn.addEventListener('click', closeLightbox);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeLightbox();
+            });
+        })();
+    </script>
 </body>
+
 </html>
