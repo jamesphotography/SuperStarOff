@@ -35,6 +35,24 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
+            <!-- Product Demo Video - Placed at Top -->
+            <div class="hero-video hero-video-top">
+                <div class="video-card">
+                    <div class="video-wrapper" id="hero-video-container">
+                        <div class="video-loading">
+                            <span class="lang-cn">正在加载视频...</span>
+                            <span class="lang-en">Loading video...</span>
+                        </div>
+                    </div>
+                    <div class="video-switch" id="hero-video-switch">
+                        <button class="video-btn" data-platform="youtube"
+                            onclick="switchVideo('hero', 'youtube')">YouTube</button>
+                        <button class="video-btn" data-platform="bilibili"
+                            onclick="switchVideo('hero', 'bilibili')">Bilibili</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="hero-badge">
                 <span class="lang-cn">AI 天文图像处理</span>
                 <span class="lang-en">AI Astrophotography Tool</span>
@@ -247,15 +265,17 @@
                     </span>
                 </div>
                 <div class="video-card">
-                    <div class="video-wrapper">
-                        <iframe src="https://www.youtube.com/embed/_a7CB8ZO2hg" title="SuperStarOff Tutorial"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowfullscreen></iframe>
+                    <div class="video-wrapper" id="tutorial-video-container">
+                        <div class="video-loading">
+                            <span class="lang-cn">正在加载视频...</span>
+                            <span class="lang-en">Loading video...</span>
+                        </div>
                     </div>
-                    <div class="video-alt">
-                        <span class="lang-cn">国内用户：</span>
-                        <span class="lang-en">China users: </span>
-                        <a href="https://www.bilibili.com/video/BV1placeholder" target="_blank">Bilibili</a>
+                    <div class="video-switch" id="tutorial-video-switch">
+                        <button class="video-btn" data-platform="youtube"
+                            onclick="switchVideo('tutorial', 'youtube')">YouTube</button>
+                        <button class="video-btn" data-platform="bilibili"
+                            onclick="switchVideo('tutorial', 'bilibili')">Bilibili</button>
                     </div>
                 </div>
             </div>
@@ -362,9 +382,9 @@
                         </a>
                     </div>
                     <div class="download-note">
-                        <span class="icon">ℹ</span>
-                        <span class="lang-cn">首次运行需右键以管理员身份运行</span>
-                        <span class="lang-en">Run as administrator for first time</span>
+                        <span class="icon">✓</span>
+                        <span class="lang-cn">Windows 版打包：于若君</span>
+                        <span class="lang-en">Windows build by: Ruojun Yu</span>
                     </div>
                 </div>
             </div>
@@ -605,6 +625,74 @@
                 if (e.key === 'Escape') closeLightbox();
             });
         })();
+
+        // === Video Platform Auto-Switch ===
+        // Video configuration
+        const videoConfig = {
+            hero: {
+                youtube: 'DRjdBdXy-gY',
+                bilibili: 'BV1bwzWB2Edm'
+            },
+            tutorial: {
+                youtube: '_a7CB8ZO2hg',
+                bilibili: 'BV1PAC9BAEcp'
+            }
+        };
+
+        // Generate video iframe
+        function getVideoEmbed(videoId, platform) {
+            if (platform === 'youtube') {
+                return `<iframe src="https://www.youtube.com/embed/${videoId}" 
+                    title="Video" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen></iframe>`;
+            } else {
+                return `<iframe src="//player.bilibili.com/player.html?bvid=${videoId}&high_quality=1" 
+                    title="Video" frameborder="0"
+                    allowfullscreen></iframe>`;
+            }
+        }
+
+        // Switch video platform
+        function switchVideo(section, platform) {
+            const container = document.getElementById(`${section}-video-container`);
+            const videoId = videoConfig[section][platform];
+            container.innerHTML = getVideoEmbed(videoId, platform);
+
+            // Update button states
+            const buttons = document.querySelectorAll(`#${section}-video-switch .video-btn`);
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.platform === platform);
+            });
+        }
+
+        // Detect user region and auto-select video platform
+        async function initVideos() {
+            let isChina = false;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                const response = await fetch('https://ipapi.co/country/', {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const country = await response.text();
+                isChina = country.trim() === 'CN';
+                console.log('Detected country:', country.trim(), '| Using:', isChina ? 'Bilibili' : 'YouTube');
+            } catch (e) {
+                console.log('IP detection failed, defaulting to YouTube');
+            }
+
+            const platform = isChina ? 'bilibili' : 'youtube';
+            switchVideo('hero', platform);
+            switchVideo('tutorial', platform);
+        }
+
+        // Initialize videos on page load
+        document.addEventListener('DOMContentLoaded', initVideos);
     </script>
 </body>
 

@@ -532,6 +532,65 @@ header {
     text-decoration: underline;
 }
 
+/* Video Platform Switch */
+.video-switch {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--bg-card);
+}
+
+.video-btn {
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.video-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.video-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg-void);
+}
+
+.video-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* Hero Video Section */
+.hero-video {
+    margin-top: var(--space-xl);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-video .video-card {
+    margin: 0;
+}
+
+/* Hero Video at Top */
+.hero-video-top {
+    margin-top: 0;
+    margin-bottom: var(--space-xl);
+}
+
 /* === Download Section === */
 .download-section {
     padding: var(--space-2xl) 0;
