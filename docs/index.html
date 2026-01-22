@@ -50,20 +50,11 @@
 
             <!-- Product Demo Video -->
             <div class="hero-video hero-video-mid">
-                <div class="video-card">
-                    <div class="video-wrapper" id="hero-video-container">
-                        <div class="video-loading">
-                            <span class="lang-cn">正在加载视频...</span>
-                            <span class="lang-en">Loading video...</span>
-                        </div>
-                    </div>
-                    <div class="video-switch" id="hero-video-switch">
-                        <button class="video-btn" data-platform="local" onclick="switchVideo('hero', 'local')">
-                            <span class="lang-cn">播放</span>
-                            <span class="lang-en">Play</span>
-                        </button>
-                        <button class="video-btn" data-platform="bilibili"
-                            onclick="switchVideo('hero', 'bilibili')">Bilibili</button>
+                <div class="video-card video-card-no-footer">
+                    <div class="video-wrapper">
+                        <video autoplay muted loop playsinline preload="auto">
+                            <source src="videos/demo.mp4" type="video/mp4">
+                        </video>
                     </div>
                 </div>
             </div>

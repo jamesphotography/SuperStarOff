@@ -591,6 +591,19 @@ header {
     margin-bottom: var(--space-xl);
 }
 
+.video-card-no-footer .video-wrapper {
+    border-radius: var(--radius-md);
+}
+
+.video-card-no-footer video {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+}
+
 /* === Download Section === */
 .download-section {
     padding: var(--space-2xl) 0;
