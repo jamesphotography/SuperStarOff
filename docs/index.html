@@ -35,24 +35,6 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <!-- Product Demo Video - Placed at Top -->
-            <div class="hero-video hero-video-top">
-                <div class="video-card">
-                    <div class="video-wrapper" id="hero-video-container">
-                        <div class="video-loading">
-                            <span class="lang-cn">正在加载视频...</span>
-                            <span class="lang-en">Loading video...</span>
-                        </div>
-                    </div>
-                    <div class="video-switch" id="hero-video-switch">
-                        <button class="video-btn" data-platform="youtube"
-                            onclick="switchVideo('hero', 'youtube')">YouTube</button>
-                        <button class="video-btn" data-platform="bilibili"
-                            onclick="switchVideo('hero', 'bilibili')">Bilibili</button>
-                    </div>
-                </div>
-            </div>
-
             <div class="hero-badge">
                 <span class="lang-cn">AI 天文图像处理</span>
                 <span class="lang-en">AI Astrophotography Tool</span>
@@ -65,6 +47,26 @@
                 <span class="lang-cn">一键去除星点，完美保留星云细节</span>
                 <span class="lang-en">Remove stars with one click, preserve nebula details perfectly</span>
             </p>
+
+            <!-- Product Demo Video -->
+            <div class="hero-video hero-video-mid">
+                <div class="video-card">
+                    <div class="video-wrapper" id="hero-video-container">
+                        <div class="video-loading">
+                            <span class="lang-cn">正在加载视频...</span>
+                            <span class="lang-en">Loading video...</span>
+                        </div>
+                    </div>
+                    <div class="video-switch" id="hero-video-switch">
+                        <button class="video-btn" data-platform="local" onclick="switchVideo('hero', 'local')">
+                            <span class="lang-cn">播放</span>
+                            <span class="lang-en">Play</span>
+                        </button>
+                        <button class="video-btn" data-platform="bilibili"
+                            onclick="switchVideo('hero', 'bilibili')">Bilibili</button>
+                    </div>
+                </div>
+            </div>
 
             <div class="hero-cta">
                 <a href="#download" class="btn btn-primary">
@@ -630,22 +632,22 @@
         // Video configuration
         const videoConfig = {
             hero: {
-                youtube: 'DRjdBdXy-gY',
+                local: 'videos/demo.mp4',
                 bilibili: 'BV1bwzWB2Edm'
             },
             tutorial: {
-                youtube: '_a7CB8ZO2hg',
+                local: 'videos/tutorial.mp4',
                 bilibili: 'BV1PAC9BAEcp'
             }
         };
 
-        // Generate video iframe
+        // Generate video embed
         function getVideoEmbed(videoId, platform) {
-            if (platform === 'youtube') {
-                return `<iframe src="https://www.youtube.com/embed/${videoId}" 
-                    title="Video" frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen></iframe>`;
+            if (platform === 'local') {
+                return `<video controls playsinline preload="metadata" style="width:100%;height:100%;position:absolute;top:0;left:0;">
+                    <source src="${videoId}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>`;
             } else {
                 return `<iframe src="//player.bilibili.com/player.html?bvid=${videoId}&high_quality=1" 
                     title="Video" frameborder="0"
@@ -681,12 +683,12 @@
 
                 const country = await response.text();
                 isChina = country.trim() === 'CN';
-                console.log('Detected country:', country.trim(), '| Using:', isChina ? 'Bilibili' : 'YouTube');
+                console.log('Detected country:', country.trim(), '| Using:', isChina ? 'Bilibili' : 'Local MP4');
             } catch (e) {
-                console.log('IP detection failed, defaulting to YouTube');
+                console.log('IP detection failed, defaulting to local video');
             }
 
-            const platform = isChina ? 'bilibili' : 'youtube';
+            const platform = isChina ? 'bilibili' : 'local';
             switchVideo('hero', platform);
             switchVideo('tutorial', platform);
         }

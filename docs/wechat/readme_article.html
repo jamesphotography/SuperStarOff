@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>慧眼去星 SuperStarOff - 基于深度学习的天文图像星点去除工具</title>
+</head>
+
+<body>
+    <div
+        style="background-color: #f0f4f8; padding: 40px 10px; letter-spacing: 0.5px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;">
+
+        <!-- 主内容卡片 -->
+        <section
+            style="max-width: 640px; margin: 0 auto; padding: 30px 25px; background: #ffffff; border-radius: 14px; box-shadow: 0 8px 32px rgba(74, 124, 155, 0.12);">
+
+            <!-- 标题区 -->
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="font-size: 28px; font-weight: 700; color: #3a4150; margin: 0 0 12px 0; line-height: 1.4;">
+                    <span style="color: #4a7c9b; text-shadow: 0 0 8px rgba(74, 124, 155, 0.3);">◆</span>
+                    <span style="color: #4a7c9b;"> </span>
+                    慧眼去星 SuperStarOff
+                </h1>
+                <p style="font-size: 15px; color: #5a6a7a; margin: 0; line-height: 1.6;">
+                    基于深度学习的天文图像星点去除工具
+                </p>
+            </div>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 25px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 项目简介 -->
+            <h2
+                style="font-size: 18px; font-weight: 600; color: #3a4150; margin: 25px 0 15px 0; padding-left: 12px; border-left: 3px solid #4a7c9b;">
+                <span style="color: #4a7c9b;">◆</span> 项目简介
+            </h2>
+            <p style="font-size: 15px; line-height: 1.8; color: #3a4150; margin: 0 0 20px 0; text-align: justify;">
+                慧眼去星 (SuperStarOff) 是一个专业的星点去除工具，采用深度学习技术，专门用于从天文图像中移除星点，保留背景星云和深空天体。
+            </p>
+
+            <!-- 主要功能 -->
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> 主要功能
+            </h3>
+            <div style="background: #e8f0f8; border-radius: 10px; padding: 18px 20px; margin: 0 0 20px 0;">
+                <p style="font-size: 14px; line-height: 2; color: #3a4150; margin: 0;">
+                    ✅ 使用先进的深度学习模型 (2025v1) 去除星点<br>
+                    ✅ 支持 RGB 和灰度图像<br>
+                    ✅ 支持 8-bit 和 16-bit TIFF 格式<br>
+                    ✅ 基于 PyTorch 实现，支持 MPS（Apple Silicon GPU）加速<br>
+                    ✅ 现代化的 PyQt6 图形界面<br>
+                    🚧 计划支持批量处理<br>
+                    🚧 计划集成到 SuperStarTrail 星轨叠加工具
+                </p>
+            </div>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 30px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 快速开始 -->
+            <h2
+                style="font-size: 18px; font-weight: 600; color: #3a4150; margin: 25px 0 15px 0; padding-left: 12px; border-left: 3px solid #4a7c9b;">
+                <span style="color: #4a7c9b;">◆</span> 快速开始
+            </h2>
+
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> 环境要求
+            </h3>
+            <div style="background: #e8f0f8; border-radius: 10px; padding: 15px 20px; margin: 0 0 15px 0;">
+                <p style="font-size: 14px; line-height: 1.8; color: #3a4150; margin: 0;">
+                    • Python 3.12+<br>
+                    • PyTorch 2.0+<br>
+                    • PyQt6（用于 GUI）
+                </p>
+            </div>
+
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> 安装依赖
+            </h3>
+            <div style="background: #2d3748; border-radius: 8px; padding: 15px 18px; margin: 0 0 15px 0;">
+                <code
+                    style="font-family: 'SF Mono', 'Monaco', 'Menlo', monospace; font-size: 13px; color: #e2e8f0; line-height: 1.6;">
+                cd SuperStarOff<br>
+                pip install -r requirements.txt
+            </code>
+            </div>
+
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> 启动应用
+            </h3>
+            <div style="background: #2d3748; border-radius: 8px; padding: 15px 18px; margin: 0 0 20px 0;">
+                <code style="font-family: 'SF Mono', 'Monaco', 'Menlo', monospace; font-size: 13px; color: #e2e8f0;">
+                python src/app.py
+            </code>
+            </div>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 30px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 使用方法 -->
+            <h2
+                style="font-size: 18px; font-weight: 600; color: #3a4150; margin: 25px 0 15px 0; padding-left: 12px; border-left: 3px solid #4a7c9b;">
+                <span style="color: #4a7c9b;">◆</span> 使用方法
+            </h2>
+
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> GUI 界面使用
+            </h3>
+            <div style="background: #e8f0f8; border-radius: 10px; padding: 18px 20px; margin: 0 0 20px 0;">
+                <p style="font-size: 14px; line-height: 2; color: #3a4150; margin: 0;">
+                    <strong style="color: #4a7c9b;">Step 1:</strong> 启动应用：python src/app.py<br>
+                    <strong style="color: #4a7c9b;">Step 2:</strong> 拖放图片到窗口，或点击"打开图片"<br>
+                    <strong style="color: #4a7c9b;">Step 3:</strong> 选择处理参数（步长、设备）<br>
+                    <strong style="color: #4a7c9b;">Step 4:</strong> 点击"去除星点"按钮<br>
+                    <strong style="color: #4a7c9b;">Step 5:</strong> 等待处理完成，查看对比结果<br>
+                    <strong style="color: #4a7c9b;">Step 6:</strong> 保存处理后的图片
+                </p>
+            </div>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 30px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 技术细节 -->
+            <h2
+                style="font-size: 18px; font-weight: 600; color: #3a4150; margin: 25px 0 15px 0; padding-left: 12px; border-left: 3px solid #4a7c9b;">
+                <span style="color: #4a7c9b;">◆</span> 技术细节
+            </h2>
+
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> 模型架构
+            </h3>
+            <p style="font-size: 15px; line-height: 1.8; color: #3a4150; margin: 0 0 15px 0;">
+                慧眼去星 2025v1 使用优化的 CNN 架构：
+            </p>
+            <div style="background: #e8f0f8; border-radius: 10px; padding: 18px 20px; margin: 0 0 20px 0;">
+                <p style="font-size: 14px; line-height: 1.8; color: #3a4150; margin: 0;">
+                    <strong style="color: #4a7c9b;">模型格式:</strong> PyTorch TorchScript (.pt) - 加密存储<br>
+                    <strong style="color: #4a7c9b;">模型大小:</strong> 168MB（包含加密层）<br>
+                    <strong style="color: #4a7c9b;">输入尺寸:</strong> 512×512 窗口（使用分块处理大图）<br>
+                    <strong style="color: #4a7c9b;">支持设备:</strong> CPU、Apple MPS、NVIDIA CUDA
+                </p>
+            </div>
+
+            <!-- 性能表格 -->
+            <h3 style="font-size: 16px; font-weight: 600; color: #3a4150; margin: 20px 0 12px 0;">
+                <span style="color: #4a7c9b;">◆</span> 性能数据
+            </h3>
+            <p style="font-size: 14px; color: #5a6a7a; margin: 0 0 10px 0;">在 MacBook Pro (Apple Silicon) 上的处理时间：</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0; font-size: 14px;">
+                <thead>
+                    <tr style="background: #4a7c9b; color: #ffffff;">
+                        <th style="padding: 12px 10px; text-align: left; border-radius: 6px 0 0 0;">图像大小</th>
+                        <th style="padding: 12px 10px; text-align: center;">Window</th>
+                        <th style="padding: 12px 10px; text-align: center;">Stride</th>
+                        <th style="padding: 12px 10px; text-align: center; border-radius: 0 6px 0 0;">处理时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #e8f0f8;">
+                        <td style="padding: 10px; color: #3a4150; border-bottom: 1px solid #d0dce8;">1048×712</td>
+                        <td
+                            style="padding: 10px; color: #3a4150; text-align: center; border-bottom: 1px solid #d0dce8;">
+                            512</td>
+                        <td
+                            style="padding: 10px; color: #3a4150; text-align: center; border-bottom: 1px solid #d0dce8;">
+                            256</td>
+                        <td
+                            style="padding: 10px; color: #4a7c9b; text-align: center; font-weight: 600; border-bottom: 1px solid #d0dce8;">
+                            ~5 秒</td>
+                    </tr>
+                    <tr style="background: #ffffff;">
+                        <td style="padding: 10px; color: #3a4150;">8256×5504</td>
+                        <td style="padding: 10px; color: #3a4150; text-align: center;">512</td>
+                        <td style="padding: 10px; color: #3a4150; text-align: center;">256</td>
+                        <td style="padding: 10px; color: #4a7c9b; text-align: center; font-weight: 600;">~2 分钟</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 30px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 下载区块 -->
+            <h2
+                style="font-size: 18px; font-weight: 600; color: #3a4150; margin: 25px 0 15px 0; padding-left: 12px; border-left: 3px solid #4a7c9b;">
+                <span style="color: #4a7c9b;">◆</span> 下载地址
+            </h2>
+
+            <div
+                style="background: linear-gradient(135deg, #4a7c9b 0%, #3d6a8a 100%); border-radius: 12px; padding: 20px; margin: 0 0 20px 0;">
+                <p style="font-size: 14px; line-height: 1.8; color: #ffffff; margin: 0;">
+                    <strong style="color: #ffffff;">🍎 macOS 版本</strong><br>
+                    谷歌网盘 / 百度网盘（提取码: nxj7）
+                </p>
+            </div>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 30px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 未来计划 -->
+            <h2
+                style="font-size: 18px; font-weight: 600; color: #3a4150; margin: 25px 0 15px 0; padding-left: 12px; border-left: 3px solid #4a7c9b;">
+                <span style="color: #4a7c9b;">◆</span> 未来计划
+            </h2>
+            <div style="background: #e8f0f8; border-radius: 10px; padding: 18px 20px; margin: 0 0 20px 0;">
+                <p style="font-size: 14px; line-height: 2; color: #3a4150; margin: 0;">
+                    ✅ 创建 GUI 界面<br>
+                    ✅ 支持 MPS 加速<br>
+                    ⏳ 添加批量处理支持<br>
+                    ⏳ 创建命令行工具<br>
+                    ⏳ 集成到 SuperStarTrail<br>
+                    ⏳ 支持更多图像格式 (FITS)<br>
+                    ⏳ 模型量化优化
+                </p>
+            </div>
+
+            <!-- 分隔线 -->
+            <div
+                style="height: 1px; background: linear-gradient(90deg, transparent, #4a7c9b, transparent); margin: 30px 0; opacity: 0.3;">
+            </div>
+
+            <!-- 致谢 -->
+            <div style="text-align: center; padding: 15px 0;">
+                <p style="font-size: 13px; color: #5a6a7a; margin: 0 0 8px 0;">
+                    感谢所有深度学习和天文图像处理领域的研究者
+                </p>
+                <p style="font-size: 12px; color: #8a9aaa; margin: 0;">
+                    SuperStarOff · Powered by PyTorch
+                </p>
+            </div>
+
+        </section>
+
+        <!-- 页脚 -->
+        <div style="text-align: center; margin-top: 25px;">
+            <p style="font-size: 12px; color: #5a6a7a; margin: 0;">
+                慧眼去星 SuperStarOff · jamesphotography.com.au
+            </p>
+        </div>
+
+    </div>
+</body>
+
+</html>

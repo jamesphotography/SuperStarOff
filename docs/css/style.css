@@ -585,9 +585,9 @@ header {
     margin: 0;
 }
 
-/* Hero Video at Top */
-.hero-video-top {
-    margin-top: 0;
+/* Hero Video at Middle (between tagline and CTA) */
+.hero-video-mid {
+    margin-top: var(--space-xl);
     margin-bottom: var(--space-xl);
 }
 
