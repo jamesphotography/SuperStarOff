@@ -42,7 +42,7 @@
 
 ### Windows
 - [GitHub 下载](https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-v1.1.0.exe)
-- [百度网盘 (提取码: 2p2s)](https://pan.baidu.com/s/10nxAvYcfZaJBkRH1c3Zdqw?pwd=2p2s)
+- [百度网盘 (提取码: u782)](https://pan.baidu.com/s/1400uoXBGjxmDyNYvPRkdBg?pwd=u782)
 
 ---
 
