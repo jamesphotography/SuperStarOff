@@ -15,6 +15,7 @@ REM Get project root (parent of installer dir)
 for %%I in ("%INSTALLER_DIR%\..") do set "PROJECT_ROOT=%%~fI"
 
 set "DIST_DIR=%PROJECT_ROOT%\dist2\superstaroff"
+set "JSX_FILE=%PROJECT_ROOT%\src\StarOff.jsx"
 set "VERSION=1.1.0"
 
 echo Project Root: %PROJECT_ROOT%
