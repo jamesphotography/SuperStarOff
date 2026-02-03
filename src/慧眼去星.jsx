@@ -4,13 +4,53 @@
  *
  * 作者：詹姆斯
  * 版本：1.1.0
+ *
+ * 支持: Windows / macOS
  */
 
 // ============== 配置 ==============
 var VERSION = "1.1.0";
-var INSTALL_DIR = "/usr/local/SuperStarOff";
 var STRIDE = 256;   // 默认平衡模式
 var DEVICE = "auto"; // 自动检测设备
+
+// 平台检测与安装目录
+var IS_WINDOWS = ($.os.indexOf("Windows") != -1);
+var PATH_SEP = IS_WINDOWS ? "\\" : "/";
+var EXEC_NAME = IS_WINDOWS ? "superstaroff.exe" : "superstaroff";
+
+// 读取配置文件获取安装路径
+function getInstallDir() {
+    var configPaths = [
+        // 优先从脚本同目录读取
+        File($.fileName).parent.fsName + PATH_SEP + "config.json",
+        // 备选：默认安装位置
+        IS_WINDOWS
+            ? "C:\\Program Files (x86)\\SuperStarOff\\config.json"
+            : "/usr/local/SuperStarOff/config.json"
+    ];
+
+    for (var i = 0; i < configPaths.length; i++) {
+        var configFile = new File(configPaths[i]);
+        if (configFile.exists) {
+            configFile.open("r");
+            var content = configFile.read();
+            configFile.close();
+
+            // 简单解析 JSON
+            var match = content.match(/"installDir"\s*:\s*"([^"]+)"/);
+            if (match && match[1]) {
+                return match[1].replace(/\\\\/g, "\\");
+            }
+        }
+    }
+
+    // 找不到配置文件时的默认值
+    return IS_WINDOWS
+        ? "C:\\Program Files (x86)\\SuperStarOff"
+        : "/usr/local/SuperStarOff";
+}
+
+var INSTALL_DIR = getInstallDir();
 // ==================================
 
 function main() {
@@ -51,15 +91,15 @@ function showDialog() {
     helpPanel.add("statictext", undefined, "• 处理完成后生成「去星」与「星点」图层");
     helpPanel.add("statictext", undefined, "• 首次运行需加载模型，请耐心等待");
 
-    dlg.add("panel", undefined, undefined, {borderStyle: "black"});
+    dlg.add("panel", undefined, undefined, { borderStyle: "black" });
 
     // 提示信息
     var noteGroup = dlg.add("group");
     noteGroup.alignment = ["fill", "top"];
-    var noteText = noteGroup.add("statictext", undefined, "提示：处理过程中请勿操作 Photoshop", {multiline: false});
+    var noteText = noteGroup.add("statictext", undefined, "提示：处理过程中请勿操作 Photoshop", { multiline: false });
     noteText.graphics.foregroundColor = noteText.graphics.newPen(noteText.graphics.PenType.SOLID_COLOR, [0.6, 0.6, 0.6], 1);
 
-    dlg.add("panel", undefined, undefined, {borderStyle: "black"});
+    dlg.add("panel", undefined, undefined, { borderStyle: "black" });
 
     // 教程链接
     var tutorialGroup = dlg.add("group");
@@ -70,13 +110,9 @@ function showDialog() {
 
     var linkButton = tutorialGroup.add("button", undefined, "詹姆斯 YouTube");
     linkButton.preferredSize = [140, 28];
-    linkButton.onClick = function() {
+    linkButton.onClick = function () {
         var url = "https://www.youtube.com/@JamesZhenYu";
-        if ($.os.indexOf("Windows") != -1) {
-            system("start " + url);
-        } else {
-            system("open " + url);
-        }
+        openURL(url);
     };
 
     // 按钮
@@ -84,8 +120,8 @@ function showDialog() {
     btnGroup.alignment = ["center", "top"];
     btnGroup.spacing = 15;
 
-    var okBtn = btnGroup.add("button", undefined, "开始处理", {name: "ok"});
-    var cancelBtn = btnGroup.add("button", undefined, "取消", {name: "cancel"});
+    var okBtn = btnGroup.add("button", undefined, "开始处理", { name: "ok" });
+    var cancelBtn = btnGroup.add("button", undefined, "取消", { name: "cancel" });
     okBtn.preferredSize = [120, 35];
     cancelBtn.preferredSize = [120, 35];
 
@@ -98,6 +134,15 @@ function showDialog() {
     return dlg.show() == 1;
 }
 
+function openURL(url) {
+    // 跨平台打开 URL
+    if (IS_WINDOWS) {
+        system('start "" "' + url + '"');
+    } else {
+        system('open "' + url + '"');
+    }
+}
+
 function processImage() {
     var doc = app.activeDocument;
     var activeLayer = doc.activeLayer;
@@ -106,7 +151,7 @@ function processImage() {
 
     try {
         // 获取临时目录路径
-        var tempDirPath = Folder.temp.fsName + "/SuperStarOff/";
+        var tempDirPath = Folder.temp.fsName + PATH_SEP + "SuperStarOff" + PATH_SEP;
         var tempFolder = new Folder(tempDirPath);
         if (!tempFolder.exists) {
             tempFolder.create();
@@ -118,6 +163,7 @@ function processImage() {
         var outputFile = tempDirPath + "output_" + timestamp + ".tif";
 
         $.writeln("=== 慧眼去星 v" + VERSION + " 开始处理 ===");
+        $.writeln("平台: " + (IS_WINDOWS ? "Windows" : "macOS"));
         $.writeln("输入: " + inputFile);
         $.writeln("输出: " + outputFile);
 
@@ -125,19 +171,78 @@ function processImage() {
         exportLayer(doc, activeLayer, inputFile);
 
         // 步骤2: 调用 superstaroff 可执行文件
-        var execPath = INSTALL_DIR + "/superstaroff";
+        var execPath = INSTALL_DIR + PATH_SEP + EXEC_NAME;
 
-        var command = '"' + execPath + '" ' +
-                      '"' + inputFile + '" "' + outputFile + '" ' +
-                      '--stride ' + STRIDE + ' --device ' + DEVICE;
-
-        $.writeln("执行命令: " + command);
+        // 检查可执行文件是否存在
+        var execFile = new File(execPath);
+        if (!execFile.exists) {
+            app.displayDialogs = DialogModes.ALL;
+            alert("错误: 找不到 SuperStarOff 程序\n\n" +
+                "请确保已正确安装 SuperStarOff:\n" +
+                execPath + "\n\n" +
+                "请运行安装程序或检查安装路径。");
+            throw new Error("SuperStarOff 未安装");
+        }
 
         var logFile = tempDirPath + "log_" + timestamp + ".txt";
-        var fullCommand = command + ' > "' + logFile + '" 2>&1';
+        var exitCode;
 
-        var exitCode = system(fullCommand);
-        $.writeln("退出代码: " + exitCode);
+        if (IS_WINDOWS) {
+            // Windows: Show terminal window with progress, also save log file
+            var batFile = tempDirPath + "run_" + timestamp + ".bat";
+
+            // Create batch file that shows progress and saves log (with Chinese text)
+            var batContent = '@echo off\r\n';
+            batContent += 'chcp 65001 >nul 2>&1\r\n';
+            batContent += 'title 慧眼去星 - 处理中...\r\n';
+            batContent += 'echo ============================================\r\n';
+            batContent += 'echo   慧眼去星 (SuperStarOff) - AI 去星处理\r\n';
+            batContent += 'echo ============================================\r\n';
+            batContent += 'echo.\r\n';
+            batContent += 'echo 正在处理中，请稍候...\r\n';
+            batContent += 'echo.\r\n';
+            // Run directly and show output (verbose mode shows progress)
+            batContent += '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE + ' --verbose\r\n';
+            batContent += 'set RESULT=%ERRORLEVEL%\r\n';
+            // Also save a simple log
+            batContent += 'if %RESULT% EQU 0 (\r\n';
+            batContent += '    echo.\r\n';
+            batContent += '    echo ============================================\r\n';
+            batContent += '    echo   处理完成！\r\n';
+            batContent += '    echo ============================================\r\n';
+            batContent += '    echo SUCCESS > "' + logFile + '"\r\n';
+            batContent += ') else (\r\n';
+            batContent += '    echo.\r\n';
+            batContent += '    echo ============================================\r\n';
+            batContent += '    echo   处理失败！\r\n';
+            batContent += '    echo ============================================\r\n';
+            batContent += '    echo FAILED > "' + logFile + '"\r\n';
+            batContent += ')\r\n';
+            batContent += 'exit /b %RESULT%\r\n';
+
+            // Write batch file with UTF-8 BOM for proper Chinese display
+            var batFileObj = new File(batFile);
+            batFileObj.encoding = "UTF-8";
+            batFileObj.open("w");
+            batFileObj.write('\uFEFF' + batContent);  // Add UTF-8 BOM
+            batFileObj.close();
+
+            $.writeln("Batch file: " + batFile);
+
+            // Execute batch file directly (no start command to avoid double window)
+            exitCode = system('cmd /c "' + batFile + '"');
+            $.writeln("Exit code: " + exitCode);
+
+            // Clean up
+            batFileObj.remove();
+        } else {
+            // macOS/Linux: Direct command
+            var command = '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE;
+            var fullCommand = command + ' > "' + logFile + '" 2>&1';
+            $.writeln("Command: " + command);
+            exitCode = system(fullCommand);
+            $.writeln("Exit code: " + exitCode);
+        }
 
         // 检查输出
         var outputFileObj = new File(outputFile);
@@ -163,9 +268,9 @@ function processImage() {
 
             app.displayDialogs = DialogModes.ALL;
             alert("处理失败，未生成输出文件\n\n" +
-                  "退出代码: " + exitCode + "\n\n" +
-                  "错误详情:\n" + errorDetails + "\n\n" +
-                  "完整日志位置:\n" + logFile);
+                "退出代码: " + exitCode + "\n\n" +
+                "错误详情:\n" + errorDetails + "\n\n" +
+                "完整日志位置:\n" + logFile);
             throw new Error("处理失败");
         }
 
@@ -203,10 +308,10 @@ function processImage() {
 
         app.displayDialogs = DialogModes.ALL;
         alert("处理完成！\n\n" +
-              "已创建图层：\n" +
-              "  • 去星 - 去除星点后的图像\n" +
-              "  • 星点 - 提取的星点（已隐藏）\n\n" +
-              "詹姆斯祝你晴空万里！Clear Skies!");
+            "已创建图层：\n" +
+            "  • 去星 - 去除星点后的图像\n" +
+            "  • 星点 - 提取的星点（已隐藏）\n\n" +
+            "詹姆斯祝你晴空万里！Clear Skies!");
 
     } catch (e) {
         app.displayDialogs = DialogModes.ALL;

@@ -15,11 +15,42 @@ var DEVICE = "auto"; // 自动检测设备
 
 // 平台检测与安装目录
 var IS_WINDOWS = ($.os.indexOf("Windows") != -1);
-var INSTALL_DIR = IS_WINDOWS
-    ? "C:\\Program Files\\SuperStarOff"
-    : "/usr/local/SuperStarOff";
-var EXEC_NAME = IS_WINDOWS ? "superstaroff.exe" : "superstaroff";
 var PATH_SEP = IS_WINDOWS ? "\\" : "/";
+var EXEC_NAME = IS_WINDOWS ? "superstaroff.exe" : "superstaroff";
+
+// 读取配置文件获取安装路径
+function getInstallDir() {
+    var configPaths = [
+        // 优先从脚本同目录读取
+        File($.fileName).parent.fsName + PATH_SEP + "config.json",
+        // 备选：默认安装位置
+        IS_WINDOWS
+            ? "C:\\Program Files (x86)\\SuperStarOff\\config.json"
+            : "/usr/local/SuperStarOff/config.json"
+    ];
+
+    for (var i = 0; i < configPaths.length; i++) {
+        var configFile = new File(configPaths[i]);
+        if (configFile.exists) {
+            configFile.open("r");
+            var content = configFile.read();
+            configFile.close();
+
+            // 简单解析 JSON
+            var match = content.match(/"installDir"\s*:\s*"([^"]+)"/);
+            if (match && match[1]) {
+                return match[1].replace(/\\\\/g, "\\");
+            }
+        }
+    }
+
+    // 找不到配置文件时的默认值
+    return IS_WINDOWS
+        ? "C:\\Program Files (x86)\\SuperStarOff"
+        : "/usr/local/SuperStarOff";
+}
+
+var INSTALL_DIR = getInstallDir();
 // ==================================
 
 function main() {

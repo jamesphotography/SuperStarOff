@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Model Encryption/Decryption Module
-用于保护模型文件的加密解密工具
+For protecting model files
 """
 
 import os
@@ -16,23 +16,23 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 
 class ModelCrypto:
-    """模型加密解密类"""
+    """Model encryption/decryption class"""
 
-    # 使用项目特定的密钥派生参数
-    # 这些参数混淆在代码中，不容易被识别
+    # Project-specific key derivation parameters
+    # These parameters are obfuscated in code
     _SALT = b'\x8a\x3f\x9e\x2d\x7b\x5c\x1a\x4e\xf6\x8d\x2c\x9a\x6b\x3f\x7e\x1d'
     _ITERATIONS = 100000
 
     @staticmethod
     def _derive_key(passphrase: str) -> bytes:
         """
-        从密码短语派生加密密钥
+        Derive encryption key from passphrase
 
         Args:
-            passphrase: 密码短语
+            passphrase: Password phrase
 
         Returns:
-            派生的密钥
+            Derived key
         """
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -45,109 +45,108 @@ class ModelCrypto:
     @staticmethod
     def _get_key() -> bytes:
         """
-        获取加密密钥
-        使用多个因子组合生成密钥，增加破解难度
+        Get encryption key
+        Uses multiple factors to generate key
 
         Returns:
-            Fernet 密钥
+            Fernet key
         """
         import base64
 
-        # 第1层：使用字节序列而非明文字符串（混淆）
-        # 这些看起来像随机数据，实际是编码后的密钥因子
-        _p1 = bytes([72, 117, 105, 89, 97, 110])  # 对应部分字符
-        _p2 = bytes([81, 117, 88, 105, 110, 103])  # 对应部分字符
-        _p3 = bytes([50, 48, 50, 53])  # 年份
+        # Layer 1: Use byte sequences instead of plaintext strings (obfuscation)
+        _p1 = bytes([72, 117, 105, 89, 97, 110])
+        _p2 = bytes([81, 117, 88, 105, 110, 103])
+        _p3 = bytes([50, 48, 50, 53])  # Year
 
-        # 第2层：添加路径绑定因子
-        # 使用平台无关的字符串确保跨平台兼容性
-        # DO NOT CHANGE - 修改此值会导致加密模型无法解密
-        _install_base = "SuperStarOff-2025"
+        # Layer 2: Add path binding factor
+        # Use platform-independent string for cross-platform compatibility
+        # DO NOT CHANGE - modifying this value will break encrypted models
+        _install_base = "/usr/local/SuperStarOff"
         _path_factor = hashlib.md5(_install_base.encode()).digest()[:8]
 
-        # 第3层：添加应用标识符（混淆在普通变量名中）
-        _app_signature = bytes([68, 101, 101, 112, 83, 112, 97, 99, 101])  # 应用标识
+        # Layer 3: Add application identifier
+        _app_signature = bytes([68, 101, 101, 112, 83, 112, 97, 99, 101])
 
-        # 第4层：组合所有因子并多次哈希
+        # Layer 4: Combine all factors and hash multiple times
         _raw = _p1 + _p2 + _p3 + _path_factor + _app_signature
 
-        # 第5层：多轮哈希增加计算复杂度
+        # Layer 5: Multiple hash rounds to increase computational complexity
         _digest = hashlib.sha256(_raw).digest()
-        for _ in range(1000):  # 1000轮额外哈希
+        for _ in range(1000):  # 1000 extra hash rounds
             _digest = hashlib.sha256(_digest).digest()
 
-        # 第6层：使用最终digest作为passphrase派生密钥
+        # Layer 6: Use final digest as passphrase to derive key
         passphrase_hash = hashlib.sha256(_digest).hexdigest()
         key_material = ModelCrypto._derive_key(passphrase_hash)
 
-        # 转换为 Fernet 密钥格式
+        # Convert to Fernet key format
         return base64.urlsafe_b64encode(key_material)
 
     @staticmethod
     def encrypt_file(input_path: str, output_path: str) -> bool:
         """
-        加密文件
+        Encrypt file
 
         Args:
-            input_path: 输入文件路径
-            output_path: 输出文件路径
+            input_path: Input file path
+            output_path: Output file path
 
         Returns:
-            加密是否成功
+            Whether encryption succeeded
         """
         try:
-            print(f"正在加密文件: {input_path}")
+            print(f"Encrypting file: {input_path}")
 
-            # 读取原始文件
+            # Read original file
             with open(input_path, 'rb') as f:
                 data = f.read()
 
-            print(f"文件大小: {len(data) / (1024*1024):.2f} MB")
+            print(f"File size: {len(data) / (1024*1024):.2f} MB")
 
-            # 获取密钥并加密
+            # Get key and encrypt
             key = ModelCrypto._get_key()
             fernet = Fernet(key)
 
-            print("正在加密...")
+            print("Encrypting...")
             encrypted_data = fernet.encrypt(data)
 
-            # 写入加密文件
+            # Write encrypted file
             with open(output_path, 'wb') as f:
                 f.write(encrypted_data)
 
-            print(f"加密完成: {output_path}")
-            print(f"加密后大小: {len(encrypted_data) / (1024*1024):.2f} MB")
+            print(f"Encryption complete: {output_path}")
+            print(f"Encrypted size: {len(encrypted_data) / (1024*1024):.2f} MB")
 
             return True
 
         except Exception as e:
-            print(f"加密失败: {e}")
+            print(f"Encryption failed: {e}")
             return False
 
     @staticmethod
     def decrypt_file(input_path: str, output_path: str = None) -> bytes:
         """
-        解密文件
+        Decrypt file
 
         Args:
-            input_path: 加密文件路径
-            output_path: 输出文件路径（可选，如果为None则只返回数据不写入文件）
+            input_path: Encrypted file path
+            output_path: Output file path (optional, if None only returns data)
 
         Returns:
-            解密后的数据（bytes），如果失败返回 None
+            Decrypted data (bytes), or None if failed
         """
         try:
-            # 读取加密文件
+            # Read encrypted file
             with open(input_path, 'rb') as f:
                 encrypted_data = f.read()
 
-            # 获取密钥并解密
+            # Get key and decrypt
             key = ModelCrypto._get_key()
             fernet = Fernet(key)
 
             decrypted_data = fernet.decrypt(encrypted_data)
 
-            # 如果指定了输出路径，则写入文件
+            # If output path specified, write to file
             if output_path:
                 with open(output_path, 'wb') as f:
                     f.write(decrypted_data)
@@ -155,79 +154,79 @@ class ModelCrypto:
             return decrypted_data
 
         except Exception as e:
-            print(f"解密失败: {e}")
+            print(f"Decryption failed: {e}")
             return None
 
     @staticmethod
     def decrypt_to_memory(input_path: str) -> io.BytesIO:
         """
-        解密文件到内存
+        Decrypt file to memory
 
         Args:
-            input_path: 加密文件路径
+            input_path: Encrypted file path
 
         Returns:
-            包含解密数据的 BytesIO 对象，如果失败返回 None
+            BytesIO object containing decrypted data, or None if failed
         """
         try:
-            # 解密文件
+            # Decrypt file
             decrypted_data = ModelCrypto.decrypt_file(input_path)
 
             if decrypted_data is None:
                 return None
 
-            # 创建内存缓冲区
+            # Create memory buffer
             buffer = io.BytesIO(decrypted_data)
-            buffer.seek(0)  # 重置到开头
+            buffer.seek(0)  # Reset to beginning
 
             return buffer
 
         except Exception as e:
-            print(f"解密到内存失败: {e}")
+            print(f"Decryption to memory failed: {e}")
             return None
 
 
 def main():
-    """测试加密解密功能"""
+    """Test encryption/decryption functionality"""
 
     if len(sys.argv) < 2:
-        print("用法:")
-        print("  加密: python core_utils.py encrypt <input_file> <output_file>")
-        print("  解密: python core_utils.py decrypt <input_file> <output_file>")
+        print("Usage:")
+        print("  Encrypt: python core_utils.py encrypt <input_file> <output_file>")
+        print("  Decrypt: python core_utils.py decrypt <input_file> <output_file>")
         sys.exit(1)
 
     command = sys.argv[1]
 
     if command == "encrypt":
         if len(sys.argv) < 4:
-            print("错误: 需要指定输入和输出文件")
+            print("Error: Need to specify input and output files")
             sys.exit(1)
 
         input_file = sys.argv[2]
         output_file = sys.argv[3]
 
         if ModelCrypto.encrypt_file(input_file, output_file):
-            print("✓ 加密成功!")
+            print("Encryption successful!")
         else:
-            print("✗ 加密失败!")
+            print("Encryption failed!")
             sys.exit(1)
 
     elif command == "decrypt":
         if len(sys.argv) < 4:
-            print("错误: 需要指定输入和输出文件")
+            print("Error: Need to specify input and output files")
             sys.exit(1)
 
         input_file = sys.argv[2]
         output_file = sys.argv[3]
 
         if ModelCrypto.decrypt_file(input_file, output_file):
-            print("✓ 解密成功!")
+            print("Decryption successful!")
         else:
-            print("✗ 解密失败!")
+            print("Decryption failed!")
             sys.exit(1)
 
     else:
-        print(f"未知命令: {command}")
+        print(f"Unknown command: {command}")
         sys.exit(1)
 
 

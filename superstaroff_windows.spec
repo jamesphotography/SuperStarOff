@@ -8,7 +8,7 @@ from pathlib import Path
 block_cipher = None
 
 # Project path - UPDATE THIS to your Windows project location
-PROJECT_ROOT = Path(r'C:\Users\jorda\PycharmProjects\SuperStarOff')
+PROJECT_ROOT = Path(r'C:\Users\ladyj\PycharmProjects\SuperStarOff')
 
 # ============================================================
 # Analysis - 收集所有需要的文件和依赖

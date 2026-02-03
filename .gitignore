@@ -93,4 +93,16 @@ FINAL_CLEANUP_STATUS.md
 REVIEW_GUIDE.txt
 
 # Test files
+# Test files
 test_*.py
+
+# Windows Build Artifacts
+dist2/
+installer_output/
+.venv_win/
+*.spec
+
+# Misplaced/Nested
+SuperStarOff/
+config.json
+

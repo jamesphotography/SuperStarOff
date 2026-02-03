@@ -53,10 +53,14 @@ english.BeveledLabel=SuperStarOff - AI Star Removal Tool
 
 [Files]
 ; 主程序和依赖 - 从 PyInstaller dist 目录复制
-Source: "..\dist2\superstaroff\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\dist\superstaroff\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; JSX 脚本
-Source: "..\src\StarOff.jsx"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "..\src\慧眼去星.jsx"; DestDir: "{app}\scripts"; Flags: ignoreversion
+
+; Batch 脚本
+Source: "install_to_photoshop.bat"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "uninstall_from_photoshop.bat"; DestDir: "{app}\scripts"; Flags: ignoreversion
 
 [Dirs]
 Name: "{app}\scripts"
@@ -67,8 +71,8 @@ Name: "{group}\{#MyAppNameCN} - 安装 Photoshop 插件"; Filename: "{app}\scrip
 Name: "{group}\卸载 {#MyAppNameCN}"; Filename: "{uninstallexe}"
 
 [Run]
-; 安装完成后运行 Photoshop 插件安装脚本
-Filename: "{app}\scripts\install_to_photoshop.bat"; Description: "安装 Photoshop 插件"; Flags: postinstall shellexec skipifsilent
+; 安装完成后不运行 bat，因为 Pascal 代码已处理脚本复制
+; 用户可以从开始菜单手动运行
 
 [UninstallRun]
 ; 卸载时清理 Photoshop 脚本
@@ -152,22 +156,38 @@ begin
   end;
 end;
 
-// 安装完成后复制 JSX 到选中的 Photoshop 版本
+// 安装完成后复制 JSX 和 config.json 到选中的 Photoshop 版本
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   I: Integer;
-  SourceFile, DestFile: String;
+  SourceFile, DestFile, ConfigFile, ConfigContent, ConfigDest: String;
+  AppPath: String;
 begin
   if CurStep = ssPostInstall then
   begin
-    SourceFile := ExpandConstant('{app}') + '\scripts\StarOff.jsx';
+    AppPath := ExpandConstant('{app}');
+    
+    // 生成 config.json 配置文件
+    ConfigFile := AppPath + '\config.json';
+    ConfigContent := '{' + #13#10 +
+                     '    "version": "{#MyAppVersion}",' + #13#10 +
+                     '    "installDir": "' + AppPath + '"' + #13#10 +
+                     '}';
+    SaveStringToFile(ConfigFile, ConfigContent, False);
+    
+    SourceFile := AppPath + '\scripts\慧眼去星.jsx';
     
     for I := 0 to PhotoshopCount - 1 do
     begin
       if PhotoshopPage.Values[I] then
       begin
-        DestFile := PhotoshopPaths[I] + '\StarOff.jsx';
+        // 复制 JSX 脚本
+        DestFile := PhotoshopPaths[I] + '\慧眼去星.jsx';
         FileCopy(SourceFile, DestFile, False);
+        
+        // 复制 config.json 到 Photoshop Scripts 目录
+        ConfigDest := PhotoshopPaths[I] + '\config.json';
+        FileCopy(ConfigFile, ConfigDest, False);
       end;
     end;
   end;
@@ -191,8 +211,8 @@ begin
     
     for I := 0 to 4 do
     begin
-      Path64 := ExpandConstant('{pf64}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\StarOff.jsx';
-      Path86 := ExpandConstant('{pf32}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\StarOff.jsx';
+      Path64 := ExpandConstant('{pf64}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\慧眼去星.jsx';
+      Path86 := ExpandConstant('{pf32}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\慧眼去星.jsx';
       
       if FileExists(Path64) then
         DeleteFile(Path64);
