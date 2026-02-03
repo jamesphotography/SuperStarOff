@@ -1,10 +1,18 @@
 # 慧眼去星 SuperStarOff
 
-谷歌网盘下载地址：
-https://drive.google.com/file/d/1EFLgytKdr_GCL615biQH9WyTN4xvTNPw/view?usp=sharing
+## 下载
 
-通过百度网盘分享的文件：SuperStarOff-PS-Installer-v11-COMPLETE.pkg
-链接: https://pan.baidu.com/s/1qmnQmUQHGT6vsjHd0ccEEg?pwd=nxj7 提取码: nxj7 
+### macOS (v1.1.0)
+- **GitHub 直接下载**: [SuperStarOff-Installer-1.1.0.pkg](https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-Installer-1.1.0.pkg)
+- **谷歌网盘**: https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing
+- **百度网盘**: https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5
+
+### Windows X64 (v1.1.0)
+- **GitHub 直接下载**: [SuperStarOff-v1.1.0-Win-X64.zip](https://github.com/jamesphotography/SuperStarOff/releases/download/%E6%85%A7%E7%9C%BC%E5%8E%BB%E6%98%9F/SuperStarOff-v1.1.0-Win-X64.zip)
+- **谷歌网盘**: https://drive.google.com/file/d/1d32Xk0zEYUTPOGaVi9l6nIaPGAksWzn5/view?usp=sharing
+- **百度网盘**: https://pan.baidu.com/s/1iYP85krulU0Wk1E_y4WRpw?pwd=btfa 提取码: btfa
+
+---
 
 基于深度学习的天文图像星点去除工具
 
