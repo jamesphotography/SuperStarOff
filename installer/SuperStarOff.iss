@@ -6,7 +6,7 @@
 
 #define MyAppName "SuperStarOff"
 #define MyAppNameCN "慧眼去星"
-#define MyAppVersion "1.1.2"
+#define MyAppVersion "1.1.3"
 #define MyAppPublisher "James Zhen Yu"
 #define MyAppURL "https://www.youtube.com/@JamesZhenYu"
 #define MyAppExeName "superstaroff.exe"

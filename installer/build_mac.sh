@@ -6,7 +6,7 @@ set -e
 # ============================================================
 # 配置
 # ============================================================
-VERSION="1.1.2"
+VERSION="1.1.3"
 APP_BUNDLE_ID="com.jameszhengyu.superstaroff"
 INSTALL_LOCATION="/usr/local/SuperStarOff"
 

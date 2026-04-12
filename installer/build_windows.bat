@@ -16,7 +16,7 @@ for %%I in ("%INSTALLER_DIR%\..") do set "PROJECT_ROOT=%%~fI"
 
 set "DIST_DIR=%PROJECT_ROOT%\dist\superstaroff"
 set "JSX_FILE=%PROJECT_ROOT%\src\慧眼去星.jsx"
-set "VERSION=1.1.2"
+set "VERSION=1.1.3"
 
 echo Project Root: %PROJECT_ROOT%
 echo Installer Dir: %INSTALLER_DIR%
