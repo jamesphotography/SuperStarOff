@@ -360,13 +360,20 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         app.refresh();
 
         if (cancelled) {
-            // 等待 CLI 写入 phase=error 确认已响应取消，最多 15 秒
+            // 等待 CLI 确认：phase=error 表示已取消，phase=done 表示已完成
+            // 若 CLI 在取消信号到达前已写出 done，则视为成功，不能删除输出文件
             var cancelWait = new Date().getTime();
             while (new Date().getTime() - cancelWait < 15000) {
                 $.sleep(400);
                 app.refresh();
                 var cp = readProgress(progressFile);
                 if (cp !== null && cp.phase === "error") break;
+                if (cp !== null && cp.phase === "done") {
+                    // CLI 已成功完成，取消信号来得太晚——当作正常完成
+                    cancelled = false;
+                    done = true;
+                    break;
+                }
             }
             break;
         }

@@ -347,13 +347,20 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         app.refresh();
 
         if (cancelled) {
-            // Wait for CLI to acknowledge cancellation (phase=error), max 15s
+            // Wait for CLI to acknowledge: phase=error means cancelled, phase=done means already finished.
+            // If CLI wrote done before seeing the cancel file, treat as success — don't delete the output.
             var cw = new Date().getTime();
             while (new Date().getTime() - cw < 15000) {
                 $.sleep(400);
                 app.refresh();
                 var cp = readProgress(progressFile);
                 if (cp !== null && cp.phase === "error") break;
+                if (cp !== null && cp.phase === "done") {
+                    // CLI finished before it saw the cancel signal — treat as normal completion
+                    cancelled = false;
+                    done = true;
+                    break;
+                }
             }
             break;
         }
