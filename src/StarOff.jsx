@@ -279,21 +279,27 @@ function launchBackground(execPath, inputFile, outputFile, logFile, progressFile
         $.sleep(200);
         bf.remove();
     } else {
-        var shFile = tempDir + "run_" + ts + ".sh";
-        // nohup + disown to fully detach from Photoshop; log launch info for debugging
-        var sh = '#!/bin/bash\n'
-               + 'echo "=== SuperStarOff CLI start $(date) ===" > "' + logFile + '"\n'
-               + 'echo "exec: ' + execPath + '" >> "' + logFile + '"\n'
-               + 'nohup "' + execPath + '" ' + args + ' >> "' + logFile + '" 2>&1 &\n'
-               + 'disown\n';
-        var sf = new File(shFile);
-        sf.encoding = "UTF-8";
-        sf.open("w");
-        sf.write(sh);
-        sf.close();
-        system('bash "' + shFile + '"');
-        $.sleep(500);   // give nohup enough time to fork
-        sf.remove();
+        // macOS: write log header from JSX directly (log always exists for diagnostics)
+        var lf = new File(logFile);
+        lf.encoding = "UTF-8";
+        lf.open("w");
+        lf.write("=== SuperStarOff v" + VERSION + " ===\n"
+               + "start: " + new Date().toString() + "\n"
+               + "exec: " + execPath + "\n"
+               + "waiting for CLI...\n");
+        lf.close();
+
+        // Use osascript do shell script to launch CLI in background.
+        // More reliable than system('bash script &') inside Photoshop on macOS.
+        var shellCmd = 'nohup "' + execPath + '" "' + inputFile + '" "' + outputFile + '"'
+                     + ' --stride ' + STRIDE
+                     + ' --device ' + DEVICE
+                     + ' --progress-file "' + progressFile + '"'
+                     + ' >> "' + logFile + '" 2>&1 &';
+        // Escape double quotes for AppleScript string; outer single-quotes protect from shell
+        var escapedCmd = shellCmd.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        system("osascript -e 'do shell script \"" + escapedCmd + "\"'");
+        $.sleep(500);
     }
 }
 
@@ -373,20 +379,10 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         var p = readProgress(progressFile);
 
         if (p === null) {
-            var now = new Date().getTime();
-            var elapsed = now - startTime;
-            var logExists = (new File(logFile)).exists;
-            var CRASH_TIMEOUT = 8000;  // if CLI started but no progress in 8s → crashed
-            if (logExists && elapsed > CRASH_TIMEOUT) {
-                var logContent = readLogTail(logFile, 30);
-                error = "CLI crashed after launch — no progress written\n\n"
+            if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
+                var logContent = readLogTail(logFile, 40);
+                error = "Startup timeout (90s)\n\n"
                       + "=== CLI log ===\n" + logContent
-                      + "\n\nLog file: " + logFile;
-                done = true;
-            } else if (elapsed > STARTUP_TIMEOUT) {
-                var logContent2 = readLogTail(logFile, 30);
-                error = "Startup timeout (90s) — CLI did not start\n\n"
-                      + "=== CLI log ===\n" + logContent2
                       + "\n\nLog file: " + logFile;
                 done = true;
             }
