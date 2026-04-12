@@ -155,140 +155,54 @@ function processImage() {
     app.displayDialogs = DialogModes.NO;
 
     try {
-        // 获取临时目录路径
         var tempDirPath = Folder.temp.fsName + PATH_SEP + "SuperStarOff" + PATH_SEP;
         var tempFolder = new Folder(tempDirPath);
-        if (!tempFolder.exists) {
-            tempFolder.create();
-        }
+        if (!tempFolder.exists) tempFolder.create();
 
-        // 生成文件名
-        var timestamp = new Date().getTime();
-        var inputFile = tempDirPath + "input_" + timestamp + ".tif";
-        var outputFile = tempDirPath + "output_" + timestamp + ".tif";
+        var timestamp    = new Date().getTime();
+        var inputFile    = tempDirPath + "input_"    + timestamp + ".tif";
+        var outputFile   = tempDirPath + "output_"   + timestamp + ".tif";
+        var logFile      = tempDirPath + "log_"      + timestamp + ".txt";
+        var progressFile = tempDirPath + "progress_" + timestamp + ".json";
+        var cancelFile   = progressFile + ".cancel";
 
-        $.writeln("=== 慧眼去星 v" + VERSION + " 开始处理 ===");
-        $.writeln("平台: " + (IS_WINDOWS ? "Windows" : "macOS"));
-        $.writeln("输入: " + inputFile);
-        $.writeln("输出: " + outputFile);
-
-        // 步骤1: 导出图层
+        $.writeln("=== StarOff v" + VERSION + " ===");
         exportLayer(doc, activeLayer, inputFile);
 
-        // 步骤2: 调用 superstaroff 可执行文件
         var execPath = INSTALL_DIR + PATH_SEP + EXEC_NAME;
-
-        // 检查可执行文件是否存在
         var execFile = new File(execPath);
         if (!execFile.exists) {
             app.displayDialogs = DialogModes.ALL;
-            alert("错误: 找不到 SuperStarOff 程序\n\n" +
-                "请确保已正确安装 SuperStarOff:\n" +
-                execPath + "\n\n" +
-                "请运行安装程序或检查安装路径。");
-            throw new Error("SuperStarOff 未安装");
+            alert("Error: SuperStarOff not found\n\n" + execPath);
+            throw new Error("SuperStarOff not installed");
         }
 
-        var logFile = tempDirPath + "log_" + timestamp + ".txt";
-        var exitCode;
+        launchBackground(execPath, inputFile, outputFile, logFile, progressFile, tempDirPath, timestamp);
 
-        if (IS_WINDOWS) {
-            // Windows: Show terminal window with progress, also save log file
-            var batFile = tempDirPath + "run_" + timestamp + ".bat";
+        var status = waitForCompletion(progressFile, cancelFile, outputFile, logFile);
 
-            // Create batch file that shows progress and saves log (with Chinese text)
-            var batContent = '@echo off\r\n';
-            batContent += 'chcp 65001 >nul 2>&1\r\n';
-            batContent += 'title 慧眼去星 - 处理中...\r\n';
-            batContent += 'echo ============================================\r\n';
-            batContent += 'echo   慧眼去星 (SuperStarOff) - AI 去星处理\r\n';
-            batContent += 'echo ============================================\r\n';
-            batContent += 'echo.\r\n';
-            batContent += 'echo 正在处理中，请稍候...\r\n';
-            batContent += 'echo.\r\n';
-            // Run directly and show output (verbose mode shows progress)
-            batContent += '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE + ' --verbose\r\n';
-            batContent += 'set RESULT=%ERRORLEVEL%\r\n';
-            // Also save a simple log
-            batContent += 'if %RESULT% EQU 0 (\r\n';
-            batContent += '    echo.\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo   处理完成！\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo SUCCESS > "' + logFile + '"\r\n';
-            batContent += ') else (\r\n';
-            batContent += '    echo.\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo   处理失败！\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo FAILED > "' + logFile + '"\r\n';
-            batContent += ')\r\n';
-            batContent += 'exit /b %RESULT%\r\n';
-
-            // Write batch file with UTF-8 BOM for proper Chinese display
-            var batFileObj = new File(batFile);
-            batFileObj.encoding = "UTF-8";
-            batFileObj.open("w");
-            batFileObj.write('\uFEFF' + batContent);  // Add UTF-8 BOM
-            batFileObj.close();
-
-            $.writeln("Batch file: " + batFile);
-
-            // Execute batch file directly (no start command to avoid double window)
-            exitCode = system('cmd /c "' + batFile + '"');
-            $.writeln("Exit code: " + exitCode);
-
-            // Clean up
-            batFileObj.remove();
-        } else {
-            // macOS/Linux: Direct command
-            var command = '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE;
-            var fullCommand = command + ' > "' + logFile + '" 2>&1';
-            $.writeln("Command: " + command);
-            exitCode = system(fullCommand);
-            $.writeln("Exit code: " + exitCode);
+        if (status === "cancelled") {
+            cleanupTempFiles([inputFile, outputFile, logFile, progressFile, cancelFile]);
+            app.displayDialogs = DialogModes.ALL;
+            alert("Processing cancelled.");
+            return;
         }
 
-        // 检查输出
         var outputFileObj = new File(outputFile);
         if (!outputFileObj.exists) {
-            var logFileObj = new File(logFile);
-            var errorDetails = "";
-
-            if (logFileObj.exists) {
-                logFileObj.open("r");
-                var logContent = logFileObj.read();
-                logFileObj.close();
-
-                var lines = logContent.split("\n");
-                var startLine = Math.max(0, lines.length - 30);
-                errorDetails = lines.slice(startLine).join("\n");
-
-                if (errorDetails.length > 2000) {
-                    errorDetails = "...\n" + errorDetails.substring(errorDetails.length - 2000);
-                }
-            } else {
-                errorDetails = "未找到日志文件";
-            }
-
             app.displayDialogs = DialogModes.ALL;
-            alert("处理失败，未生成输出文件\n\n" +
-                "退出代码: " + exitCode + "\n\n" +
-                "错误详情:\n" + errorDetails + "\n\n" +
-                "完整日志位置:\n" + logFile);
-            throw new Error("处理失败");
+            alert("Processing failed - no output file.\n\nLog: " + logFile);
+            throw new Error("Processing failed");
         }
 
-        // 步骤3: 导入结果
         var tempDoc = app.open(outputFileObj);
         app.activeDocument = tempDoc;
         tempDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
         tempDoc.close(SaveOptions.DONOTSAVECHANGES);
 
         app.activeDocument = doc;
-        doc.activeLayer.name = "去星";
+        doc.activeLayer.name = "Starless";
 
-        // 步骤4: 创建星点图层
         var starlessLayer = doc.activeLayer;
         starlessLayer.blendMode = BlendMode.DIFFERENCE;
 
@@ -297,26 +211,15 @@ function processImage() {
         executeAction(charIDToTypeID("MrgV"), desc, DialogModes.NO);
 
         var starsLayer = doc.activeLayer;
-        starsLayer.name = "星点";
+        starsLayer.name = "Stars";
         starsLayer.blendMode = BlendMode.LINEARDODGE;
         starsLayer.visible = false;
-
         starlessLayer.blendMode = BlendMode.NORMAL;
 
-        // 清理临时文件
-        var input = new File(inputFile);
-        if (input.exists) input.remove();
-        var output = new File(outputFile);
-        if (output.exists) output.remove();
-        var log = new File(logFile);
-        if (log.exists) log.remove();
+        cleanupTempFiles([inputFile, outputFile, logFile, progressFile, cancelFile]);
 
         app.displayDialogs = DialogModes.ALL;
-        alert("处理完成！\n\n" +
-            "已创建图层：\n" +
-            "  • 去星 - 去除星点后的图像\n" +
-            "  • 星点 - 提取的星点（已隐藏）\n\n" +
-            "詹姆斯祝你晴空万里！Clear Skies!");
+        alert("Done!\n\nLayers created:\n  • Starless\n  • Stars (hidden)\n\nClear Skies! - James");
 
     } catch (e) {
         app.displayDialogs = DialogModes.ALL;
@@ -356,5 +259,204 @@ function exportLayer(doc, layer, filePath) {
     $.writeln("导出完成: " + filePath);
 }
 
-// 运行主函数
+function launchBackground(execPath, inputFile, outputFile, logFile, progressFile, tempDir, ts) {
+    var args = '"' + inputFile + '" "' + outputFile + '"'
+             + ' --stride ' + STRIDE
+             + ' --device ' + DEVICE
+             + ' --progress-file "' + progressFile + '"';
+
+    if (IS_WINDOWS) {
+        var batFile = tempDir + "run_" + ts + ".bat";
+        var bat = '@echo off\r\n'
+                + 'chcp 65001 >nul 2>&1\r\n'
+                + 'start "" /B cmd /c ""' + execPath + '" ' + args + ' > "' + logFile + '" 2>&1"\r\n';
+        var bf = new File(batFile);
+        bf.encoding = "UTF-8";
+        bf.open("w");
+        bf.write('\uFEFF' + bat);  // UTF-8 BOM for correct path parsing by cmd.exe
+        bf.close();
+        system('cmd /c "' + batFile + '"');
+        $.sleep(200);
+        bf.remove();
+    } else {
+        var shFile = tempDir + "run_" + ts + ".sh";
+        var sh = '#!/bin/bash\n'
+               + '"' + execPath + '" ' + args + ' > "' + logFile + '" 2>&1 &\n';
+        var sf = new File(shFile);
+        sf.open("w");
+        sf.write(sh);
+        sf.close();
+        system('bash "' + shFile + '"');
+        $.sleep(200);
+        sf.remove();
+    }
+}
+
+function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
+    var win = new Window("palette", "StarOff v" + VERSION + "  •  Processing");
+    win.orientation   = "column";
+    win.alignChildren = ["fill", "top"];
+    win.spacing       = 10;
+    win.margins       = [20, 18, 20, 18];
+    win.preferredSize = [400, 220];
+
+    var phaseText = win.add("statictext", undefined, "Starting AI engine...");
+    phaseText.graphics.font = ScriptUI.newFont("dialog", ScriptUI.FontStyle.BOLD, 13);
+
+    var bar = win.add("progressbar", undefined, 0, 100);
+    bar.preferredSize = [360, 14];
+
+    var infoGroup = win.add("group");
+    infoGroup.orientation   = "row";
+    infoGroup.alignChildren = ["fill", "center"];
+
+    var tileText = infoGroup.add("statictext", undefined, "Preparing...");
+    tileText.alignment = ["left", "center"];
+    var timeText = infoGroup.add("statictext", undefined, "");
+    timeText.alignment = ["right", "center"];
+
+    win.add("panel", undefined, undefined);
+
+    var btnGroup = win.add("group");
+    btnGroup.alignment = ["center", "top"];
+    var cancelBtn = btnGroup.add("button", undefined, "Cancel");
+    cancelBtn.preferredSize = [110, 30];
+
+    var cancelled = false;
+    cancelBtn.onClick = function () {
+        var cf = new File(cancelFile);
+        cf.open("w"); cf.write("cancel"); cf.close();
+        cancelled = true;
+        phaseText.text = "Cancelling...";
+        cancelBtn.enabled = false;
+        app.refresh();
+    };
+
+    win.show();
+    app.refresh();
+
+    var STARTUP_TIMEOUT = 90000;
+    var POLL_INTERVAL   = 350;
+    var startTime           = new Date().getTime();
+    var processingStartTime = null;
+    var done  = false;
+    var error = null;
+
+    while (!done) {
+        $.sleep(POLL_INTERVAL);
+        app.refresh();
+
+        if (cancelled) {
+            // Wait for CLI to acknowledge cancellation (phase=error), max 15s
+            var cw = new Date().getTime();
+            while (new Date().getTime() - cw < 15000) {
+                $.sleep(400);
+                app.refresh();
+                var cp = readProgress(progressFile);
+                if (cp !== null && cp.phase === "error") break;
+            }
+            break;
+        }
+
+        var p = readProgress(progressFile);
+
+        if (p === null) {
+            if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
+                error = "Startup timeout (90s)";
+                done = true;
+            }
+            continue;
+        }
+
+        var pct = 0;
+        if (p.phase === "loading") {
+            pct = 3;
+            phaseText.text = "Loading AI model (first run ~15-30s)...";
+            tileText.text  = "Decrypting model...";
+            timeText.text  = "";
+        } else if (p.phase === "loaded") {
+            pct = 8;
+            phaseText.text = "Model ready, starting...";
+            tileText.text  = ""; timeText.text = "";
+        } else if (p.phase === "processing") {
+            if (!processingStartTime && p.current > 0)
+                processingStartTime = new Date().getTime();
+            pct = Math.round(10 + (p.total > 0 ? p.current / p.total : 0) * 84);
+            phaseText.text = "✦  Removing stars...";
+            tileText.text  = "Tile " + p.current + " / " + p.total;
+            if (p.current > 2 && processingStartTime) {
+                var el   = (new Date().getTime() - processingStartTime) / 1000;
+                var rate = p.current / el;
+                var rem  = Math.round((p.total - p.current) / rate);
+                timeText.text = formatTime(rem);
+            } else { timeText.text = ""; }
+        } else if (p.phase === "saving") {
+            pct = 96;
+            phaseText.text = "Saving result...";
+            tileText.text  = "Almost done"; timeText.text = "";
+        } else if (p.phase === "done") {
+            pct = 100; done = true;
+            phaseText.text = "Complete!";
+            tileText.text  = ""; timeText.text = "";
+        } else if (p.phase === "error") {
+            error = p.message || "Unknown error"; done = true;
+        }
+
+        bar.value = pct;
+        app.refresh();
+    }
+
+    win.close();
+    if (cancelled) return "cancelled";
+    if (error)     throw new Error(error);
+    return "done";
+}
+
+function readProgress(progressFile) {
+    var pf = new File(progressFile);
+    if (!pf.exists) return null;
+    pf.open("r");
+    var raw = pf.read();
+    pf.close();
+    if (!raw) return null;
+    var phase   = matchStr(raw, "phase");
+    var current = matchNum(raw, "current");
+    var total   = matchNum(raw, "total");
+    var message = matchStr(raw, "message");
+    if (!phase) return null;
+    return { phase: phase, current: current || 0,
+             total: total || 100, message: message };
+}
+
+function matchStr(s, key) {
+    var m = s.match(new RegExp('"' + key + '"\\s*:\\s*"([^"]*)"'));
+    return m ? m[1] : null;
+}
+function matchNum(s, key) {
+    var m = s.match(new RegExp('"' + key + '"\\s*:\\s*(\\d+)'));
+    return m ? parseInt(m[1], 10) : null;
+}
+
+function formatTime(secs) {
+    if (secs <= 0) return "";
+    if (secs < 60) return "~" + secs + "s";
+    return "~" + Math.floor(secs / 60) + "m " + (secs % 60) + "s";
+}
+
+function readLogTail(logFile, n) {
+    var lf = new File(logFile);
+    if (!lf.exists) return "Log not found";
+    lf.open("r");
+    var c = lf.read(); lf.close();
+    var lines = c.split("\n");
+    return lines.slice(Math.max(0, lines.length - n)).join("\n");
+}
+
+function cleanupTempFiles(paths) {
+    for (var i = 0; i < paths.length; i++) {
+        try { var f = new File(paths[i]); if (f.exists) f.remove(); } catch(e) {}
+    }
+}
+
+// Run
 main();

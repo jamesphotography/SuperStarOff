@@ -13,6 +13,7 @@ Supports:
 
 import os
 import sys
+import json
 import torch
 import numpy as np
 import tifffile as tiff
@@ -24,7 +25,7 @@ import copy
 class StarRemover:
     """Star Removal Processor - Core Class"""
 
-    def __init__(self, model_path=None, device='auto', stride=256, window_size=512):
+    def __init__(self, model_path=None, device='auto', stride=256, window_size=512, progress_file=None):
         """
         Initialize
 
@@ -33,12 +34,31 @@ class StarRemover:
             device: 'auto', 'cpu', 'mps' or 'cuda'
             stride: Processing stride (default 256)
             window_size: Window size (default 512, fixed)
+            progress_file: Path to write JSON progress updates (for Photoshop plugin)
         """
         self.device = self._get_device(device)
         self.window_size = window_size
         self.stride = stride
         self.model_path = self._find_model(model_path)
         self.model = None
+        self.progress_file = progress_file
+        self._cancel_file = (progress_file + ".cancel") if progress_file else None
+
+    def _write_progress(self, phase, current, total, **kwargs):
+        """Write progress state to JSON file for JSX polling."""
+        if not self.progress_file:
+            return
+        data = {"phase": phase, "current": current, "total": total}
+        data.update(kwargs)
+        try:
+            with open(self.progress_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f)
+        except Exception:
+            pass
+
+    def _is_cancelled(self):
+        """Check if JSX has requested cancellation."""
+        return self._cancel_file and os.path.exists(self._cancel_file)
 
     def _get_install_directories(self):
         """Get platform-specific installation directories"""
@@ -128,6 +148,7 @@ class StarRemover:
             raise FileNotFoundError(f"Model file not found: {self.model_path}")
 
         print(f"Loading model: {self.model_path.name}")
+        self._write_progress("loading", 0, 100)
 
         # Try decryption loading
         try:
@@ -147,10 +168,12 @@ class StarRemover:
             print("Warning: Encryption module not available, trying direct load")
             self.model = torch.jit.load(str(self.model_path), map_location=self.device)
         except Exception as e:
+            self._write_progress("error", 0, 100, message=str(e))
             raise RuntimeError(f"Model loading failed: {e}")
 
         self.model.eval()
         print(f"Model ready (device: {self.device})")
+        self._write_progress("loaded", 5, 100, device=str(self.device))
 
     def predict(self, image):
         """
@@ -207,7 +230,9 @@ class StarRemover:
             starless = starless[:, :, 0]
 
         # Save result
+        self._write_progress("saving", 99, 100)
         self._save_image(output_path, starless, input_dtype, color_profile)
+        self._write_progress("done", 100, 100)
         print("Done!")
 
     def _load_image(self, input_path):
@@ -331,9 +356,15 @@ class StarRemover:
         # Process each tile
         total_tiles = ith * itw
         print(f"Total {ith}x{itw} = {total_tiles} tiles...")
+        self._write_progress("processing", 0, total_tiles)
 
         for i in range(ith):
             for j in range(itw):
+                # Check for cancellation before each tile
+                if self._is_cancelled():
+                    self._write_progress("error", 0, total_tiles, message="用户取消了处理")
+                    raise RuntimeError("Processing cancelled by user")
+
                 x = self.stride * i
                 y = self.stride * j
 
@@ -351,6 +382,7 @@ class StarRemover:
                             j + 1) + offset, :] = tile_center
 
                 current = i * itw + j + 1
+                self._write_progress("processing", current, total_tiles)
                 if current % 10 == 0:
                     print(f"  Processed {current}/{total_tiles} tiles")
 

@@ -39,6 +39,8 @@ def main():
                         help='计算设备 (默认: auto 自动选择)')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='显示详细信息')
+    parser.add_argument('--progress-file', type=str, default=None,
+                        help='进度文件路径，供 Photoshop 插件轮询使用')
 
     args = parser.parse_args()
 
@@ -66,7 +68,11 @@ def main():
 
         # 初始化模型
         print("正在初始化模型...")
-        processor = SuperStarOff(stride=args.stride, device=args.device)
+        processor = SuperStarOff(
+            stride=args.stride,
+            device=args.device,
+            progress_file=args.progress_file
+        )
 
         # 处理图像
         print("正在处理图像...")
@@ -85,6 +91,7 @@ def main():
         print(f"错误: {e}", file=sys.stderr)
         print("\n请确保模型文件存在:", file=sys.stderr)
         print("  models/SuperStarOff2025.pt", file=sys.stderr)
+        _write_error_progress(args.progress_file, str(e))
         sys.exit(1)
 
     except RuntimeError as e:
@@ -97,6 +104,7 @@ def main():
             print("   export CRYPTOGRAPHY_OPENSSL_NO_LEGACY=1", file=sys.stderr)
         else:
             print(f"运行时错误: {error_msg}", file=sys.stderr)
+        _write_error_progress(args.progress_file, error_msg)
         sys.exit(1)
 
     except Exception as e:
@@ -104,7 +112,21 @@ def main():
         if args.verbose:
             import traceback
             traceback.print_exc()
+        _write_error_progress(args.progress_file, str(e))
         sys.exit(1)
+
+
+def _write_error_progress(progress_file, message):
+    """向进度文件写入错误状态，让 JSX 能感知失败。"""
+    if not progress_file:
+        return
+    import json
+    try:
+        with open(progress_file, 'w', encoding='utf-8') as f:
+            json.dump({"phase": "error", "current": 0, "total": 100,
+                       "message": message}, f)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

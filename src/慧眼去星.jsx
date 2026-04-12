@@ -164,8 +164,11 @@ function processImage() {
 
         // 生成文件名
         var timestamp = new Date().getTime();
-        var inputFile = tempDirPath + "input_" + timestamp + ".tif";
-        var outputFile = tempDirPath + "output_" + timestamp + ".tif";
+        var inputFile  = tempDirPath + "input_"    + timestamp + ".tif";
+        var outputFile = tempDirPath + "output_"   + timestamp + ".tif";
+        var logFile    = tempDirPath + "log_"      + timestamp + ".txt";
+        var progressFile = tempDirPath + "progress_" + timestamp + ".json";
+        var cancelFile   = progressFile + ".cancel";
 
         $.writeln("=== 慧眼去星 v" + VERSION + " 开始处理 ===");
         $.writeln("平台: " + (IS_WINDOWS ? "Windows" : "macOS"));
@@ -175,10 +178,8 @@ function processImage() {
         // 步骤1: 导出图层
         exportLayer(doc, activeLayer, inputFile);
 
-        // 步骤2: 调用 superstaroff 可执行文件
+        // 步骤2: 检查可执行文件
         var execPath = INSTALL_DIR + PATH_SEP + EXEC_NAME;
-
-        // 检查可执行文件是否存在
         var execFile = new File(execPath);
         if (!execFile.exists) {
             app.displayDialogs = DialogModes.ALL;
@@ -189,97 +190,32 @@ function processImage() {
             throw new Error("SuperStarOff 未安装");
         }
 
-        var logFile = tempDirPath + "log_" + timestamp + ".txt";
-        var exitCode;
+        // 步骤3: 后台启动 CLI，JSX 轮询进度文件
+        launchBackground(execPath, inputFile, outputFile, logFile, progressFile, tempDirPath, timestamp);
 
-        if (IS_WINDOWS) {
-            // Windows: Show terminal window with progress, also save log file
-            var batFile = tempDirPath + "run_" + timestamp + ".bat";
+        // 步骤4: 显示进度窗口并等待完成
+        var status = waitForCompletion(progressFile, cancelFile, outputFile, logFile);
 
-            // Create batch file that shows progress and saves log (with Chinese text)
-            var batContent = '@echo off\r\n';
-            batContent += 'chcp 65001 >nul 2>&1\r\n';
-            batContent += 'title 慧眼去星 - 处理中...\r\n';
-            batContent += 'echo ============================================\r\n';
-            batContent += 'echo   慧眼去星 (SuperStarOff) - AI 去星处理\r\n';
-            batContent += 'echo ============================================\r\n';
-            batContent += 'echo.\r\n';
-            batContent += 'echo 正在处理中，请稍候...\r\n';
-            batContent += 'echo.\r\n';
-            // Run directly and show output (verbose mode shows progress)
-            batContent += '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE + ' --verbose\r\n';
-            batContent += 'set RESULT=%ERRORLEVEL%\r\n';
-            // Also save a simple log
-            batContent += 'if %RESULT% EQU 0 (\r\n';
-            batContent += '    echo.\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo   处理完成！\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo SUCCESS > "' + logFile + '"\r\n';
-            batContent += ') else (\r\n';
-            batContent += '    echo.\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo   处理失败！\r\n';
-            batContent += '    echo ============================================\r\n';
-            batContent += '    echo FAILED > "' + logFile + '"\r\n';
-            batContent += ')\r\n';
-            batContent += 'exit /b %RESULT%\r\n';
-
-            // Write batch file with UTF-8 BOM for proper Chinese display
-            var batFileObj = new File(batFile);
-            batFileObj.encoding = "UTF-8";
-            batFileObj.open("w");
-            batFileObj.write('\uFEFF' + batContent);  // Add UTF-8 BOM
-            batFileObj.close();
-
-            $.writeln("Batch file: " + batFile);
-
-            // Execute batch file directly (no start command to avoid double window)
-            exitCode = system('cmd /c "' + batFile + '"');
-            $.writeln("Exit code: " + exitCode);
-
-            // Clean up
-            batFileObj.remove();
-        } else {
-            // macOS/Linux: Direct command
-            var command = '"' + execPath + '" "' + inputFile + '" "' + outputFile + '" --stride ' + STRIDE + ' --device ' + DEVICE;
-            var fullCommand = command + ' > "' + logFile + '" 2>&1';
-            $.writeln("Command: " + command);
-            exitCode = system(fullCommand);
-            $.writeln("Exit code: " + exitCode);
+        if (status === "cancelled") {
+            // 清理临时文件
+            cleanupTempFiles([inputFile, outputFile, logFile, progressFile, cancelFile]);
+            app.displayDialogs = DialogModes.ALL;
+            alert("已取消处理。");
+            return;
         }
 
-        // 检查输出
+        // 步骤5: 检查输出文件
         var outputFileObj = new File(outputFile);
         if (!outputFileObj.exists) {
-            var logFileObj = new File(logFile);
-            var errorDetails = "";
-
-            if (logFileObj.exists) {
-                logFileObj.open("r");
-                var logContent = logFileObj.read();
-                logFileObj.close();
-
-                var lines = logContent.split("\n");
-                var startLine = Math.max(0, lines.length - 30);
-                errorDetails = lines.slice(startLine).join("\n");
-
-                if (errorDetails.length > 2000) {
-                    errorDetails = "...\n" + errorDetails.substring(errorDetails.length - 2000);
-                }
-            } else {
-                errorDetails = "未找到日志文件";
-            }
-
+            var errorDetails = readLogTail(logFile, 30);
             app.displayDialogs = DialogModes.ALL;
             alert("处理失败，未生成输出文件\n\n" +
-                "退出代码: " + exitCode + "\n\n" +
                 "错误详情:\n" + errorDetails + "\n\n" +
                 "完整日志位置:\n" + logFile);
             throw new Error("处理失败");
         }
 
-        // 步骤3: 导入结果
+        // 步骤6: 导入结果图层
         var tempDoc = app.open(outputFileObj);
         app.activeDocument = tempDoc;
         tempDoc.activeLayer.duplicate(doc, ElementPlacement.PLACEATBEGINNING);
@@ -288,7 +224,7 @@ function processImage() {
         app.activeDocument = doc;
         doc.activeLayer.name = "去星";
 
-        // 步骤4: 创建星点图层
+        // 步骤7: 创建星点图层（差值混合后合并）
         var starlessLayer = doc.activeLayer;
         starlessLayer.blendMode = BlendMode.DIFFERENCE;
 
@@ -304,12 +240,7 @@ function processImage() {
         starlessLayer.blendMode = BlendMode.NORMAL;
 
         // 清理临时文件
-        var input = new File(inputFile);
-        if (input.exists) input.remove();
-        var output = new File(outputFile);
-        if (output.exists) output.remove();
-        var log = new File(logFile);
-        if (log.exists) log.remove();
+        cleanupTempFiles([inputFile, outputFile, logFile, progressFile, cancelFile]);
 
         app.displayDialogs = DialogModes.ALL;
         alert("处理完成！\n\n" +
@@ -321,6 +252,250 @@ function processImage() {
     } catch (e) {
         app.displayDialogs = DialogModes.ALL;
         throw e;
+    }
+}
+
+// ── 后台启动 CLI ──────────────────────────────────────────────
+function launchBackground(execPath, inputFile, outputFile, logFile, progressFile, tempDir, ts) {
+    var args = '"' + inputFile + '" "' + outputFile + '"'
+             + ' --stride ' + STRIDE
+             + ' --device ' + DEVICE
+             + ' --progress-file "' + progressFile + '"';
+
+    if (IS_WINDOWS) {
+        // 写一个 bat，用 start /B 在后台运行（system() 立即返回）
+        var batFile = tempDir + "run_" + ts + ".bat";
+        var bat = '@echo off\r\n'
+                + 'chcp 65001 >nul 2>&1\r\n'
+                + 'start "" /B cmd /c ""' + execPath + '" ' + args + ' > "' + logFile + '" 2>&1"\r\n';
+
+        var bf = new File(batFile);
+        bf.encoding = "UTF-8";
+        bf.open("w");
+        bf.write('\uFEFF' + bat);  // UTF-8 BOM：让 cmd.exe 正确解析中文路径
+        bf.close();
+
+        system('cmd /c "' + batFile + '"');
+        $.sleep(200);
+        bf.remove();
+    } else {
+        // macOS: 写 shell 脚本并后台执行（system() 立即返回）
+        var shFile = tempDir + "run_" + ts + ".sh";
+        var sh = '#!/bin/bash\n'
+               + '"' + execPath + '" ' + args + ' > "' + logFile + '" 2>&1 &\n';
+
+        var sf = new File(shFile);
+        sf.open("w");
+        sf.write(sh);
+        sf.close();
+
+        system('bash "' + shFile + '"');
+        $.sleep(200);
+        sf.remove();
+    }
+}
+
+// ── 进度轮询窗口（返回 "done" / "cancelled"，失败时 throw）─────
+function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
+    // ── 构建进度窗口 ──
+    var win = new Window("palette", "慧眼去星 v" + VERSION + "  •  正在处理");
+    win.orientation   = "column";
+    win.alignChildren = ["fill", "top"];
+    win.spacing       = 10;
+    win.margins       = [20, 18, 20, 18];
+    win.preferredSize = [400, 220];
+
+    var phaseText = win.add("statictext", undefined, "正在启动 AI 引擎...");
+    phaseText.graphics.font = ScriptUI.newFont("dialog", ScriptUI.FontStyle.BOLD, 13);
+
+    var bar = win.add("progressbar", undefined, 0, 100);
+    bar.preferredSize = [360, 14];
+
+    var infoGroup = win.add("group");
+    infoGroup.orientation   = "row";
+    infoGroup.alignChildren = ["fill", "center"];
+    infoGroup.spacing       = 0;
+
+    var tileText = infoGroup.add("statictext", undefined, "正在准备...");
+    tileText.alignment = ["left", "center"];
+
+    var timeText = infoGroup.add("statictext", undefined, "");
+    timeText.alignment = ["right", "center"];
+
+    var sep = win.add("panel", undefined, undefined);
+    sep.alignment = ["fill", "top"];
+
+    var btnGroup = win.add("group");
+    btnGroup.alignment = ["center", "top"];
+    var cancelBtn = btnGroup.add("button", undefined, "取消");
+    cancelBtn.preferredSize = [110, 30];
+
+    // 取消：写 cancel 文件，CLI 检测后退出
+    var cancelled = false;
+    cancelBtn.onClick = function () {
+        var cf = new File(cancelFile);
+        cf.open("w");
+        cf.write("cancel");
+        cf.close();
+        cancelled    = true;
+        phaseText.text = "正在取消，请稍候...";
+        cancelBtn.enabled = false;
+        app.refresh();
+    };
+
+    win.show();
+    app.refresh();
+
+    // ── 轮询参数 ──
+    var STARTUP_TIMEOUT = 90000;   // 90 秒内必须出现进度文件
+    var POLL_INTERVAL   = 350;     // ms
+
+    var startTime           = new Date().getTime();
+    var processingStartTime = null;
+    var done  = false;
+    var error = null;
+
+    while (!done) {
+        $.sleep(POLL_INTERVAL);
+        app.refresh();
+
+        if (cancelled) {
+            // 等待 CLI 写入 phase=error 确认已响应取消，最多 15 秒
+            var cancelWait = new Date().getTime();
+            while (new Date().getTime() - cancelWait < 15000) {
+                $.sleep(400);
+                app.refresh();
+                var cp = readProgress(progressFile);
+                if (cp !== null && cp.phase === "error") break;
+            }
+            break;
+        }
+
+        var p = readProgress(progressFile);
+
+        if (p === null) {
+            // 进度文件还不存在，检查启动超时
+            if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
+                error = "启动超时（90 秒内未收到进度信息）";
+                done = true;
+            }
+            continue;
+        }
+
+        // 映射阶段 → 进度条百分比
+        var pct = 0;
+        if (p.phase === "loading") {
+            pct = 3;
+            phaseText.text = "正在加载 AI 模型（首次约需 15-30 秒）...";
+            tileText.text  = "模型解密中...";
+            timeText.text  = "";
+        } else if (p.phase === "loaded") {
+            pct = 8;
+            phaseText.text = "模型加载完成，开始处理...";
+            tileText.text  = "即将开始分块处理";
+            timeText.text  = "";
+        } else if (p.phase === "processing") {
+            if (!processingStartTime && p.current > 0) {
+                processingStartTime = new Date().getTime();
+            }
+            var ratio = p.total > 0 ? p.current / p.total : 0;
+            pct = Math.round(10 + ratio * 84);   // 10% ~ 94%
+            phaseText.text = "✦  正在分析星点...";
+            tileText.text  = "区块 " + p.current + " / " + p.total;
+
+            if (p.current > 2 && processingStartTime) {
+                var elapsed = (new Date().getTime() - processingStartTime) / 1000;
+                var rate    = p.current / elapsed;
+                var remain  = Math.round((p.total - p.current) / rate);
+                timeText.text = formatTime(remain);
+            } else {
+                timeText.text = "";
+            }
+        } else if (p.phase === "saving") {
+            pct = 96;
+            phaseText.text = "正在保存图像...";
+            tileText.text  = "即将完成";
+            timeText.text  = "";
+        } else if (p.phase === "done") {
+            pct  = 100;
+            done = true;
+            phaseText.text = "处理完成！";
+            tileText.text  = "";
+            timeText.text  = "";
+        } else if (p.phase === "error") {
+            error = p.message || "未知错误";
+            done  = true;
+        }
+
+        bar.value = pct;
+        app.refresh();
+    }
+
+    win.close();
+
+    if (cancelled) return "cancelled";
+    if (error)     throw new Error(error);
+    return "done";
+}
+
+// ── 读取进度文件（返回对象或 null）────────────────────────────
+function readProgress(progressFile) {
+    var pf = new File(progressFile);
+    if (!pf.exists) return null;
+
+    pf.open("r");
+    var raw = pf.read();
+    pf.close();
+    if (!raw) return null;
+
+    // 用正则解析简单 JSON（避免 ExtendScript 旧版不支持 JSON.parse）
+    var phase   = matchStr(raw, "phase");
+    var current = matchNum(raw, "current");
+    var total   = matchNum(raw, "total");
+    var message = matchStr(raw, "message");
+
+    if (!phase) return null;
+    return { phase: phase, current: current || 0,
+             total: total || 100, message: message };
+}
+
+function matchStr(s, key) {
+    var m = s.match(new RegExp('"' + key + '"\\s*:\\s*"([^"]*)"'));
+    return m ? m[1] : null;
+}
+
+function matchNum(s, key) {
+    var m = s.match(new RegExp('"' + key + '"\\s*:\\s*(\\d+)'));
+    return m ? parseInt(m[1], 10) : null;
+}
+
+// ── 格式化剩余时间 ─────────────────────────────────────────────
+function formatTime(secs) {
+    if (secs <= 0)  return "";
+    if (secs < 60)  return "约 " + secs + " 秒";
+    var m = Math.floor(secs / 60);
+    var s = secs % 60;
+    return "约 " + m + " 分 " + (s > 0 ? s + " 秒" : "");
+}
+
+// ── 读日志末尾 N 行 ────────────────────────────────────────────
+function readLogTail(logFile, n) {
+    var lf = new File(logFile);
+    if (!lf.exists) return "未找到日志文件";
+    lf.open("r");
+    var content = lf.read();
+    lf.close();
+    var lines = content.split("\n");
+    return lines.slice(Math.max(0, lines.length - n)).join("\n");
+}
+
+// ── 清理临时文件 ───────────────────────────────────────────────
+function cleanupTempFiles(paths) {
+    for (var i = 0; i < paths.length; i++) {
+        try {
+            var f = new File(paths[i]);
+            if (f.exists) f.remove();
+        } catch (e) { /* 忽略清理错误 */ }
     }
 }
 
