@@ -281,16 +281,21 @@ function launchBackground(execPath, inputFile, outputFile, logFile, progressFile
     } else {
         // macOS: 写 shell 脚本并后台执行（system() 立即返回）
         var shFile = tempDir + "run_" + ts + ".sh";
+        // nohup + disown 彻底脱离 Photoshop 进程；setsid 确保新会话
         var sh = '#!/bin/bash\n'
-               + '"' + execPath + '" ' + args + ' > "' + logFile + '" 2>&1 &\n';
+               + 'echo "=== SuperStarOff CLI 启动 $(date) ===" > "' + logFile + '"\n'
+               + 'echo "exec: ' + execPath + '" >> "' + logFile + '"\n'
+               + 'nohup "' + execPath + '" ' + args + ' >> "' + logFile + '" 2>&1 &\n'
+               + 'disown\n';
 
         var sf = new File(shFile);
+        sf.encoding = "UTF-8";
         sf.open("w");
         sf.write(sh);
         sf.close();
 
         system('bash "' + shFile + '"');
-        $.sleep(200);
+        $.sleep(500);   // 给 nohup 足够时间 fork
         sf.remove();
     }
 }
@@ -381,9 +386,24 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         var p = readProgress(progressFile);
 
         if (p === null) {
-            // 进度文件还不存在，检查启动超时
-            if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
-                error = "启动超时（90 秒内未收到进度信息）";
+            var now = new Date().getTime();
+            var elapsed = now - startTime;
+            // 如果日志文件已出现（CLI 已启动），但进度文件迟迟不来
+            // → 说明 CLI 启动后立即崩溃，5 秒内提前报错
+            var logExists = (new File(logFile)).exists;
+            var CRASH_TIMEOUT = 8000;   // CLI 启动后 8 秒内必须写出进度文件
+            if (logExists && elapsed > CRASH_TIMEOUT) {
+                var logContent = readLogTail(logFile, 30);
+                error = "CLI 启动后崩溃，未写出进度文件\n\n"
+                      + "=== CLI 日志 ===\n" + logContent
+                      + "\n\n日志文件: " + logFile;
+                done = true;
+            } else if (elapsed > STARTUP_TIMEOUT) {
+                // CLI 根本没有启动（连日志文件都没出现）
+                var logContent2 = readLogTail(logFile, 30);
+                error = "启动超时（90 秒内未收到进度信息）\n\n"
+                      + "=== CLI 日志 ===\n" + logContent2
+                      + "\n\n日志文件: " + logFile;
                 done = true;
             }
             continue;

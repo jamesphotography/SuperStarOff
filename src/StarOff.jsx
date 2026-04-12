@@ -280,14 +280,19 @@ function launchBackground(execPath, inputFile, outputFile, logFile, progressFile
         bf.remove();
     } else {
         var shFile = tempDir + "run_" + ts + ".sh";
+        // nohup + disown to fully detach from Photoshop; log launch info for debugging
         var sh = '#!/bin/bash\n'
-               + '"' + execPath + '" ' + args + ' > "' + logFile + '" 2>&1 &\n';
+               + 'echo "=== SuperStarOff CLI start $(date) ===" > "' + logFile + '"\n'
+               + 'echo "exec: ' + execPath + '" >> "' + logFile + '"\n'
+               + 'nohup "' + execPath + '" ' + args + ' >> "' + logFile + '" 2>&1 &\n'
+               + 'disown\n';
         var sf = new File(shFile);
+        sf.encoding = "UTF-8";
         sf.open("w");
         sf.write(sh);
         sf.close();
         system('bash "' + shFile + '"');
-        $.sleep(200);
+        $.sleep(500);   // give nohup enough time to fork
         sf.remove();
     }
 }
@@ -368,8 +373,21 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         var p = readProgress(progressFile);
 
         if (p === null) {
-            if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
-                error = "Startup timeout (90s)";
+            var now = new Date().getTime();
+            var elapsed = now - startTime;
+            var logExists = (new File(logFile)).exists;
+            var CRASH_TIMEOUT = 8000;  // if CLI started but no progress in 8s → crashed
+            if (logExists && elapsed > CRASH_TIMEOUT) {
+                var logContent = readLogTail(logFile, 30);
+                error = "CLI crashed after launch — no progress written\n\n"
+                      + "=== CLI log ===\n" + logContent
+                      + "\n\nLog file: " + logFile;
+                done = true;
+            } else if (elapsed > STARTUP_TIMEOUT) {
+                var logContent2 = readLogTail(logFile, 30);
+                error = "Startup timeout (90s) — CLI did not start\n\n"
+                      + "=== CLI log ===\n" + logContent2
+                      + "\n\nLog file: " + logFile;
                 done = true;
             }
             continue;
