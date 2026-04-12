@@ -1,10 +1,10 @@
 /*
  * 慧眼去星 for Photoshop - 开发测试版
- * 版本：1.1.0-DEV
+ * 版本：1.1.2-DEV
  */
 
 // ============== 开发配置 ==============
-var VERSION = "1.1.0-DEV";
+var VERSION = "1.1.2-DEV";
 var DEV_DIR = "/Users/jameszhenyu/PycharmProjects/SuperStarOff";
 var PYTHON_PATH = DEV_DIR + "/.venv/bin/python";
 var CLI_PATH = DEV_DIR + "/src/superstaroff_cli.py";

@@ -1,12 +1,12 @@
 /*
  * 慧眼去星 for Photoshop - 开发测试版
- * 版本：1.1.0-DEV
+ * 版本：1.1.2-DEV
  *
  * 支持: Windows / macOS
  */
 
 // ============== 开发配置 ==============
-var VERSION = "1.1.0-DEV";
+var VERSION = "1.1.2-DEV";
 var STRIDE = 256;
 var DEVICE = "auto";
 

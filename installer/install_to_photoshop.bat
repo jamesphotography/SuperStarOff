@@ -15,7 +15,9 @@ echo SuperStarOff - Photoshop Plugin Installer
 echo ===================================================
 echo.
 
-set "SOURCE=%~dp0StarOff.jsx"
+set "SOURCE=%~dp0慧眼去星.jsx"
+REM config.json 在 scripts 上级目录（{app}\config.json）
+set "CONFIG_SOURCE=%~dp0..\config.json"
 set INSTALLED=0
 
 echo Scanning for installed Photoshop versions...
@@ -26,8 +28,12 @@ for %%Y in (2026 2025 2024 2023 2022) do (
     set "PS_PATH=C:\Program Files\Adobe\Adobe Photoshop %%Y\Presets\Scripts"
     if exist "!PS_PATH!" (
         echo Found Photoshop %%Y
-        copy /Y "%SOURCE%" "!PS_PATH!\StarOff.jsx" >nul 2>&1
+        copy /Y "%SOURCE%" "!PS_PATH!\慧眼去星.jsx" >nul 2>&1
         if !errorlevel! equ 0 (
+            REM 同时复制 config.json，让 JSX 能找到正确的 exe 路径
+            if exist "%CONFIG_SOURCE%" (
+                copy /Y "%CONFIG_SOURCE%" "!PS_PATH!\config.json" >nul 2>&1
+            )
             echo   [OK] Installed to Photoshop %%Y
             set /a INSTALLED=INSTALLED+1
         ) else (
@@ -46,7 +52,7 @@ if !INSTALLED! gtr 0 (
     echo How to use:
     echo   1. Restart Photoshop
     echo   2. Open a star field image
-    echo   3. Menu: File - Scripts - StarOff
+    echo   3. Menu: File - Scripts - 慧眼去星
     echo.
     echo Clear Skies! - James
     echo.

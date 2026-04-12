@@ -1,0 +1,71 @@
+#!/bin/bash
+
+LOG_FILE="/tmp/superstaroff_install.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+echo "==================================================="
+echo "SuperStarOff - 安装核心组件"
+echo "开始时间: $(date)"
+echo "==================================================="
+echo ""
+
+APP_DIR="/usr/local/SuperStarOff"
+
+# 设置权限
+echo "设置权限..."
+chown -R root:wheel "$APP_DIR"
+chmod -R 755 "$APP_DIR"
+chmod +x "$APP_DIR/superstaroff"
+chmod 644 "$APP_DIR/慧眼去星.jsx"
+if [ -d "$APP_DIR/安装到Photoshop.app" ]; then
+    chmod +x "$APP_DIR/安装到Photoshop.app/Contents/MacOS/applet"
+fi
+
+# 创建命令行快捷方式
+echo "创建命令行快捷方式..."
+mkdir -p /usr/local/bin
+ln -sf "$APP_DIR/superstaroff" /usr/local/bin/superstaroff
+
+# 扫描 Photoshop 版本
+echo ""
+echo "扫描已安装的 Photoshop 版本..."
+
+PS_FOUND=""
+for YEAR in 2026 2025 2024 2023 2022; do
+    PS_PATH="/Applications/Adobe Photoshop $YEAR/Presets/Scripts"
+    if [ -d "$PS_PATH" ]; then
+        PS_FOUND="$PS_FOUND $YEAR"
+    fi
+done
+
+echo ""
+echo "==================================================="
+echo "SuperStarOff 核心组件安装完成！"
+echo "==================================================="
+echo ""
+
+if [ -n "$PS_FOUND" ]; then
+    echo "检测到 Photoshop 版本:$PS_FOUND"
+    echo ""
+    echo "即将打开安装工具，请选择要安装插件的版本..."
+    echo ""
+else
+    echo "未检测到已安装的 Photoshop"
+    echo ""
+    echo "安装 Photoshop 后，请打开以下工具安装插件:"
+    echo "    /usr/local/SuperStarOff/安装到Photoshop.app"
+    echo ""
+fi
+
+echo "命令行使用:"
+echo "  superstaroff input.tif output.tif"
+echo ""
+echo "==================================================="
+
+# 获取当前登录用户并打开 GUI 安装工具
+CURRENT_USER=$(stat -f "%Su" /dev/console)
+if [ -n "$CURRENT_USER" ] && [ "$CURRENT_USER" != "root" ]; then
+    sudo -u "$CURRENT_USER" open "$APP_DIR/安装到Photoshop.app" &
+fi
+
+exit 0

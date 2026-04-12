@@ -6,7 +6,7 @@
 
 #define MyAppName "SuperStarOff"
 #define MyAppNameCN "慧眼去星"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.2"
 #define MyAppPublisher "James Zhen Yu"
 #define MyAppURL "https://www.youtube.com/@JamesZhenYu"
 #define MyAppExeName "superstaroff.exe"
@@ -167,11 +167,11 @@ begin
   begin
     AppPath := ExpandConstant('{app}');
     
-    // 生成 config.json 配置文件
+    // 生成 config.json 配置文件（反斜杠需转义为 \\ 才是合法 JSON）
     ConfigFile := AppPath + '\config.json';
     ConfigContent := '{' + #13#10 +
                      '    "version": "{#MyAppVersion}",' + #13#10 +
-                     '    "installDir": "' + AppPath + '"' + #13#10 +
+                     '    "installDir": "' + StringReplace(AppPath, '\', '\\', [rfReplaceAll]) + '"' + #13#10 +
                      '}';
     SaveStringToFile(ConfigFile, ConfigContent, False);
     
@@ -213,7 +213,16 @@ begin
     begin
       Path64 := ExpandConstant('{pf64}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\慧眼去星.jsx';
       Path86 := ExpandConstant('{pf32}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\慧眼去星.jsx';
-      
+
+      if FileExists(Path64) then
+        DeleteFile(Path64);
+      if FileExists(Path86) then
+        DeleteFile(Path86);
+
+      // 同时清理遗留的 config.json
+      Path64 := ExpandConstant('{pf64}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\config.json';
+      Path86 := ExpandConstant('{pf32}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\config.json';
+
       if FileExists(Path64) then
         DeleteFile(Path64);
       if FileExists(Path86) then

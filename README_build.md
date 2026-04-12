@@ -14,24 +14,12 @@ pip install pyinstaller
 
 ### 构建选项
 
-#### 选项 1: 构建 GUI 安装程序
-这将创建一个带有安装界面的 `SuperStarOff.exe`：
-
-```powershell
-cd C:\Users\jorda\PycharmProjects\SuperStarOff
-pyinstaller superstaroff_windows.spec
-```
-
-输出位置: `dist\SuperStarOff\SuperStarOff.exe`
-
-用户双击此 EXE 会看到安装界面。
-
-#### 选项 2: 构建 CLI 命令行工具
+#### 构建 CLI 命令行工具
 这将创建供 Photoshop 调用的 `superstaroff.exe`：
 
 ```powershell
-cd C:\Users\jorda\PycharmProjects\SuperStarOff
-pyinstaller superstaroff_cli_windows.spec
+cd C:\Users\<你的用户名>\PycharmProjects\SuperStarOff
+pyinstaller superstaroff_windows.spec
 ```
 
 输出位置: `dist\superstaroff\superstaroff.exe`
@@ -40,7 +28,7 @@ pyinstaller superstaroff_cli_windows.spec
 
 1. **构建 CLI 工具**（供 Photoshop 使用）:
    ```powershell
-   pyinstaller superstaroff_cli_windows.spec
+   pyinstaller superstaroff_windows.spec
    ```
 
 2. **安装到 Program Files**:
@@ -73,8 +61,8 @@ pyinstaller superstaroff_cli_windows.spec
 
 ### 构建命令
 ```bash
-cd /Users/jameszhenyu/PycharmProjects/SuperStarOff
-pyinstaller superstaroff_macos.spec  # 使用你现有的 macOS spec 文件
+cd /path/to/SuperStarOff
+pyinstaller superstaroff.spec
 ```
 
 ### 安装
@@ -96,15 +84,18 @@ SuperStarOff/
 │   ├── core_utils.py           # 加密解密模块
 │   ├── model_processor.py      # AI 模型处理核心
 │   ├── superstaroff_cli.py     # 命令行接口
-│   └── superstaroff_installer.py  # GUI 安装程序
+│   ├── 慧眼去星.jsx            # Photoshop 生产脚本（中文版）
+│   └── 慧眼去星_DEV.jsx        # Photoshop 开发脚本
 ├── models/
 │   └── SuperStarOff2025.pt     # AI 模型文件
-├── scripts/
-│   ├── 慧眼去星.jsx            # Photoshop 生产脚本
-│   └── 慧眼去星_DEV.jsx        # Photoshop 开发脚本
-├── superstaroff_windows.spec   # Windows GUI 安装程序打包配置
-├── superstaroff_cli_windows.spec  # Windows CLI 打包配置
-└── README_BUILD.md             # 本文件
+├── installer/
+│   ├── SuperStarOff.iss        # Inno Setup 安装包脚本
+│   ├── build_windows.bat       # Windows 一键构建脚本
+│   ├── install_to_photoshop.bat   # 手动安装插件脚本
+│   └── uninstall_from_photoshop.bat  # 卸载插件脚本
+├── superstaroff.spec           # macOS PyInstaller 打包配置
+├── superstaroff_windows.spec   # Windows PyInstaller 打包配置
+└── README_build.md             # 本文件
 ```
 
 ---

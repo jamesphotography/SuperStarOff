@@ -1,4 +1,4 @@
-慧眼去星 (SuperStarOff) v1.1.0
+慧眼去星 (SuperStarOff) v1.1.2
 
 AI 星点去除工具 - Photoshop 集成版
 

@@ -14,9 +14,9 @@ set "INSTALLER_DIR=%INSTALLER_DIR:~0,-1%"
 REM Get project root (parent of installer dir)
 for %%I in ("%INSTALLER_DIR%\..") do set "PROJECT_ROOT=%%~fI"
 
-set "DIST_DIR=%PROJECT_ROOT%\dist2\superstaroff"
-set "JSX_FILE=%PROJECT_ROOT%\src\StarOff.jsx"
-set "VERSION=1.1.0"
+set "DIST_DIR=%PROJECT_ROOT%\dist\superstaroff"
+set "JSX_FILE=%PROJECT_ROOT%\src\慧眼去星.jsx"
+set "VERSION=1.1.2"
 
 echo Project Root: %PROJECT_ROOT%
 echo Installer Dir: %INSTALLER_DIR%
@@ -28,13 +28,13 @@ echo === Step 1: Check build files ===
 
 if not exist "%DIST_DIR%\superstaroff.exe" (
     echo [ERROR] Cannot find PyInstaller output
-    echo Please run first: pyinstaller superstaroff_windows.spec --noconfirm --distpath dist2
+    echo Please run first: pyinstaller superstaroff_windows.spec --noconfirm
     pause
     exit /b 1
 )
 echo [OK] superstaroff.exe exists
 
-if not exist "%PROJECT_ROOT%\src\StarOff.jsx" (
+if not exist "%PROJECT_ROOT%\src\慧眼去星.jsx" (
     echo [ERROR] Cannot find JSX file in %PROJECT_ROOT%\src\
     pause
     exit /b 1
@@ -100,7 +100,7 @@ echo.
 REM Step 4: Compile installer
 echo === Step 4: Compile installer ===
 
-if not exist "%INSTALLER_DIR%\installer_output" mkdir "%INSTALLER_DIR%\installer_output"
+if not exist "%PROJECT_ROOT%\installer_output" mkdir "%PROJECT_ROOT%\installer_output"
 
 "%ISCC_PATH%" "%INSTALLER_DIR%\SuperStarOff.iss"
 
@@ -117,7 +117,7 @@ echo [SUCCESS] Build complete!
 echo ===================================================
 echo.
 echo Version: %VERSION%
-echo Output: %INSTALLER_DIR%\installer_output\SuperStarOff-Installer-v%VERSION%.exe
+echo Output: %PROJECT_ROOT%\installer_output\SuperStarOff-Installer-v%VERSION%.exe
 echo.
 echo ===================================================
 

@@ -7,8 +7,8 @@ from pathlib import Path
 
 block_cipher = None
 
-# Project path - UPDATE THIS to your Windows project location
-PROJECT_ROOT = Path(r'C:\Users\ladyj\PycharmProjects\SuperStarOff')
+# 项目路径：始终基于当前 spec 文件所在目录，避免写死本机路径
+PROJECT_ROOT = Path(globals().get("SPEC", "superstaroff_windows.spec")).resolve().parent
 
 # ============================================================
 # Analysis - 收集所有需要的文件和依赖
@@ -37,6 +37,9 @@ a = Analysis(
         'torchvision',
         'torchvision.transforms',
         'torchvision.transforms.functional',
+        # 必须包含以避免 torch._library.infer_schema 在新版 PyTorch (2.2+) 中
+        # 尝试 import GroupName 时失败（与 macOS spec 保持同步）
+        'torch.distributed.distributed_c10d',
         # 数据处理
         'numpy',
         'PIL',
@@ -48,6 +51,8 @@ a = Analysis(
         'cryptography.hazmat.primitives',
         'cryptography.hazmat.primitives.hashes',
         'cryptography.hazmat.primitives.kdf.pbkdf2',
+        # TIFF 压缩格式支持
+        'imagecodecs',
         # 项目模块
         'model_processor',
         'core_utils',

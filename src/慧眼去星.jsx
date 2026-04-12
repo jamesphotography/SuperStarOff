@@ -3,13 +3,13 @@
  * AI 星点去除工具 - Photoshop 集成脚本
  *
  * 作者：詹姆斯
- * 版本：1.1.0
+ * 版本：1.1.2
  *
  * 支持: Windows / macOS
  */
 
 // ============== 配置 ==============
-var VERSION = "1.1.0";
+var VERSION = "1.1.2";
 var STRIDE = 256;   // 默认平衡模式
 var DEVICE = "auto"; // 自动检测设备
 
