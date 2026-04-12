@@ -167,16 +167,17 @@ begin
   begin
     AppPath := ExpandConstant('{app}');
     
-    // 生成 config.json 配置文件（反斜杠需转义为 \\ 才是合法 JSON）
-    ConfigFile := AppPath + '\config.json';
+    // 生成 superstaroff.config.json（专属文件名避免与其他脚本冲突）
+    // 反斜杠需转义为 \\ 才是合法 JSON
+    ConfigFile := AppPath + '\superstaroff.config.json';
     ConfigContent := '{' + #13#10 +
                      '    "version": "{#MyAppVersion}",' + #13#10 +
                      '    "installDir": "' + StringReplace(AppPath, '\', '\\', [rfReplaceAll]) + '"' + #13#10 +
                      '}';
     SaveStringToFile(ConfigFile, ConfigContent, False);
-    
+
     SourceFile := AppPath + '\scripts\慧眼去星.jsx';
-    
+
     for I := 0 to PhotoshopCount - 1 do
     begin
       if PhotoshopPage.Values[I] then
@@ -184,9 +185,9 @@ begin
         // 复制 JSX 脚本
         DestFile := PhotoshopPaths[I] + '\慧眼去星.jsx';
         FileCopy(SourceFile, DestFile, False);
-        
-        // 复制 config.json 到 Photoshop Scripts 目录
-        ConfigDest := PhotoshopPaths[I] + '\config.json';
+
+        // 复制专属 config 到 Photoshop Scripts 目录
+        ConfigDest := PhotoshopPaths[I] + '\superstaroff.config.json';
         FileCopy(ConfigFile, ConfigDest, False);
       end;
     end;
@@ -219,9 +220,9 @@ begin
       if FileExists(Path86) then
         DeleteFile(Path86);
 
-      // 同时清理遗留的 config.json
-      Path64 := ExpandConstant('{pf64}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\config.json';
-      Path86 := ExpandConstant('{pf32}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\config.json';
+      // 同时清理遗留的 superstaroff.config.json
+      Path64 := ExpandConstant('{pf64}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\superstaroff.config.json';
+      Path86 := ExpandConstant('{pf32}') + '\Adobe\Adobe Photoshop ' + Years[I] + '\Presets\Scripts\superstaroff.config.json';
 
       if FileExists(Path64) then
         DeleteFile(Path64);

@@ -21,15 +21,20 @@ var EXEC_NAME = IS_WINDOWS ? "superstaroff.exe" : "superstaroff";
 // 读取配置文件获取安装路径
 function getInstallDir() {
     var configPaths = [
-        // 优先从脚本同目录读取
-        File($.fileName).parent.fsName + PATH_SEP + "config.json",
-        // 备选：默认安装位置
+        // 优先从脚本同目录读取（安装器会把 superstaroff.config.json 复制到此处）
+        File($.fileName).parent.fsName + PATH_SEP + "superstaroff.config.json",
+        // 备选：64 位默认安装位置
         IS_WINDOWS
-            ? "C:\\Program Files (x86)\\SuperStarOff\\config.json"
-            : "/usr/local/SuperStarOff/config.json"
+            ? "C:\\Program Files\\SuperStarOff\\superstaroff.config.json"
+            : "/usr/local/SuperStarOff/superstaroff.config.json",
+        // 再备选：32 位安装位置
+        IS_WINDOWS
+            ? "C:\\Program Files (x86)\\SuperStarOff\\superstaroff.config.json"
+            : null
     ];
 
     for (var i = 0; i < configPaths.length; i++) {
+        if (!configPaths[i]) continue;
         var configFile = new File(configPaths[i]);
         if (configFile.exists) {
             configFile.open("r");
@@ -44,9 +49,9 @@ function getInstallDir() {
         }
     }
 
-    // 找不到配置文件时的默认值
+    // 找不到配置文件时的默认值（64 位优先）
     return IS_WINDOWS
-        ? "C:\\Program Files (x86)\\SuperStarOff"
+        ? "C:\\Program Files\\SuperStarOff"
         : "/usr/local/SuperStarOff";
 }
 

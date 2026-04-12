@@ -17,7 +17,7 @@ echo.
 
 set "SOURCE=%~dp0慧眼去星.jsx"
 REM config.json 在 scripts 上级目录（{app}\config.json）
-set "CONFIG_SOURCE=%~dp0..\config.json"
+set "CONFIG_SOURCE=%~dp0..\superstaroff.config.json"
 set INSTALLED=0
 
 echo Scanning for installed Photoshop versions...
@@ -30,9 +30,15 @@ for %%Y in (2026 2025 2024 2023 2022) do (
         echo Found Photoshop %%Y
         copy /Y "%SOURCE%" "!PS_PATH!\慧眼去星.jsx" >nul 2>&1
         if !errorlevel! equ 0 (
-            REM 同时复制 config.json，让 JSX 能找到正确的 exe 路径
+            REM 同时复制专属 config，让 JSX 能找到正确的 exe 路径
             if exist "%CONFIG_SOURCE%" (
-                copy /Y "%CONFIG_SOURCE%" "!PS_PATH!\config.json" >nul 2>&1
+                copy /Y "%CONFIG_SOURCE%" "!PS_PATH!\superstaroff.config.json" >nul 2>&1
+                if !errorlevel! neq 0 (
+                    echo   [WARN] JSX copied but config copy failed - plugin may not find exe
+                )
+            ) else (
+                echo   [WARN] superstaroff.config.json not found at %CONFIG_SOURCE%
+                echo         Plugin installed but may not locate superstaroff.exe correctly
             )
             echo   [OK] Installed to Photoshop %%Y
             set /a INSTALLED=INSTALLED+1
