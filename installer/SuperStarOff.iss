@@ -6,7 +6,10 @@
 
 #define MyAppName "SuperStarOff"
 #define MyAppNameCN "慧眼去星"
-#define MyAppVersion "1.1.3"
+; CI 可用 ISCC /DMyAppVersion=x.y.z 覆盖；本地构建使用下面的默认值
+#ifndef MyAppVersion
+  #define MyAppVersion "1.1.3"
+#endif
 #define MyAppPublisher "James Zhen Yu"
 #define MyAppURL "https://www.youtube.com/@JamesZhenYu"
 #define MyAppExeName "superstaroff.exe"
