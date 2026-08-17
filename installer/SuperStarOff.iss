@@ -165,6 +165,7 @@ var
   I: Integer;
   SourceFile, DestFile, ConfigFile, ConfigContent, ConfigDest: String;
   AppPath: String;
+  EscapedPath: String;
 begin
   if CurStep = ssPostInstall then
   begin
@@ -173,9 +174,13 @@ begin
     // 生成 superstaroff.config.json（专属文件名避免与其他脚本冲突）
     // 反斜杠需转义为 \\ 才是合法 JSON
     ConfigFile := AppPath + '\superstaroff.config.json';
+    // Inno Setup 的 Pascal Script 没有 Delphi 的 StringReplace，
+    // 只有就地修改的 StringChangeEx
+    EscapedPath := AppPath;
+    StringChangeEx(EscapedPath, '\', '\\', True);
     ConfigContent := '{' + #13#10 +
                      '    "version": "{#MyAppVersion}",' + #13#10 +
-                     '    "installDir": "' + StringReplace(AppPath, '\', '\\', [rfReplaceAll]) + '"' + #13#10 +
+                     '    "installDir": "' + EscapedPath + '"' + #13#10 +
                      '}';
     SaveStringToFile(ConfigFile, ConfigContent, False);
 
