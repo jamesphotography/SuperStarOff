@@ -9,7 +9,7 @@
 ### 前置要求
 
 确保已安装：
-- Python 3.x
+- Python 3.11
 - PyInstaller (`pip install pyinstaller`)
 - Inno Setup 6 (https://jrsoftware.org/isinfo.php)
 

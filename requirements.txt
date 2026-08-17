@@ -1,5 +1,5 @@
 # SuperStarOff - Photoshop 插件依赖
-# Python 3.9+ required
+# Python 3.11 required（numpy<2.0 仅提供至 3.12 的 wheel，3.13+ 装不上）
 
 # 核心深度学习
 torch>=2.0.0
