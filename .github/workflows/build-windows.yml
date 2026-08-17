@@ -101,13 +101,13 @@ jobs:
           Get-ChildItem dist\superstaroff\scripts
 
       - name: 编译 Inno Setup 安装包
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.9
         with:
           path: installer/SuperStarOff.iss
           options: /DMyAppVersion=${{ steps.meta.outputs.version }}
 
       - name: 上传安装包为 workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SuperStarOff-Windows-v${{ steps.meta.outputs.version }}
           path: installer_output/SuperStarOff-Installer-v*.exe
