@@ -271,7 +271,9 @@ if [ "$CI_MODE" = 1 ] && [ -n "$RCODESIGN" ]; then
     # 取 Installer 私钥会被钥匙串授权阻塞（本机可签、CI 复现不出），此处根治。
     PW_FILE="$(mktemp)"
     printf '%s' "$INSTALLER_P12_PASSWORD" > "$PW_FILE"
-    "$RCODESIGN" sign --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" "$PKG_FINAL"
+    # --config-file /dev/null 短路默认配置文件加载：runner 镜像中存在会被
+    # rcodesign 误认作自身配置的 TOML，导致 UnknownField("version") 而中止
+    "$RCODESIGN" --config-file /dev/null sign --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" "$PKG_FINAL"
     rm -f "$PW_FILE"
     echo "[OK] 已用 rcodesign 签名"
 else

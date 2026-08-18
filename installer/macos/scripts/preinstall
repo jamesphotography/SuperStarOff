@@ -1,6 +1,9 @@
 #!/bin/bash
 
-LOG_FILE="/tmp/superstaroff_install.log"
+# 日志写入 /var/log（仅 root 可写）而非全局可写的 /tmp：
+# 本脚本以 root 运行，若攻击者预先将该路径建为指向任意文件的符号链接，
+# tee -a 会跟随它并以 root 身份写入目标，造成任意文件破坏或提权。
+LOG_FILE="/var/log/superstaroff_install.log"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 APP_DIR="/usr/local/SuperStarOff"
