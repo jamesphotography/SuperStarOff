@@ -266,20 +266,47 @@ echo ""
 echo "=== Step 8: 签名 PKG ==="
 
 RCODESIGN="$(command -v rcodesign || true)"
+
+# macOS 无 GNU timeout；用 perl alarm 做超时保护，避免 productsign 在无头
+# 环境被钥匙串授权阻塞时把 CI 挂到 job 超时（曾有干等数小时的先例）
+run_with_timeout() {
+    local secs="$1"; shift
+    perl -e 'alarm shift; exec @ARGV' "$secs" "$@"
+}
+
+sign_with_productsign() {
+    local signed="$PKG_FINAL.signed"
+    rm -f "$signed"
+    local args=(--sign "$PKG_SIGN_ID")
+    [ -n "$TEMP_KEYCHAIN" ] && args+=(--keychain "$TEMP_KEYCHAIN")
+    run_with_timeout 300 productsign "${args[@]}" "$PKG_FINAL" "$signed"
+    mv "$signed" "$PKG_FINAL"
+}
+
 if [ "$CI_MODE" = 1 ] && [ -n "$RCODESIGN" ]; then
-    # rcodesign 直接用 .p12 原地签名，完全不碰钥匙串。productsign 在无头 CI 上
-    # 取 Installer 私钥会被钥匙串授权阻塞（本机可签、CI 复现不出），此处根治。
     PW_FILE="$(mktemp)"
     printf '%s' "$INSTALLER_P12_PASSWORD" > "$PW_FILE"
-    # --config-file /dev/null 短路默认配置文件加载：runner 镜像中存在会被
-    # rcodesign 误认作自身配置的 TOML，导致 UnknownField("version") 而中止
-    "$RCODESIGN" --config-file /dev/null sign --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" "$PKG_FINAL"
-    rm -f "$PW_FILE"
-    echo "[OK] 已用 rcodesign 签名"
+    # --config-file /dev/null 意在短路默认配置加载；某些 runner 镜像上仍会读到
+    # 一个含 version 键的 TOML 而报 UnknownField，故失败时收集诊断并回退
+    if "$RCODESIGN" --config-file /dev/null sign \
+         --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" "$PKG_FINAL"; then
+        rm -f "$PW_FILE"
+        echo "[OK] 已用 rcodesign 签名"
+    else
+        rm -f "$PW_FILE"
+        echo "[WARN] rcodesign 签名失败，收集诊断信息："
+        echo "--- HOME 下的 toml ---"
+        find "$HOME" -maxdepth 4 -name "*.toml" 2>/dev/null | head -10 || true
+        echo "--- 工作目录下的 toml ---"
+        find . -maxdepth 3 -name "*.toml" 2>/dev/null | head -10 || true
+        echo "--- XDG/CONFIG 环境变量 ---"
+        env | grep -iE "^(XDG|.*CONFIG)" || echo "(无)"
+        echo "[INFO] 回退到 productsign"
+        sign_with_productsign
+        echo "[OK] 已用 productsign 签名"
+    fi
 else
-    SIGNED_PKG="$PKG_FINAL.signed"
-    productsign --sign "$PKG_SIGN_ID" "$PKG_FINAL" "$SIGNED_PKG"
-    mv "$SIGNED_PKG" "$PKG_FINAL"
+    sign_with_productsign
     echo "[OK] 已用 productsign 签名"
 fi
 
