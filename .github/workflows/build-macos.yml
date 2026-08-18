@@ -1,0 +1,200 @@
+name: Build macOS Release
+
+# 触发方式：
+#   1. 推送 v*.*.* tag → 构建两种架构并创建 draft release
+#   2. 手动触发 → 可指定架构，只上传 artifact
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（如 1.1.3，不带 v 前缀）'
+        required: true
+      arch:
+        description: '构建架构'
+        type: choice
+        default: all
+        options: [all, arm64, x86_64]
+
+env:
+  MODEL_RELEASE_TAG: model-assets-2025
+  MODEL_FILE: SuperStarOff2025.pt
+  RCODESIGN_VERSION: '0.29.0'
+
+jobs:
+  # 版本解析与矩阵生成都放在这里：job 级别的 if 无法访问 matrix context，
+  # 想按输入裁剪构建架构只能靠动态矩阵。
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      tag: ${{ steps.meta.outputs.tag }}
+      matrix: ${{ steps.meta.outputs.matrix }}
+    steps:
+      - name: 解析版本号与目标架构
+        id: meta
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_ARCH: ${{ inputs.arch }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            VERSION="$INPUT_VERSION"
+            ARCH="${INPUT_ARCH:-all}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+            ARCH="all"
+          fi
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::版本号格式非法: '$VERSION'（应形如 1.1.3）"
+            exit 1
+          fi
+
+          ARM='{"runner":"macos-15","arch":"arm64"}'
+          INTEL='{"runner":"macos-15-intel","arch":"x86_64"}'
+          case "$ARCH" in
+            arm64)  MATRIX="{\"include\":[$ARM]}" ;;
+            x86_64) MATRIX="{\"include\":[$INTEL]}" ;;
+            *)      MATRIX="{\"include\":[$ARM,$INTEL]}" ;;
+          esac
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION"    >> "$GITHUB_OUTPUT"
+          echo "matrix=$MATRIX"   >> "$GITHUB_OUTPUT"
+          echo "版本 $VERSION / 架构 $ARCH"
+
+  build-macos:
+    needs: setup
+    # 一个架构失败不影响另一个继续构建
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: 确认 runner 架构
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          echo "期望 $TARGET_ARCH / 实际 $(uname -m)"
+          test "$(uname -m)" = "$TARGET_ARCH"
+          python -c "import platform; print('Python 架构:', platform.machine())"
+
+      - name: 下载 AI 模型
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release download "$MODEL_RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "$MODEL_FILE" \
+            --output "models/$MODEL_FILE" \
+            --clobber
+          ls -lh "models/$MODEL_FILE"
+
+      - name: 安装依赖
+        shell: bash
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          # PyTorch 自 2.3 起不再发布 macOS x86_64 wheel，2.2.2 是最后一版。
+          # arm64 跟随 requirements.txt 取最新，Intel 必须固定在 2.2.2。
+          if [ "$TARGET_ARCH" = "x86_64" ]; then
+            pip install "torch==2.2.2"
+          fi
+          pip install -r requirements.txt
+          pip install pyinstaller
+          python -c "import torch; print('torch', torch.__version__)"
+
+      - name: 安装 rcodesign
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/${RCODESIGN_VERSION}/apple-codesign-${RCODESIGN_VERSION}-macos-universal.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/rcodesign.tar.gz" "$url"
+          tar -xzf "$RUNNER_TEMP/rcodesign.tar.gz" -C "$RUNNER_TEMP"
+          bin="$(find "$RUNNER_TEMP" -name rcodesign -type f -perm -u+x | head -1)"
+          sudo install -m 0755 "$bin" /usr/local/bin/rcodesign
+          rcodesign --version
+
+      - name: 物化签名证书
+        shell: bash
+        env:
+          APP_CERT: ${{ secrets.MACOS_CERTIFICATE }}
+          INSTALLER_CERT: ${{ secrets.MACOS_INSTALLER_CERTIFICATE }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$APP_CERT" | base64 --decode > "$RUNNER_TEMP/app.p12"
+          printf '%s' "$INSTALLER_CERT" | base64 --decode > "$RUNNER_TEMP/installer.p12"
+
+      - name: 构建、签名并公证 PKG
+        shell: bash
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+          BUILD_VERSION: ${{ needs.setup.outputs.version }}
+          APP_P12_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          INSTALLER_P12_PASSWORD: ${{ secrets.MACOS_INSTALLER_CERTIFICATE_PWD }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_ID_VALUE: ${{ secrets.APPLE_ID }}
+          TEAM_ID_VALUE: ${{ secrets.MACOS_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          ./installer/build_mac.sh \
+            --version "$BUILD_VERSION" \
+            --arch "$TARGET_ARCH" \
+            --skip-venv \
+            --p12-app "$RUNNER_TEMP/app.p12" \
+            --p12-installer "$RUNNER_TEMP/installer.p12" \
+            --apple-id "$APPLE_ID_VALUE" \
+            --team-id "$TEAM_ID_VALUE"
+
+      - name: 冒烟测试（确认产物真能加载模型并推理）
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./dist/superstaroff/superstaroff test_input.tif "$RUNNER_TEMP/smoke_out.tif" --verbose
+          test -s "$RUNNER_TEMP/smoke_out.tif"
+          echo "[OK] 推理链路正常"
+
+      - name: 清理证书
+        if: always()
+        run: rm -f "$RUNNER_TEMP/app.p12" "$RUNNER_TEMP/installer.p12"
+
+      - name: 上传 PKG 为 workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: SuperStarOff-macOS-${{ matrix.arch }}-v${{ needs.setup.outputs.version }}
+          path: installer_output/SuperStarOff-v*-${{ matrix.arch }}.pkg
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: 创建 GitHub Release（draft）
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.setup.outputs.tag }}
+          name: 慧眼去星 ${{ needs.setup.outputs.tag }}
+          body_path: RELEASE_NOTES.md
+          draft: true
+          fail_on_unmatched_files: true
+          files: |
+            installer_output/SuperStarOff-v*-${{ matrix.arch }}.pkg
