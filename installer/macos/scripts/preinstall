@@ -1,0 +1,13 @@
+#!/bin/bash
+
+LOG_FILE="/tmp/superstaroff_install.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+APP_DIR="/usr/local/SuperStarOff"
+
+echo "清理旧安装残留..."
+if [ -d "$APP_DIR" ] && [ -f "$APP_DIR/superstaroff" ]; then
+    rm -rf "$APP_DIR"
+fi
+
+exit 0
