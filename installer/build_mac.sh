@@ -215,7 +215,9 @@ while IFS= read -r fw; do
         || { echo "[WARN] framework 签名失败: $fw"; SIGN_FAILED=$((SIGN_FAILED+1)); }
 done < <(find "$DIST_DIR" -type d -name "*.framework")
 
-[ "$SIGN_FAILED" -gt 0 ] && echo "[WARN] 共 $SIGN_FAILED 处签名失败"
+if [ "$SIGN_FAILED" -gt 0 ]; then
+    echo "[WARN] 共 $SIGN_FAILED 处签名失败"
+fi
 
 codesign --force --sign "$APP_SIGN_ID" --timestamp \
     --options runtime "$DIST_DIR/superstaroff"
@@ -256,8 +258,6 @@ mkdir -p "$PAYLOAD_DIR" "$OUTPUT_DIR"
 # 会判定 _internal/Python 与 Python.framework/Python 的签名无效。
 ditto "$DIST_DIR" "$PAYLOAD_DIR"
 
-echo "--- payload 中 Python 符号链接是否保留 ---"
-ls -la "$PAYLOAD_DIR/_internal/Python" "$PAYLOAD_DIR/_internal/Python.framework/Python" 2>&1 || true
 cp "$PROJECT_ROOT/src/慧眼去星.jsx" "$PAYLOAD_DIR/慧眼去星.jsx"
 cp -r "$APPLET_OUT" "$PAYLOAD_DIR/安装到Photoshop.app"
 
@@ -392,3 +392,6 @@ echo "架构:   $BUILT_ARCH"
 echo "文件:   $PKG_FINAL"
 echo "大小:   $(du -sh "$PKG_FINAL" | cut -f1)"
 echo ""
+
+# 构建全部成功，显式返回 0：脚本末尾若残留非零状态会被 CI 判为失败
+exit 0
