@@ -220,6 +220,18 @@ done < <(find "$DIST_DIR" -type d -name "*.framework")
 codesign --force --sign "$APP_SIGN_ID" --timestamp \
     --options runtime "$DIST_DIR/superstaroff"
 
+# 诊断：Apple 反复判定 _internal/Python 与 Python.framework/Python 签名无效。
+# 若两者 inode 相同（硬链接），任一处的独立签名都会破坏另一处的 bundle 签名。
+echo "--- Python 相关文件的 inode 与类型 ---"
+ls -lai "$DIST_DIR/_internal/Python" \
+        "$DIST_DIR/_internal/Python.framework/Python" \
+        "$DIST_DIR/_internal/Python.framework/Versions/3.11/Python" 2>&1 || true
+echo "--- 签名校验 ---"
+for f in "$DIST_DIR/_internal/Python" "$DIST_DIR/_internal/Python.framework"; do
+    echo "[$f]"
+    codesign --verify --verbose=2 "$f" 2>&1 | head -4 || true
+done
+
 echo "[OK] 签名完成"
 echo ""
 
