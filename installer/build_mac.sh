@@ -220,18 +220,6 @@ done < <(find "$DIST_DIR" -type d -name "*.framework")
 codesign --force --sign "$APP_SIGN_ID" --timestamp \
     --options runtime "$DIST_DIR/superstaroff"
 
-# 诊断：Apple 反复判定 _internal/Python 与 Python.framework/Python 签名无效。
-# 若两者 inode 相同（硬链接），任一处的独立签名都会破坏另一处的 bundle 签名。
-echo "--- Python 相关文件的 inode 与类型 ---"
-ls -lai "$DIST_DIR/_internal/Python" \
-        "$DIST_DIR/_internal/Python.framework/Python" \
-        "$DIST_DIR/_internal/Python.framework/Versions/3.11/Python" 2>&1 || true
-echo "--- 签名校验 ---"
-for f in "$DIST_DIR/_internal/Python" "$DIST_DIR/_internal/Python.framework"; do
-    echo "[$f]"
-    codesign --verify --verbose=2 "$f" 2>&1 | head -4 || true
-done
-
 echo "[OK] 签名完成"
 echo ""
 
@@ -263,7 +251,13 @@ PAYLOAD_DIR="$BUILD_DIR/payload$INSTALL_LOCATION"
 rm -rf "$BUILD_DIR"
 mkdir -p "$PAYLOAD_DIR" "$OUTPUT_DIR"
 
-cp -r "$DIST_DIR/." "$PAYLOAD_DIR/"
+# 用 ditto 而非 cp：Apple 自家工具，能完整保留符号链接、扩展属性与
+# bundle 结构。Python.framework 的签名依赖这些元数据，cp 复制后公证
+# 会判定 _internal/Python 与 Python.framework/Python 的签名无效。
+ditto "$DIST_DIR" "$PAYLOAD_DIR"
+
+echo "--- payload 中 Python 符号链接是否保留 ---"
+ls -la "$PAYLOAD_DIR/_internal/Python" "$PAYLOAD_DIR/_internal/Python.framework/Python" 2>&1 || true
 cp "$PROJECT_ROOT/src/慧眼去星.jsx" "$PAYLOAD_DIR/慧眼去星.jsx"
 cp -r "$APPLET_OUT" "$PAYLOAD_DIR/安装到Photoshop.app"
 
