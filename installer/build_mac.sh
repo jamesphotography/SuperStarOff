@@ -286,22 +286,15 @@ sign_with_productsign() {
 if [ "$CI_MODE" = 1 ] && [ -n "$RCODESIGN" ]; then
     PW_FILE="$(mktemp)"
     printf '%s' "$INSTALLER_P12_PASSWORD" > "$PW_FILE"
-    # 注：rcodesign 0.29.0 会误读 ~/.rustup/settings.toml 作为自身配置而中止。
-    # 该文件由 CI 层在构建前移开（见 build-macos.yml）——此处设置 HOME 无效，
-    # 因为 macOS 上 Rust 的 dirs crate 经 getpwuid 取家目录，不读 HOME 变量。
+    # 注：rcodesign 从 RCODESIGN_ 前缀的环境变量读取自身配置，调用方切勿
+    # 定义此类变量（详见 build-macos.yml 中的说明）。
     if "$RCODESIGN" --config-file /dev/null sign \
          --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" "$PKG_FINAL"; then
         rm -f "$PW_FILE"
         echo "[OK] 已用 rcodesign 签名"
     else
-        echo "[WARN] rcodesign 签名失败，用 -vv 重跑以定位配置来源："
-        "$RCODESIGN" -vv --config-file /dev/null sign \
-            --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" \
-            "$PKG_FINAL" 2>&1 | head -40 || true
         rm -f "$PW_FILE"
-        echo "--- rcodesign 相关环境变量 ---"
-        env | grep -iE "rcodesign|apple|codesign" || echo "(无)"
-        echo "[INFO] 回退到 productsign"
+        echo "[WARN] rcodesign 签名失败，回退 productsign"
         sign_with_productsign
         echo "[OK] 已用 productsign 签名"
     fi
