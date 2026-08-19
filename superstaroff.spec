@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_submodules
 # PyInstaller spec file for SuperStarOff
 
 import os
@@ -35,10 +36,19 @@ a = Analysis(
         'imagecodecs',
         'model_processor',
         'core_utils',
-        # 必须包含以避免 torch._library.infer_schema 在新版 PyTorch (2.2+) 中
-        # 尝试 import GroupName 时失败
+        # torch._library.infer_schema (2.2+) 需要 distributed_c10d
         'torch.distributed.distributed_c10d',
-    ],
+        # torch/_jit_internal.py → rpc → server_process_global_profiler
+        # → torch.autograd.gradcheck → torch.testing 整条依赖链
+        'torch.distributed.rpc',
+        'torch.distributed.rpc.server_process_global_profiler',
+        'torch.autograd.gradcheck',
+        'torch.testing',
+        'torch.testing._comparison',
+    # 逐个列出 hiddenimports 不足以让 PyInstaller 收全 torch.distributed：
+    # 打包产物运行时仍报 No module named 'torch.distributed.rpc'。
+    # torch/nn/__init__.py 在 import 阶段即会走到这条链，缺失即启动失败。
+    ] + collect_submodules('torch.distributed'),
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -74,21 +84,9 @@ a = Analysis(
         'peft',
         # torchvision：源码未使用，排除
         'torchvision',
-        # torch 内部不需要的子模块
-        # 注意：不能排除整个 torch.distributed，因为 torch._library.infer_schema (2.2+)
-        # 在模块级别 import GroupName from torch.distributed.distributed_c10d
-        # 改为精确排除不需要的分布式子模块
-        'torch.distributed.rpc',
-        'torch.distributed.pipeline',
-        'torch.distributed.elastic',
-        'torch.distributed.launcher',
-        'torch.distributed.algorithms',
-        'torch.distributed.optim',
-        'torch.distributed.checkpoint',
-        'torch.distributed.fsdp',
-        'torch.testing',
-        'torch.onnx',
-        'torch._inductor',
+        # 不再裁剪 torch 内部分布式/编译子模块。
+        # PyTorch 2.6 在 import torch 期间会动态走到这些模块；
+        # 精确排除会导致干净安装包在启动阶段出现“补一个缺一个”的缺模块错误。
         # 计算机视觉（不需要）
         'cv2',
         # Google / Cloud API（不需要）

@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_submodules
 # PyInstaller spec file for SuperStarOff (Windows)
 # 慧眼去星 Windows 打包配置
 
@@ -40,6 +41,10 @@ a = Analysis(
         # 必须包含以避免 torch._library.infer_schema 在新版 PyTorch (2.2+) 中
         # 尝试 import GroupName 时失败（与 macOS spec 保持同步）
         'torch.distributed.distributed_c10d',
+        # 逐个列出不足以让 PyInstaller 收全 torch.distributed：macOS 侧产物
+        # 运行时曾报 No module named 'torch.distributed.rpc'。
+        # torch/nn/__init__.py 在 import 阶段即走到该链，缺失即启动失败。
+        *collect_submodules('torch.distributed'),
         # 数据处理
         'numpy',
         'PIL',

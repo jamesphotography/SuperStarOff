@@ -100,6 +100,16 @@ jobs:
           Copy-Item installer\uninstall_from_photoshop.bat dist\superstaroff\scripts\ -Force
           Get-ChildItem dist\superstaroff\scripts
 
+      # macOS 侧曾出现签名公证全过、产物却因缺 torch.distributed 子模块
+      # 无法启动的情况。装包前先实跑一次，避免发出装上就崩的安装包。
+      - name: 冒烟测试（确认产物真能加载模型并推理）
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./dist/superstaroff/superstaroff.exe test_input.tif "$RUNNER_TEMP/smoke_out.tif" --verbose
+          test -s "$RUNNER_TEMP/smoke_out.tif"
+          echo "[OK] 推理链路正常"
+
       - name: 编译 Inno Setup 安装包
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.9
         with:
