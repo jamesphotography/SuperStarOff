@@ -11,6 +11,16 @@ import sys
 import argparse
 from pathlib import Path
 
+# Windows 下 stdout 一旦被重定向（JSX 即以 > logFile 调用本程序），Python 会改用
+# 系统 locale 编码（cp936/cp1252），输出中文即抛 UnicodeEncodeError 并令进程退出，
+# 日志随之停在半截。chcp 65001 只影响控制台，对重定向无效，故在此强制 UTF-8。
+if sys.platform == "win32":
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
 # Import core module
 from model_processor import StarRemover as SuperStarOff
 
