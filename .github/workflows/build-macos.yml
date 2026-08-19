@@ -136,6 +136,22 @@ jobs:
           sudo install -m 0755 "$bin" /usr/local/bin/rcodesign
           rcodesign --version
 
+      # rcodesign 0.29.0 会把 ~/.rustup/settings.toml 当作自身配置解析，
+      # 撞上其顶层的 version 键后以 UnknownField 中止。该行为不受
+      # --config-file /dev/null 影响，设置 HOME 也无效（macOS 上取家目录
+      # 走 getpwuid 而非环境变量）。runner 是一次性的，直接把它移开。
+      - name: 移开 rustup 配置（规避 rcodesign 误读）
+        shell: bash
+        run: |
+          set -euo pipefail
+          f="$HOME/.rustup/settings.toml"
+          if [ -f "$f" ]; then
+            mv "$f" "$f.disabled"
+            echo "已移开 $f"
+          else
+            echo "未发现 rustup 配置，跳过"
+          fi
+
       - name: 物化签名证书
         shell: bash
         env:
