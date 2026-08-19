@@ -104,6 +104,11 @@ jobs:
       # 无法启动的情况。装包前先实跑一次，避免发出装上就崩的安装包。
       - name: 冒烟测试（确认产物真能加载模型并推理）
         shell: bash
+        # CLI 输出中文，Windows 控制台默认 cp1252 会抛 UnicodeEncodeError。
+        # 生产环境由 JSX 生成的 bat 用 chcp 65001 解决，此处等效设置。
+        env:
+          PYTHONIOENCODING: utf-8
+
         run: |
           set -euo pipefail
           ./dist/superstaroff/superstaroff.exe test_input.tif "$RUNNER_TEMP/smoke_out.tif" --verbose

@@ -121,7 +121,10 @@ jobs:
           # PyTorch 自 2.3 起不再发布 macOS x86_64 wheel，2.2.2 是最后一版。
           # arm64 跟随 requirements.txt 取最新，Intel 必须固定在 2.2.2。
           if [ "$TARGET_ARCH" = "x86_64" ]; then
-            pip install "torch==2.2.2"
+            # cryptography 49+ 同样不再发布 macOS x86_64 wheel，会退化为源码编译，
+            # 编译产物的扩展模块 PyInstaller 收集不到，导致运行时
+            # "Encryption module not available" 而无法解密模型
+            pip install "torch==2.2.2" "cryptography<49"
           fi
           pip install -r requirements.txt
           pip install pyinstaller
