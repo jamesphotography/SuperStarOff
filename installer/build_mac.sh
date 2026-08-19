@@ -190,18 +190,32 @@ echo ""
 # ============================================================
 echo "=== Step 4: 深度签名二进制文件 ==="
 
-# 按 Mach-O 魔数筛选而非按扩展名：Python.framework 内的可执行文件没有
-# .so/.dylib 后缀，仅按扩展名会漏签，导致公证被判 Invalid
+# 签名顺序必须自内向外，且全部启用 hardened runtime——公证会逐个文件检查：
+#   1) 普通 Mach-O 文件（跳过 .framework 内部，见 2）
+#   2) .framework 整体签名。单独签 framework 内的文件会使其 bundle 签名失效，
+#      Apple 曾据此判定 Python.framework/Python "signature is invalid"
+#   3) 主可执行文件最后签
+# 按 Mach-O 魔数筛选而非扩展名：torch/bin 下的 protoc、torch_shm_manager
+# 以及 Python 均无后缀，按后缀匹配会整批漏签
+SIGN_OPTS=(--force --sign "$APP_SIGN_ID" --timestamp --options runtime)
 SIGN_FAILED=0
+
 while IFS= read -r f; do
+    case "$f" in *.framework/*) continue ;; esac
     case "$(file -b "$f")" in
         *Mach-O*)
-            codesign --force --sign "$APP_SIGN_ID" --timestamp "$f" 2>/dev/null \
+            codesign "${SIGN_OPTS[@]}" "$f" 2>/dev/null \
                 || { echo "[WARN] 签名失败: $f"; SIGN_FAILED=$((SIGN_FAILED+1)); }
             ;;
     esac
 done < <(find "$DIST_DIR" -type f)
-[ "$SIGN_FAILED" -gt 0 ] && echo "[WARN] 共 $SIGN_FAILED 个文件签名失败"
+
+while IFS= read -r fw; do
+    codesign "${SIGN_OPTS[@]}" "$fw" 2>/dev/null \
+        || { echo "[WARN] framework 签名失败: $fw"; SIGN_FAILED=$((SIGN_FAILED+1)); }
+done < <(find "$DIST_DIR" -type d -name "*.framework")
+
+[ "$SIGN_FAILED" -gt 0 ] && echo "[WARN] 共 $SIGN_FAILED 处签名失败"
 
 codesign --force --sign "$APP_SIGN_ID" --timestamp \
     --options runtime "$DIST_DIR/superstaroff"
