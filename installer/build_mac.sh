@@ -190,9 +190,18 @@ echo ""
 # ============================================================
 echo "=== Step 4: 深度签名二进制文件 ==="
 
-find "$DIST_DIR" -type f \( -name "*.so" -o -name "*.dylib" \) | while read -r f; do
-    codesign --force --sign "$APP_SIGN_ID" --timestamp "$f" 2>/dev/null || true
-done
+# 按 Mach-O 魔数筛选而非按扩展名：Python.framework 内的可执行文件没有
+# .so/.dylib 后缀，仅按扩展名会漏签，导致公证被判 Invalid
+SIGN_FAILED=0
+while IFS= read -r f; do
+    case "$(file -b "$f")" in
+        *Mach-O*)
+            codesign --force --sign "$APP_SIGN_ID" --timestamp "$f" 2>/dev/null \
+                || { echo "[WARN] 签名失败: $f"; SIGN_FAILED=$((SIGN_FAILED+1)); }
+            ;;
+    esac
+done < <(find "$DIST_DIR" -type f)
+[ "$SIGN_FAILED" -gt 0 ] && echo "[WARN] 共 $SIGN_FAILED 个文件签名失败"
 
 codesign --force --sign "$APP_SIGN_ID" --timestamp \
     --options runtime "$DIST_DIR/superstaroff"
@@ -314,11 +323,28 @@ if [ "$NOTARIZE" = 1 ]; then
 
     if [ -n "$APPLE_ID" ]; then
         : "${APPLE_APP_PASSWORD:?需要设置 APPLE_APP_PASSWORD}"
-        xcrun notarytool submit "$PKG_FINAL" \
+        set +e
+        SUBMIT_OUT="$(xcrun notarytool submit "$PKG_FINAL" \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_APP_PASSWORD" \
             --team-id "$TEAM_ID" \
-            --wait
+            --wait 2>&1)"
+        SUBMIT_RC=$?
+        set -e
+        printf '%s\n' "$SUBMIT_OUT"
+        # status: Invalid 时 submit 亦返回非零；拉取 Apple 的逐项检查结果，
+        # 否则只知道被拒、不知道哪个文件出了问题
+        if [ "$SUBMIT_RC" -ne 0 ] || printf '%s' "$SUBMIT_OUT" | grep -q "status: Invalid"; then
+            SUB_ID="$(printf '%s' "$SUBMIT_OUT" | awk '/ id: /{print $2; exit}')"
+            if [ -n "$SUB_ID" ]; then
+                echo "=== Apple 公证详细日志 ($SUB_ID) ==="
+                xcrun notarytool log "$SUB_ID" \
+                    --apple-id "$APPLE_ID" \
+                    --password "$APPLE_APP_PASSWORD" \
+                    --team-id "$TEAM_ID" 2>&1 | head -60 || true
+            fi
+            exit 1
+        fi
     else
         xcrun notarytool submit "$PKG_FINAL" \
             --keychain-profile "$NOTARY_PROFILE" \
