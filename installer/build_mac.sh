@@ -119,7 +119,7 @@ if [ "$CI_MODE" = 1 ]; then
     security import "$P12_APP" -k "$TEMP_KEYCHAIN" -P "$APP_P12_PASSWORD" -T /usr/bin/codesign
     security import "$P12_INSTALLER" -k "$TEMP_KEYCHAIN" -P "$INSTALLER_P12_PASSWORD" -T /usr/bin/productsign
 
-    security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PW" "$TEMP_KEYCHAIN" >/dev/null
+    security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KC_PW" "$TEMP_KEYCHAIN" >/dev/null
 
     echo "[OK] 证书已导入临时钥匙串"
     security find-identity -v "$TEMP_KEYCHAIN" | grep "Developer ID" || true
@@ -279,7 +279,7 @@ sign_with_productsign() {
     rm -f "$signed"
     local args=(--sign "$PKG_SIGN_ID")
     [ -n "$TEMP_KEYCHAIN" ] && args+=(--keychain "$TEMP_KEYCHAIN")
-    run_with_timeout 300 productsign "${args[@]}" "$PKG_FINAL" "$signed"
+    run_with_timeout 90 productsign "${args[@]}" "$PKG_FINAL" "$signed"
     mv "$signed" "$PKG_FINAL"
 }
 
@@ -294,14 +294,13 @@ if [ "$CI_MODE" = 1 ] && [ -n "$RCODESIGN" ]; then
         rm -f "$PW_FILE"
         echo "[OK] 已用 rcodesign 签名"
     else
+        echo "[WARN] rcodesign 签名失败，用 -vv 重跑以定位配置来源："
+        "$RCODESIGN" -vv --config-file /dev/null sign \
+            --p12-file "$P12_INSTALLER" --p12-password-file "$PW_FILE" \
+            "$PKG_FINAL" 2>&1 | head -40 || true
         rm -f "$PW_FILE"
-        echo "[WARN] rcodesign 签名失败，收集诊断信息："
-        echo "--- HOME 下的 toml ---"
-        find "$HOME" -maxdepth 4 -name "*.toml" 2>/dev/null | head -10 || true
-        echo "--- 工作目录下的 toml ---"
-        find . -maxdepth 3 -name "*.toml" 2>/dev/null | head -10 || true
-        echo "--- XDG/CONFIG 环境变量 ---"
-        env | grep -iE "^(XDG|.*CONFIG)" || echo "(无)"
+        echo "--- rcodesign 相关环境变量 ---"
+        env | grep -iE "rcodesign|apple|codesign" || echo "(无)"
         echo "[INFO] 回退到 productsign"
         sign_with_productsign
         echo "[OK] 已用 productsign 签名"
