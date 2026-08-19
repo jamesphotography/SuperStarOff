@@ -1,6 +1,6 @@
 # 慧眼去星 V1.1.3 Release Notes
 
-**发布日期：2026年8月17日**
+**发布日期：2026年8月19日**
 
 > 本版本为自 V1.1.0 以来的累积更新（含 1.1.1 / 1.1.2 内部迭代）。
 
@@ -30,11 +30,16 @@
 ## 问题修复
 
 ### macOS
+- **新增 Intel 版本**：此前的安装包仅支持 Apple Silicon，Intel 芯片的 Mac 安装后
+  会提示「Bad CPU type in executable」而无法运行。现按芯片类型分别提供安装包
 - **修复插件无响应问题**：新版 Photoshop / macOS 下后台启动方式失效，导致点击「开始处理」后卡住直至 90 秒超时。现改用 macOS 官方的 `osascript` 机制启动，不再受 Photoshop 进程限制
 - **失败时给出有效诊断**：过去超时只显示一句「启动超时」，现在会直接展示运行日志内容，便于定位原因
 - **崩溃快速反馈**：程序异常退出时 8 秒内即报错，无需再等满 90 秒
 
 ### Windows
+- **修复处理过程中途崩溃**：插件调用核心程序时会把输出重定向到日志文件，此时
+  程序输出中文即触发编码错误而中断，日志也停在半截。这是部分用户遇到「退出代码 1、
+  日志文件为空」的直接原因，现已强制使用 UTF-8 输出
 - **修复中文路径处理失败**：启动脚本改用 UTF-8 BOM 编码写入，中文用户名和中文路径不再导致处理中断
 - **修复安装后插件找不到核心程序**：手动补装时会同步复制配置文件，不再回退到错误的固定路径
 - **修复卸载残留**：卸载时一并清除 Photoshop 脚本目录内遗留的配置文件
@@ -49,16 +54,15 @@
 
 ## 下载地址
 
-> ⚠️ **待更新**：V1.1.3 安装包尚未上传，以下链接仍指向 V1.1.0。发布 V1.1.3 时需同步替换本节链接与 README 中的下载链接。
+> 请按 Mac 芯片类型选择：点击左上角  → 关于本机，查看「芯片」一栏。
+> 显示 Apple M1/M2/M3/M4 选 Apple Silicon 版，显示 Intel 选 Intel 版。
 
 ### macOS
-- [Google Drive](https://drive.google.com/file/d/1A2dfbfA0-JoWZ-9TdlZXCzSEuw86pPko/view?usp=sharing)
-- [百度网盘 (提取码: jhx5)](https://pan.baidu.com/s/1TY9qSiVpbBBUtmDZ-QSawg?pwd=jhx5)
+- [Apple Silicon 版 (M1/M2/M3/M4)](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-v1.1.3-arm64.pkg)
+- [Intel 版](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-v1.1.3-x86_64.pkg)
 
 ### Windows
-- [百度网盘 (提取码: u782)](https://pan.baidu.com/s/1400uoXBGjxmDyNYvPRkdBg?pwd=u782)
-
----
+- [Windows x64 安装程序](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-Installer-v1.1.3.exe)
 
 ## 系统要求
 

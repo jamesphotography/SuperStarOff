@@ -192,14 +192,14 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      - name: 创建 GitHub Release（draft）
+      - name: 创建 GitHub Release（prerelease）
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.setup.outputs.tag }}
           name: 慧眼去星 ${{ needs.setup.outputs.tag }}
           body_path: RELEASE_NOTES.md
-          draft: true
+          prerelease: true
           fail_on_unmatched_files: true
           files: |
             installer_output/SuperStarOff-v*-${{ matrix.arch }}.pkg
