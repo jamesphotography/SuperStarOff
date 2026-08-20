@@ -321,13 +321,19 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
 
     var infoGroup = win.add("group");
     infoGroup.orientation   = "row";
+    infoGroup.alignment     = ["fill", "top"];
     infoGroup.alignChildren = ["fill", "center"];
     infoGroup.spacing       = 0;
 
+    // ScriptUI 中 statictext 的宽度在创建时由初始文本决定，此后不随内容增长。
+    // tileText 初始为短文本、timeText 初始为空串，运行时更新成
+    // 「区块 266 / 324」「剩余 45 秒」会被截断甚至几乎不可见，故显式预留宽度。
     var tileText = infoGroup.add("statictext", undefined, "正在准备...");
+    tileText.preferredSize = [200, -1];
     tileText.alignment = ["left", "center"];
 
     var timeText = infoGroup.add("statictext", undefined, "");
+    timeText.preferredSize = [150, -1];
     timeText.alignment = ["right", "center"];
 
     var sep = win.add("panel", undefined, undefined);
@@ -389,6 +395,14 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         var p = readProgress(progressFile);
 
         if (p === null) {
+            var startupFailure = detectCliStartupFailure(logFile);
+            if (startupFailure) {
+                error = "CLI 启动失败\n\n"
+                      + "=== CLI 日志 ===\n" + startupFailure
+                      + "\n\n日志文件: " + logFile;
+                done = true;
+                continue;
+            }
             if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
                 var logContent = readLogTail(logFile, 40);
                 error = "启动超时（90 秒内未收到进度信息）\n\n"
@@ -504,6 +518,21 @@ function readLogTail(logFile, n) {
     lf.close();
     var lines = content.split("\n");
     return lines.slice(Math.max(0, lines.length - n)).join("\n");
+}
+
+function detectCliStartupFailure(logFile) {
+    var tail = readLogTail(logFile, 80);
+    if (!tail || tail === "未找到日志文件") return null;
+
+    if (tail.indexOf("Traceback (most recent call last):") !== -1 ||
+        tail.indexOf("ModuleNotFoundError:") !== -1 ||
+        tail.indexOf("ImportError:") !== -1 ||
+        tail.indexOf("[PYI-") !== -1 ||
+        tail.indexOf("Failed to execute script") !== -1) {
+        return tail;
+    }
+
+    return null;
 }
 
 // ── 清理临时文件 ───────────────────────────────────────────────

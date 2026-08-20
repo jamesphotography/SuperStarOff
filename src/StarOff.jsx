@@ -319,11 +319,18 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
 
     var infoGroup = win.add("group");
     infoGroup.orientation   = "row";
+    infoGroup.alignment     = ["fill", "top"];
     infoGroup.alignChildren = ["fill", "center"];
 
+    // In ScriptUI a statictext's width is fixed at creation from its initial
+    // string and never grows. tileText starts short and timeText starts empty,
+    // so runtime updates get clipped; reserve explicit widths.
     var tileText = infoGroup.add("statictext", undefined, "Preparing...");
+    tileText.preferredSize = [200, -1];
     tileText.alignment = ["left", "center"];
+
     var timeText = infoGroup.add("statictext", undefined, "");
+    timeText.preferredSize = [150, -1];
     timeText.alignment = ["right", "center"];
 
     win.add("panel", undefined, undefined);
@@ -379,6 +386,14 @@ function waitForCompletion(progressFile, cancelFile, outputFile, logFile) {
         var p = readProgress(progressFile);
 
         if (p === null) {
+            var startupFailure = detectCliStartupFailure(logFile);
+            if (startupFailure) {
+                error = "CLI startup failed\n\n"
+                      + "=== CLI log ===\n" + startupFailure
+                      + "\n\nLog file: " + logFile;
+                done = true;
+                continue;
+            }
             if (new Date().getTime() - startTime > STARTUP_TIMEOUT) {
                 var logContent = readLogTail(logFile, 40);
                 error = "Startup timeout (90s)\n\n"
@@ -471,6 +486,21 @@ function readLogTail(logFile, n) {
     var c = lf.read(); lf.close();
     var lines = c.split("\n");
     return lines.slice(Math.max(0, lines.length - n)).join("\n");
+}
+
+function detectCliStartupFailure(logFile) {
+    var tail = readLogTail(logFile, 80);
+    if (!tail || tail === "Log not found") return null;
+
+    if (tail.indexOf("Traceback (most recent call last):") !== -1 ||
+        tail.indexOf("ModuleNotFoundError:") !== -1 ||
+        tail.indexOf("ImportError:") !== -1 ||
+        tail.indexOf("[PYI-") !== -1 ||
+        tail.indexOf("Failed to execute script") !== -1) {
+        return tail;
+    }
+
+    return null;
 }
 
 function cleanupTempFiles(paths) {
