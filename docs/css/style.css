@@ -611,10 +611,20 @@ header {
 
 .download-cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    /* 三张卡片（macOS 两种芯片 + Windows）；窄屏自动降为两列或单列 */
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
     gap: var(--space-lg);
-    max-width: 900px;
+    max-width: 1140px;
     margin: 0 auto;
+}
+
+.download-tip {
+    max-width: 1140px;
+    margin: 0 auto var(--space-lg);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #888);
+    line-height: 1.6;
 }
 
 @media (max-width: 800px) {
