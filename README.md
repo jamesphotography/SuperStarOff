@@ -4,16 +4,27 @@
 
 最新版本 **v1.1.3** — [全部版本](https://github.com/jamesphotography/SuperStarOff/releases)
 
-### macOS (v1.1.3)
+> 网盘下载的为 zip 压缩包，需先解压再安装。
+
+### macOS
 
 请按芯片类型选择（点击左上角  → 关于本机，查看「芯片」一栏）：
 
-- **Apple Silicon (M1/M2/M3/M4)**: [SuperStarOff-v1.1.3-arm64.pkg](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-v1.1.3-arm64.pkg)
-- **Intel**: [SuperStarOff-v1.1.3-x86_64.pkg](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-v1.1.3-x86_64.pkg)
+**Apple Silicon (M1/M2/M3/M4)**
+- [GitHub](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-v1.1.3-arm64.pkg)
+- [Google Drive](https://drive.google.com/file/d/145X6xYIcOhGjUVQnXPU7u8jZfg7aMUYw/view?usp=sharing)
+- [百度网盘](https://pan.baidu.com/s/1vjIouNe1t7yHY1dvvp5Fsw?pwd=idfu) 提取码: idfu
 
-### Windows X64 (v1.1.3)
+**Intel**
+- [GitHub](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-v1.1.3-x86_64.pkg)
+- [Google Drive](https://drive.google.com/file/d/1QrM2LOei2t4d6enjNGKEKtLAprLeviDt/view?usp=sharing)
+- [百度网盘](https://pan.baidu.com/s/1nuMFbu2rKqZCrZoSixBSOg?pwd=7r4s) 提取码: 7r4s
 
-- **GitHub 直接下载**: [SuperStarOff-Installer-v1.1.3.exe](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-Installer-v1.1.3.exe)
+### Windows x64
+
+- [GitHub](https://github.com/jamesphotography/SuperStarOff/releases/download/v1.1.3/SuperStarOff-Installer-v1.1.3.exe)
+- [Google Drive](https://drive.google.com/file/d/1MExY1ejH7oi9kD9mqBZLiOKpkj_dL5bg/view?usp=sharing)
+- [百度网盘](https://pan.baidu.com/s/1UbSCJ2SD-TMzwNkSce-y9g?pwd=6nhy) 提取码: 6nhy
 
 ---
 
