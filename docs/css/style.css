@@ -611,8 +611,8 @@ header {
 
 .download-cards {
     display: grid;
-    /* 三张卡片（macOS 两种芯片 + Windows）；窄屏自动降为两列或单列 */
-    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    /* 三张卡片（macOS 两种芯片 + Windows）固定一行；见下方断点的窄屏回退 */
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-lg);
     max-width: 1140px;
     margin: 0 auto;
@@ -625,6 +625,13 @@ header {
     font-size: 0.9rem;
     color: var(--text-secondary, #888);
     line-height: 1.6;
+}
+
+@media (max-width: 1000px) {
+    .download-cards {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 760px;
+    }
 }
 
 @media (max-width: 800px) {
