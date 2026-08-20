@@ -109,7 +109,7 @@
 ## 技术支持
 
 - **视频教程**：[詹姆斯 YouTube 频道](https://www.youtube.com/@JamesZhenYu)
-- **项目主页**：[superstaroff.com](https://superstaroff.com)
+- **项目主页**：[superstaroff.jamesphotography.com.au](https://superstaroff.jamesphotography.com.au)
 
 ---
 
